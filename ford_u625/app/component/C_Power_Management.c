@@ -1,0 +1,233 @@
+#include "C_Power_Management.h"
+#include "C_Display_Management.h"
+#include "C_Diagnosis.h"
+#include "Memory_Pool.h"
+
+static tpower_manage_task_def tPowerManageTask;
+static uint8_t u8SyncLowDebounce;
+
+/******************************************************************************
+ ;       Function Name			:	void C_TD7800_Manage_Init(void)
+ ;       Function Description	:	This state will do power management initialize
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		Source ID				:
+ ******************************************************************************/
+static void C_Power_Manage_ParaInit(void)
+{
+    u8SyncLowDebounce=0U;
+
+    Memory_Pool_SyncStatus_Set(SYNC_UNKNOW);
+    Memory_Pool_SoftwareReset_Set(false);
+    tPowerManageTask.u16Timer1 = TIME_DISABLE;
+}
+/******************************************************************************
+ ;       Function Name			:	void C_Power_Manage_Init(void)
+ ;       Function Description	:	This state will do power management initialize
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		Source ID				:
+ ******************************************************************************/
+static void C_Power_Manage_Init(void)
+{
+    HAL_UART_Printf("Component PM Init Start\n");
+    C_Power_Manage_ParaInit();
+    Task_ChangeState(TYPE_POWER_MANAGE, LEVEL5, STATE_POWER_MANAGE_CTRL, Power_Manage_State_Machine[STATE_POWER_MANAGE_CTRL]);
+    HAL_UART_Printf("Component PM Init Done\n\r");
+    Task_TaskDone();
+}
+/******************************************************************************
+ ;       Function Name			:	void C_Power_Manager_Control(void)
+ ;       Function Description	:	This state will do power on/off sequence
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		Source ID				:
+ ******************************************************************************/
+static void C_Power_Manager_Control(void)
+{
+    uint32_t u32Temp=0U;
+	uint32_t u32CommDisplayStatus=0U;
+    uint16_t u16SyncVol;
+	//uint16_t u16GeneralDiagnosis;
+    uint8_t u8PowerStatus;
+
+    HAL_UART_Printf("Component PM Control Start\n");
+    switch (Task_Current_Event_Get())
+    {
+        case EVENT_FIRST :
+            HAL_UART_Printf("=> Event First...\n");
+
+            /* Switch to  Power On mode. */
+            Memory_Pool_PowerState_Set(START_UP_STATE);
+            Memory_Pool_PowerStatus_Set(POWER_ON);
+            Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+            break;
+        case EVENT_MESSAGE :
+            HAL_UART_Printf("=> Event Message...\n");
+            switch (Memory_Pool_PowerState_Get())
+            {
+                case START_UP_STATE:
+                    u8PowerStatus = M_PM_Sequnce_Execute(Memory_Pool_PowerStatus_Get());
+                    if (u8PowerStatus == POWER_PASS)
+                    {
+                        /* Enable power system successfully and switch to Normal Run mode. */
+                        Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
+                        Memory_Pool_PowerStatus_Set(POWER_ON_READY);
+                        Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                        HAL_UART_Printf("=> Start up successful...\n");
+                    }
+                    else if (u8PowerStatus == P3V3_FAIL)
+                    {
+                        /* Record this fault case in the Display Status */
+                        u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+                        u32Temp = Memory_Pool_ActualDisplayStatus_Get();
+
+                        Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_LCDERR_POS | BIT_LLOSS_POS | BIT_BLERR_POS | BIT_TCERR_POS | BIT_TSCERR_POS | BIT_DCERR_POS);
+                        Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_LCDERR_POS | BIT_LLOSS_POS | BIT_BLERR_POS | BIT_TCERR_POS | BIT_TSCERR_POS | BIT_DCERR_POS);
+
+                        /* Record power error status. */
+			            Memory_Pool_PowerErrorStatus_Set(ERROR_LM63625_P3V3_PG);
+
+                        /* Disable power system. */
+                        Memory_Pool_PowerState_Set(OFF_POWER_STATE);
+                        Memory_Pool_PowerStatus_Set(POWER_OFF);
+                        Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                        HAL_UART_Printf("=> Start up fail ...\n");
+                    }
+                    else if (u8PowerStatus == P1V2_FAIL)
+                    {
+                        /* Record this fault case in the Display Status */
+                        u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+                        u32Temp = Memory_Pool_ActualDisplayStatus_Get();
+                        Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_LLOSS_POS);
+                        Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_LLOSS_POS);
+
+                        /* Record power error status. */
+			            Memory_Pool_PowerErrorStatus_Set(ERROR_TPS74501_P1V2_PG);
+
+                        /* Disable power system. */
+                        Memory_Pool_PowerState_Set(OFF_POWER_STATE);
+                        Memory_Pool_PowerStatus_Set(POWER_OFF);
+                        Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                        HAL_UART_Printf("=> Start up fail ...\n");
+                    }
+                    else
+                    { /*Nothing*/ }
+                    break;
+                case OFF_POWER_STATE:
+                    /* Disable power system. */
+                    M_PM_Sequnce_Execute(Memory_Pool_PowerStatus_Get());
+                    Memory_Pool_PowerStatus_Set(POWER_OFF_READY);
+
+                    /* Clear INIT bit in Display Status. */
+                    u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+                    u32Temp = Memory_Pool_ActualDisplayStatus_Get();
+                    Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_INIT_POS);
+                    Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_INIT_POS);
+
+					/* Power off TBD, it won't restore power.*/
+                    /* Check software reset request. */
+                    if(Memory_Pool_SoftwareReset_Get() == true)
+                    {
+                        NVIC_SystemReset();
+                    }
+					else
+					{/*Nothing*/}
+                    break;
+                case SHUTDOWN1OR2_STATE:
+                    /* Mask serdes communication bus to avoid that shutdown flow be broken */
+                    Memory_Pool_CommunicationMask_Set(true);
+
+                    /* Disable diagnosis functions*/
+                    Memory_Pool_DiagnosisEnable_Set(false);
+                    Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
+
+                    /*Disable display functions */
+                    Memory_Pool_DisplayEnable_Set(DISPLAY_OFF_TOUCH_OFF);
+                    Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+                    break;
+                case NORMAL_RUN_STATE:
+                    /* Delay 100ms to enable SYNC detection function periodically. */
+                    tPowerManageTask.u16Timer1 = TIME_100ms;
+                    break;
+                case NORMAL_DISABLE_STATE:
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case EVENT_SYNCS_CHECK_PERIOD :
+			HAL_UART_Printf("=> Event SYNC Check period...\n");
+			u16SyncVol=Memory_Pool_SyncVol_Get();
+
+			if(u16SyncVol < SYNC_LOW_VOL)
+			{
+				u8SyncLowDebounce+=1U;
+			}
+			else
+			{
+				u8SyncLowDebounce=0U;
+			}
+			
+			/*Action when over debounce threadhold*/
+			if(u8SyncLowDebounce >= SYNC_LOW_DEBOUNCE_MAX)
+			{
+				u8SyncLowDebounce=SYNC_LOW_DEBOUNCE_MAX;
+				tPowerManageTask.u16Timer1=TIME_DISABLE;
+				Memory_Pool_SyncStatus_Set(SYNC_DISABLE);
+				Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
+				Memory_Pool_BacklightEnable_Set(false);
+				Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+			}
+			else
+			{
+				tPowerManageTask.u16Timer1=TIME_2ms;
+			}
+			break;
+		default:
+			break;
+    }
+    HAL_UART_Printf("Component PM Control Done\n\r");
+    Task_TaskDone();
+
+}
+/******************************************************************************
+ ;       Function Name			:	void C_Power_Manage_Error(void)
+ ;       Function Description	:	This state for error condition
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		Source ID				:
+ ******************************************************************************/
+static void C_Power_Manage_Error(void)
+{
+    HAL_UART_Printf("Component PM Error Start\n");
+    HAL_UART_Printf("Component PM Error Done\n\r");
+    Task_TaskDone();
+}
+/******************************************************************************
+ ;       Function Name			:	void C_Power_Manage_Timer1(void)
+ ;       Function Description	:	This function for timing using
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		Source ID				:
+ ******************************************************************************/
+void C_Power_Manage_Timer1(void)
+{
+    if (tPowerManageTask.u16Timer1 > TIME_UP)
+    {
+        tPowerManageTask.u16Timer1--;
+        if (tPowerManageTask.u16Timer1 == TIME_UP)
+        {
+            tPowerManageTask.u16Timer1 = TIME_DISABLE;
+            Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL3, EVENT_TIMER1);
+        }
+        else
+        { /* Nothing */ }
+    }
+    else
+    { /* Nothing */ }
+}
+
+void (*const Power_Manage_State_Machine[MAX_PM_STATE_NO])(void) =
+{   C_Power_Manage_Init, C_Power_Manager_Control, C_Power_Manage_Error };
+

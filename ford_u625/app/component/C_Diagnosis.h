@@ -1,0 +1,73 @@
+
+/******************************************************************************
+;       Program		: C_Power_Management.h
+;       Function	: Declare main function & variable
+;       Chip		: Cypress CY8C4149AZI-S598
+;       Clock		: IMO Internal 48MHz
+;       Date		: 2021 / 10 / 07
+;       Author		:
+******************************************************************************/
+#pragma once
+
+#ifndef C_DIAGNOSIS_H
+#define C_DIAGNOSIS_H
+
+#include "main.h"
+#include "M_GPIOSense.h"
+#include "public.h"
+
+// Power Management State Machine Define
+// The Max Number of State
+#define MAX_DN_STATE_NO             	0x03U
+#define STATE_DIAGNOSIS_INIT     		0x00U
+#define STATE_DIAGNOSIS_CTRL     		0x01U
+#define STATE_DIAGNOSIS_ERROR    		0x02U
+
+#define INT_ERROR						0x01U
+#define INT_TOUCH						0x04U
+
+#define DIAG_FPC_TX_DISCON_VOL			1800U /*Unit: 1 mv*/
+#define DIAG_FPC_RX_DISCON_VOL			1800U /*Unit: 1 mv*/
+
+#define DEBOUNCE_3_TIMES			  		3U
+
+#define C_DIAG_LP8864_I2CTIME				500U /*Unit: 1ms*/
+#define C_DIAG_NT51926_I2CTIME				500U /*Unit: 1ms*/
+
+#define EVENT_MESSAGE_DISANOSIS_ENABLE		EVENT_MESSAGE
+#define EVENT_TIME_INITIAL_DELAY			EVENT_TIMER1
+#define EVENT_TIME_DIAGNOSIS_POLLING		EVENT_TIMER2
+
+typedef void (*CALLBACK_DIAG_ACTION_PROTECT)(void);
+typedef void (*CALLBACK_DIAG_ACTION_RECOVER)(void);
+
+typedef struct
+{
+    uint16_t u16Timer1;
+    uint16_t u16Timer2;
+    uint32_t u32Timeout;
+}tdiagnosis_task_def;
+
+typedef enum
+{
+	DIAG_ACTION_NONE=0x00U,
+	DIAG_ACTION_SHUTDOWN,
+	DIAG_ACTION_DISPBL_OFF_RSTRQ,
+	DIAG_ACTION_DISPBL_OFF_NORSTRQ_NORECOV,
+	DIAG_ACTION_DISPBL_OFF_NORSTRQ_RECOV,
+ }DIAGPROTECT_ACTION;
+
+typedef struct
+{
+ 	DIAGPROTECT_ACTION DiagProtectAction;
+	uint16_t u16LEDDriverCommTime;
+	uint16_t u16NT51926CommTime;
+}tdiagnosis_ctrl_def;
+
+extern void C_Diagnosis_Timer1(void);
+extern void C_Diagnosis_Timer2(void);
+extern void (*const Diagnosis_State_Machine[MAX_DN_STATE_NO])(void);
+extern void C_Diagnosis_Callback_Register(CALLBACK_DIAG_ACTION_PROTECT CBDiagActionProtectReg, CALLBACK_DIAG_ACTION_RECOVER CBDiagActionRecoverReg);
+
+
+#endif
