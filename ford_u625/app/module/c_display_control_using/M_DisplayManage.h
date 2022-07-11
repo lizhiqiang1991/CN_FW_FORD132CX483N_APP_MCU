@@ -40,16 +40,15 @@ extern void M_DM_FW_DisplayStatus_Get(uint8_t *pReturnData);
 extern void M_DM_DisplayID1_Get(uint8_t *pReturnData);
 extern void M_DM_DisplayID2_Get(uint8_t *pReturnData);
 extern void M_DM_DisplayID3_Get(uint8_t *pReturnData);
+extern void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel);
 #if(U625_TDDI_TD7800)
 extern void M_DM_TD7800_Lock(void);
 extern void M_DM_TD7800_Unlock(void);
 extern void M_DM_TD7800_TouchReset(void);
 extern uint8_t M_DM_TD7800_ATTN_Read (void);
-extern void M_DM_U625_INTB_Ctrl(uint8_t u8DigitalLevel);
 #elif(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 extern void M_DM_NT51926_TouchReset(void);
 extern uint8_t M_DM_NT51926_ATTN_Read (void);
-extern void M_DM_CX430_INTB_Ctrl(uint8_t u8DigitalLevel);
 #else
 #endif
 #endif

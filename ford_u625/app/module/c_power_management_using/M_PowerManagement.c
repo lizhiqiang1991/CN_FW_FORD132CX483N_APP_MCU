@@ -99,10 +99,10 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 #else
 #endif
-					Cy_SysLib_Delay(10U); /* 10ms */
+					Cy_SysLib_Delay(11U); /* 11ms */
 					HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
 
-					Cy_SysLib_Delay(100U); /* 100ms */
+					Cy_SysLib_Delay(101U); /* 101ms */
                     HAL_GPIO_High( U301_PDB_PORT, U301_PDB_PIN);
                     HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
                     /* INTB Init. */
@@ -124,23 +124,23 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
             break;
         case POWER_OFF:
 
-			Cy_SysLib_Delay(5U); /* 5ms */
+			Cy_SysLib_Delay(6U); /* 6ms */
             /* INTB Deinit */
 			MINTB_StrategyControl(STRATEGY_CTRL_DEINIT);
             HAL_GPIO_Low( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
             HAL_GPIO_Low( U301_PDB_PORT, U301_PDB_PIN);
 			
-			Cy_SysLib_Delay(5U); /* 5ms */
+			Cy_SysLib_Delay(6U); /* 6ms */
             HAL_GPIO_Low( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);
 			
-			Cy_SysLib_Delay(5U); /* 5ms */
+			Cy_SysLib_Delay(6U); /* 6ms */
 #if (U625_TDDI_TD7800)
             HAL_GPIO_Low( U301_FCS_PORT, U301_FCS_PIN);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 #endif
             HAL_GPIO_Low( U301_P3V3_EN_PORT, U301_P3V3_EN_PIN);
 
-			Cy_SysLib_Delay(5U); /* 5ms */
+			Cy_SysLib_Delay(6U); /* 6ms */
             HAL_GPIO_Low( U301_HV_LDO_EN_PORT, U301_HV_LDO_EN_PIN);
 
             u8Return = POWER_PASS;

@@ -319,9 +319,9 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);							
 							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
 #if (U625_TDDI_TD7800)             
-							tDisplayManageTask.u16Timer1 = TIME_100ms;
+							tDisplayManageTask.u16Timer1 = TIME_101ms;
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-							tDisplayManageTask.u16Timer1 = TIME_150ms;		
+							tDisplayManageTask.u16Timer1 = TIME_151ms;		
 #else
 #endif							
 							break;							
@@ -329,7 +329,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Reset Display  */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 							
 							break;
 						case DS_ACTION_TOUCH_CTRL:
@@ -402,7 +402,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
 							} 							
 							u8ReturnStatus  = DS_ACTION_BACKLIGHT;	         
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 						
 							break;
 						case DS_ACTION_BACKLIGHT:
@@ -572,7 +572,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
 							} 							
 							u8ReturnStatus  = DS_ACTION_BACKLIGHT;	         
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 						
 							break;
 						case DS_ACTION_BACKLIGHT:
@@ -698,9 +698,9 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 
 							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
 #if (U625_TDDI_TD7800)             
-							tDisplayManageTask.u16Timer1 = TIME_100ms;
+							tDisplayManageTask.u16Timer1 = TIME_101ms;
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-							tDisplayManageTask.u16Timer1 = TIME_150ms;		
+							tDisplayManageTask.u16Timer1 = TIME_151ms;		
 #else
 #endif					
 							break;							
@@ -708,7 +708,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Reset Display  */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 							
 							break;
 						case DS_ACTION_TOUCH_CTRL:
@@ -782,13 +782,13 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Reset Touch */
 							Memory_Pool_TouchStatus_Set(M_DM_TouchControl(Memory_Pool_TouchStatus_Get(), DISPLAY_ON_TOUCH_ON, Memory_Pool_LockLoss_Get(), Memory_Pool_LcdStatus_Get()));
 							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;          
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 							break;
 						case DS_ACTION_DISPLAY_RESET:
 							/* Reset DISPLAY */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_DISPLAY_CTRL;          
-							tDisplayManageTask.u16Timer1 = TIME_200ms;
+							tDisplayManageTask.u16Timer1 = TIME_201ms;
 							break;							
 						case DS_ACTION_DISPLAY_CTRL:
 							/* Enable LCD */
@@ -814,7 +814,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
 							} 							
 							u8ReturnStatus  = DS_ACTION_BACKLIGHT;	         
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 						
 							break;
 						case DS_ACTION_BACKLIGHT:
@@ -949,9 +949,9 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 
 							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
 #if (U625_TDDI_TD7800)             
-							tDisplayManageTask.u16Timer1 = TIME_100ms;
+							tDisplayManageTask.u16Timer1 = TIME_101ms;
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-							tDisplayManageTask.u16Timer1 = TIME_150ms;		
+							tDisplayManageTask.u16Timer1 = TIME_151ms;		
 #else
 #endif					
 							break;							
@@ -959,7 +959,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Reset Display  */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 							
 							break;
 						case DS_ACTION_TOUCH_CTRL:
@@ -1024,19 +1024,19 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							if(tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_OFF)
 							{
 								u8ReturnStatus  = DS_ACTION_TOUCH_STATUS;          
-								tDisplayManageTask.u16Timer1 = TIME_245ms;
+								tDisplayManageTask.u16Timer1 = TIME_246ms;
 							}
 							else
 							{
 								u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;          
-								tDisplayManageTask.u16Timer1 = TIME_10ms;
+								tDisplayManageTask.u16Timer1 = TIME_11ms;
 							}
 							break;
 						case DS_ACTION_DISPLAY_RESET:
 							/* Reset Touch */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_DISPLAY_CTRL;          
-							tDisplayManageTask.u16Timer1 = TIME_200ms;
+							tDisplayManageTask.u16Timer1 = TIME_201ms;
 
 							break;
 						case DS_ACTION_DISPLAY_CTRL:
@@ -1063,7 +1063,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS); 
 							} 							
 							u8ReturnStatus  = DS_ACTION_BACKLIGHT;	         
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_11ms;
 						
 							break;
 						case DS_ACTION_BACKLIGHT:
@@ -1220,14 +1220,9 @@ static void C_Display_Manage_Init(void)
 				, C_Display_Management_CallbackLeavingDiagnosisProtected);
 
                 tDisplayManageTask.u16Timer1 = TIME_DISABLE;
-#if (U625_TDDI_TD7800)
-				/* Delay 100ms =84ms + eeprom read time 16ms , for TD7800 */
-				tDisplayManageTask.u16Timer2 = TIME_84ms;
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-				/* Delay 100ms =84ms + eeprom read time 16ms , for NT51926 */
-				tDisplayManageTask.u16Timer2 = TIME_84ms; 			
-#else
-#endif
+
+				/* Delay 100ms =100ms + eeprom read time 91us */
+				tDisplayManageTask.u16Timer2 = TIME_101ms; 			
             }
             else
             {

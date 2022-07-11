@@ -607,7 +607,24 @@ void M_DM_DisplayID3_Get(uint8_t *pReturnData)
     HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
     HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(u8ReturnData), 100U);
 }
-
+/******************************************************************************
+;       Function Name			:	void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel)
+;       Function Description	:
+;       Parameters				:	uint8_t u8DigitalLevel
+;       Return Values			:   void
+;       Source ID				:
+******************************************************************************/
+void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel)
+{
+    if(u8DigitalLevel == 0U)
+    {
+        HAL_GPIO_Low( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
+    }
+    else
+    {
+        HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
+    }
+}
 #if (U625_TDDI_TD7800)
 /******************************************************************************
  ;       Function Name           :   void M_TC_Control(uint8_t u8Status)
@@ -675,21 +692,6 @@ uint8_t M_DM_TD7800_ATTN_Read(void)
 
 	return u8Level;
 }
-/**
- * @brief 
- * 
- */
-void M_DM_U625_INTB_Ctrl(uint8_t u8DigitalLevel)
-{
-    if(u8DigitalLevel == 0U)
-    {
-        HAL_GPIO_Low( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
-    }
-    else
-    {
-        HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
-    }
-}
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 /******************************************************************************
  ;       Function Name           :   void M_DM_NT51926_TouchReset(void)
@@ -719,14 +721,6 @@ uint8_t M_DM_NT51926_ATTN_Read(void)
 	HAL_GPIO_Read( U301_TSC_ATTN_PORT,  U301_TSC_ATTN_PIN, &u8Level);
 
 	return u8Level;
-}
-/**
- * @brief 
- * 
- */
-void M_DM_CX430_INTB_Ctrl(uint8_t u8DigitalLevel)
-{
-
 }
 #else
 #endif

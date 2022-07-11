@@ -519,12 +519,8 @@ void C_Communication_ParaInit(void)
     tCommunicationTask.u32Timeout = TIME_DISABLE;
 
     /* Registers INTB Module */
-#if (U625_TDDI_TD7800)
-    MINTB_Register(M_DM_U625_INTB_Ctrl,INTB_INT_TYPE_FALLING);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-    MINTB_Register(M_DM_CX430_INTB_Ctrl,INTB_INT_TYPE_FALLING);
-#else
-#endif
+    MINTB_Register(M_DM_INTB_Ctrl,INTB_INT_TYPE_FALLING);
+
 
 }
 /******************************************************************************
@@ -556,7 +552,7 @@ static void C_Communiction_Init(void)
 				HAL_GPIO_Toggle( U301_INTB_IN_PORT,  U301_INTB_IN_PIN); 
 #endif
                 __disable_irq();
-                C_Communication_EEPROM_Read();  /* ISSUE , Do this function use 28ms -> 16ms */
+                C_Communication_EEPROM_Read();  /* Do this function use 91us */
                 __enable_irq();
                 tCommunicationTask.u16Timer1 = TIME_DISABLE;
 #if(DEBUG_POWER_UP)				
