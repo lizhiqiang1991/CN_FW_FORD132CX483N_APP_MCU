@@ -120,7 +120,37 @@ void M_COM_I2cDeInit(void)
 uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 {
 	uint8_t u8CheckResult=FORMAT_UNSUPPORT_SUBADDRESS;
-	
+
+	/* E4 and F4 without checking fusa. */
+	switch(u8subaddress)
+	{
+		default:
+			/* Continues next checking */
+		break;
+
+		case CMD_UPDATE_REQUEST:
+			if(u8Length == (LEN_SUBADDRESS + LEN_LEN + LEN_UPDATE_REQUEST + LEN_CHECKSUM))
+			{
+				return FORMAT_WRITE_CHECK_SAFETY;
+			}
+			else
+			{
+				return FORMAT_LEN_FAIL;
+			}
+		break;
+
+		case CMD_JUMP_TO_BOOTLOADER:
+			if(u8Length == LEN_SUBADDRESS)
+			{
+				return FORMAT_READ_CHECK_SAFETY;
+			}
+			else
+			{
+				return FORMAT_LEN_FAIL;
+			}
+		break;
+	}
+
 #if(FORD_SPSS_CRC_ROLL_EN)
 	u8Length=u8Length-(LEN_ROLLING_COUNTER+LEN_CRC8);
 #endif	
@@ -150,7 +180,6 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 		case CMD_FPCTXOUTVOLINFO:
 		case CMD_FPCRXOUTVOLINFO:
 		case CMD_MCU_VERSION_GET:
-		case CMD_JUMP_TO_BOOTLOADER:
 			if(u8Length == LEN_SUBADDRESS)
 			{
 				u8CheckResult=FORMAT_READ_CHECK_SAFETY;
@@ -351,16 +380,7 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			}
 		break;
 
-		case CMD_UPDATE_REQUEST:
-			if(u8Length == (LEN_SUBADDRESS+LEN_UPDATE_REQUEST))
-			{
-				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
-			}
-			else
-			{
-				u8CheckResult=FORMAT_LEN_FAIL;
-			}
-		break;
+
 			
 		default:
 			u8CheckResult=FORMAT_UNSUPPORT_SUBADDRESS;

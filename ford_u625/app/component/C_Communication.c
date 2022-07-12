@@ -379,28 +379,19 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 				{
 					if(mu8RxBuff[CMD_SUBADDRESS_POS] == CMD_JUMP_TO_BOOTLOADER)
 					{
-						if((Common_Checksum_Calculation(mu8RxBuff, (u8DataLength-LEN_CHECKSUM)) + 0x01U) == mu8RxBuff[u8DataLength])
-						{
-							u8MSGFormatCheckResult=FORMAT_READ_FORMAT_CORRECT;
-							/* Clear all data. */
-							memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
-							/* Copy sub-address */
-							mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
-							/* Fetch the information from memory pool. */
-							Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);
-							/* Calculated the rolling counter and CRC8 or checksum. */
-							M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);
-							/* MCU returns data.*/
-							M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
-							Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
-							Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
-						}
-						else
-						{
-							u8MSGFormatCheckResult=FORMAT_READ_CRC_FAIL;
-							/* Clear all data. */
-							memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
-						}
+                        u8MSGFormatCheckResult=FORMAT_READ_FORMAT_CORRECT;
+                        /* Clear all data. */
+                        memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
+                        /* Restore subaddress for echo purpose. */
+					    mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
+                        /* Fetch the information from memory pool. */
+                        Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);
+                        /* Calculated the rolling counter and CRC8 or checksum. */
+						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);
+                        /* MCU returns data.*/
+						M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
+                        Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
+                        Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 					}
 					else if(M_COM_RxMSGCRC8Value_Check(mu8RxBuff, u8DataLength) == false)
 					{
@@ -439,7 +430,7 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 				{
 					if(mu8RxBuff[CMD_SUBADDRESS_POS] == CMD_UPDATE_REQUEST)
 					{
-						if((Common_Checksum_Calculation(mu8RxBuff, (u8DataLength-LEN_CHECKSUM)) + 0x01U) == mu8RxBuff[u8DataLength])
+						if((Common_Checksum_Calculation(mu8RxBuff, (u8DataLength-LEN_CHECKSUM)) + 0x01U) == mu8RxBuff[u8DataLength - 1])
 						{
 							u8MSGFormatCheckResult=FORMAT_WRITE_FORMAT_CORRECT;
 							/* MCU will execute the command from host */
