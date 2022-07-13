@@ -600,7 +600,7 @@ static void C_Communiction_Process(void)
 
         case EVENT_TIMER_INTB_ROUNTINE:
             tCommunicationTask.u16Timer2 = TIME_2ms;
-            MINTB_Routine2ms();
+            MINTB_Routine2ms((uint16_t)(TIME_2ms - 1));
             break;
 
         default:

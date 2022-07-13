@@ -9,6 +9,9 @@ extern "C" {
 #include "main.h"
 
 /* -- Marco Define -- */
+#define MINTB_SATISFIED_DEASSERTED_TIME (uint16_t)2u
+#define MINTB_SATISFIED_ASSERTED_TIME (uint16_t)2u
+
 typedef enum
 {
     STRATEGY_CTRL_CANCEL = 0U,
@@ -30,9 +33,9 @@ typedef void (*CALLBACK_SDM_INTB_DO_SET)(uint8_t u8DigitalLevel);
 /* -- Extern Global Variables -- */
 
 /* -- Extern Functions -- */
-extern bool MINTB_Register(CALLBACK_SDM_INTB_DO_SET CallbackSDMIntbDoSet,MINTB_InttruptType_E eInterruptType);
+extern bool MINTB_Register(CALLBACK_SDM_INTB_DO_SET CallbackSDMIntbDoSet, MINTB_InttruptType_E eInterruptType);
 extern bool MINTB_StrategyControl(MINTB_StrategyCtrl_E eStrategyCtrl);
-extern void MINTB_Routine2ms(void);
+extern void MINTB_Routine2ms(uint16_t u16RoutineTime);
 
 #endif
 /* -- END -- */
