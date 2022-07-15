@@ -11,15 +11,15 @@
 
 #include "public.h"
 
-#define BP_VMIN_CFG				78 /*Define as 7.8V, unit: 0.1V*/
-#define BP_VMINRCV_CFG			80 /*Define as 8.0V, unit: 0.1V*/
+#define BP_VMIN_CFG				68 /*Define as 6.8V, unit: 0.1V*/
+#define BP_VMINRCV_CFG			70 /*Define as 7.0V, unit: 0.1V*/
 #define BP_VMAX_CFG				220 /*Define as 22V, unit: 0.1V*/
-#define BP_VMAXRCV_CFG			200 /*Define as 20V, unit: 0.1V*/
+#define BP_VMAXRCV_CFG			180 /*Define as 18V, unit: 0.1V*/
 
 #define BP_LOTIME_CFG			15U /*Unit: ms*/
 #define BP_HITIME_CFG			15U /*Unit: ms*/
 #define BP_LOOVRTIME_CFG		1000U /*Unit: ms*/
-#define BP_HIOVRTIME_CFG		160U /*Unit: ms*/
+#define BP_HIOVRTIME_CFG		1000U /*Unit: ms*/
 #define BP_LORECOVTIME_CFG		200U /*Unit: ms*/
 #define BP_HIRECOVTIME_CFG		200U /*Unit: ms*/
 

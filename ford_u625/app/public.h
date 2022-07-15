@@ -307,10 +307,10 @@
 #define HORIZONTAL_LEFT_TO_RIGHT			0x00U
 #define HORIZONTAL_RIGHT_TO_LEFT			0x01U
 
-#define SCAN_VT_HL							0x00U       // Vertical scan Top to Bottom and Horizontal Left to Right
-#define SCAN_VB_HL							0x01U		// Vertical scan Bottom to Top and Horizontal Left to Right
-#define SCAN_VT_HR							0x02U		// Vertical scan Top to Bottom and Horizontal Right to Left
-#define SCAN_VB_HR							0x03U		// Vertical scan Bottom to Top and Horizontal Right to Left
+#define SCAN_VT_HL							0x00U       /* Vertical scan Top to Bottom and Horizontal Left to Right */
+#define SCAN_VT_HR							0x01U		/* Vertical scan Top to Bottom and Horizontal Right to Left */
+#define SCAN_VB_HL							0x02U		/* Vertical scan Bottom to Top and Horizontal Left to Right */
+#define SCAN_VB_HR							0x03U		/* Vertical scan Bottom to Top and Horizontal Right to Left */
 #define SCAN_UNKNOW							0x04U
 
 #define LOW_LEVEL							0x00U
@@ -345,6 +345,11 @@
 #define BIT_A3_COMM_LOSS_ERROR_POS			0x0040U
 #define BIT_A3_TEMP_PCB_LOW_ERROR_POS		0x0100U
 #define BIT_A3_TEMP_BL_LOW_ERROR_POS		0x0200U
+#define BIT_A3_POWER_ON_P1V2_ERROR_POS		0x0400U
+#define BIT_A3_POWER_ON_P3V3_ERROR_POS		0x0800U
+#define BIT_A3_POWER_ON_LOW_VOL_ERROR_POS	0x1000U
+#define BIT_A3_POWER_ON_HIGH_VOL_ERROR_POS	0x2000U
+
 
 /* Battery Part */
 #define BATT_PROTECT_OFF					0x00U

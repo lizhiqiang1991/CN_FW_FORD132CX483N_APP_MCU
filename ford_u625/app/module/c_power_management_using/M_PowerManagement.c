@@ -79,7 +79,7 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 #endif
             HAL_GPIO_High( U301_HV_LDO_EN_PORT, U301_HV_LDO_EN_PIN);
             HAL_GPIO_High( U301_P3V3_EN_PORT, U301_P3V3_EN_PIN);
-            Cy_SysLib_Delay(10U);  /* 10ms */
+            Cy_SysLib_Delay(9U);  /* <=10ms */
 
             if (HIGH_LEVEL == M_PM_CheckPowerPG(P3V3_PGOOD, 12U)) /* about 1ms */
             {
@@ -87,7 +87,7 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 				Cy_SysLib_DelayUs(200U); /* 200us */
                 HAL_GPIO_High( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);
 				
-                Cy_SysLib_Delay(10U);	/* 10ms */
+                Cy_SysLib_Delay(9U);	/* <=10ms */
                 if (HIGH_LEVEL == M_PM_CheckPowerPG(P1V2_PGOOD, 10U))
                 {
                  	/* HAL_UART_Printf("=> P1V2 successful ...\n"); */
@@ -143,6 +143,8 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 			Cy_SysLib_Delay(6U); /* 6ms */
             HAL_GPIO_Low( U301_HV_LDO_EN_PORT, U301_HV_LDO_EN_PIN);
 
+            HAL_GPIO_Low(EN_VBATT_SENSE_PORT,EN_VBATT_SENSE_PIN);
+            
             u8Return = POWER_PASS;
             break;
     }

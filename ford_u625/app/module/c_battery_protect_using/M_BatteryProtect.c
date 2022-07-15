@@ -17,8 +17,7 @@ CALLBACK_BATT_ACTION_RECOVER CallbackBattActionRecover=NULL;
 void M_BP_State_Maching(uint16_t u16RoundTime)
 {
 	uint16_t u16BatteryVol=Memory_Pool_BatteryVol_Get();
-	uint32_t u32CommDisplayStatus = 0U;
-	uint32_t u32Temp = 0U;
+	uint16_t u16Temp = 0U;
 
 	switch(tBPManagement.u8VbattState)
 	{
@@ -179,13 +178,9 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 				{/*Nothing*/}
 				tBPManagement.u8ProtectAction=BP_ACTION_NONE;
 				
-				/* Read 0x00 status. */
-				u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-				u32Temp = Memory_Pool_ActualDisplayStatus_Get();
-				
-				/* Set 0x00 related status. */
-				Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_RST_RQ_POS);				
-				Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_RST_RQ_POS);
+				/* Record 0xA3 Status */
+				u16Temp = Memory_Pool_GeneralDiagnosis_Get();
+				Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_LOW_VOL_ERROR_POS);
 
 				/* Record power error status. */
 			    Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);
@@ -231,13 +226,9 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 				{/*Nothing*/}
 				tBPManagement.u8ProtectAction=BP_ACTION_NONE;
 				
-				/* Read 0x00 status. */
-				u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-				u32Temp = Memory_Pool_ActualDisplayStatus_Get();
-				
-				/* Set 0x00 related status. */
-				Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_RST_RQ_POS);
-				Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_RST_RQ_POS);
+				/* Record 0xA3 Status */
+				u16Temp = Memory_Pool_GeneralDiagnosis_Get();
+				Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_HIGH_VOL_ERROR_POS);
 
 				/* Record power error status. */
 			    Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);	

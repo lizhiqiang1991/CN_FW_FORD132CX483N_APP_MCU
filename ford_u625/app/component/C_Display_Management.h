@@ -54,7 +54,6 @@ typedef enum
 typedef struct
 {
 	uint8_t u8DisplayEnLock;
-	bool bBattProtectRecoverEvent;
 	bool bPowerStartupEvent;
 	uint8_t u8LastDisplayStatus;
 	uint8_t u8DispSeqStatus;

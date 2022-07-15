@@ -81,9 +81,11 @@ static void C_Display_Management_CallbackEnteringBatteryProtected(uint8_t u8BpSt
     /* Turns off backlight */
     Memory_Pool_BacklightEnable_Set(false);
 	MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
-	/* Action => turn off the display, touch , back-light*/
+
+	/* Action => do shutdown2 sequence*/
 	Memory_Pool_VBattProtectState_Set(BATT_PROTECT_ON);
-	Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+	Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
+	Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 	(void)u8BpStatus;
 }
 /**
@@ -98,8 +100,6 @@ static void C_Display_Management_CallbackEnteringBatteryProtected(uint8_t u8BpSt
 static void C_Display_Management_CallbackLeavingBatteryProtected(void)
 {
 	Memory_Pool_VBattProtectState_Set(BATT_PROTECT_OFF);
-	Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
-	tDisplayCtrl.bBattProtectRecoverEvent = true;
 }
 
 /**
@@ -259,6 +259,7 @@ static void C_Display_Management_RegContrl(uint8_t *pCommand)
             { /* Nothing */ }
             break;
         default:
+        	/* Nothing */
             break;
     }
 }
@@ -365,6 +366,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 
 							break;							
 						default:
+							/* Nothing */
 							break;
 					}
 					break;
@@ -380,6 +382,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					{
 						case DS_ACTION_DISPLAY_CTRL:
 							/* Enable LCD */
+							Memory_Pool_LcdResetStatus_Set(LCD_RESET_HIGH);
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));				
 							u8ReturnStatus  = DS_ACTION_DISPLAY_STATUS;          
 							tDisplayManageTask.u16Timer1 = TIME_190ms;
@@ -429,7 +432,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							}				            
 						
 							u8ReturnStatus  = DS_ACTION_BACKLIGHT_PWM;
-							tDisplayManageTask.u16Timer1 = TIME_10ms;													
+							tDisplayManageTask.u16Timer1 = TIME_13ms;													
 
 							break;
 						case DS_ACTION_BACKLIGHT_PWM:
@@ -442,7 +445,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{ /* Nothing */ }				            
 						
 							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
-							tDisplayManageTask.u16Timer1 = TIME_35ms;													
+							tDisplayManageTask.u16Timer1 = TIME_32ms;													
 
 							break;							
 						case DS_ACTION_TOUCH_CTRL:
@@ -473,10 +476,12 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							break;
 							
 						default:
+							/* Nothing */
 							break;
 					}
 					break;
 			case DISPLAY_OFF_TOUCH_ON :  /* TBD */
+#if 0
 					if(u8CtrlStatus == DS_ACTION_NONE)
 					{
 						u8CtrlStatus = DS_ACTION_DISPLAY_STATUS;
@@ -535,8 +540,13 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							break;
 							
 						default:
+							/* Nothing */
 							break;
 					}
+#endif
+					tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+					u8ReturnStatus  = DS_ACTION_NONE;
+					tDisplayManageTask.u16Timer1 = TIME_DISABLE;				
 					break;
 			case DISPLAY_ON_TOUCH_ON :
 					if(u8CtrlStatus == DS_ACTION_NONE)
@@ -550,6 +560,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					{
 						case DS_ACTION_DISPLAY_CTRL:
 							/* Enable LCD */
+							Memory_Pool_LcdResetStatus_Set(LCD_RESET_HIGH);
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));				
 							u8ReturnStatus  = DS_ACTION_DISPLAY_STATUS;          
 							tDisplayManageTask.u16Timer1 = TIME_190ms;
@@ -597,7 +608,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_BL_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_BL_ST_POS);
 							}
-							tDisplayManageTask.u16Timer1 = TIME_10ms;
+							tDisplayManageTask.u16Timer1 = TIME_13ms;
 							u8ReturnStatus  = DS_ACTION_BACKLIGHT_PWM;												
 
 							break;
@@ -611,7 +622,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{ /* Nothing */ }				            
 						
 							u8ReturnStatus  = DS_ACTION_TOUCH_STATUS;
-							tDisplayManageTask.u16Timer1 = TIME_35ms;													
+							tDisplayManageTask.u16Timer1 = TIME_32ms;													
 
 							break;							
 						case DS_ACTION_TOUCH_STATUS:
@@ -639,10 +650,12 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 
 							break;							
 						default:
+							/* Nothing */
 							break;
 					}
 					break;					
 			default:
+				/* Nothing */
 				break;
 		}
 	}
@@ -663,6 +676,11 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					else
 					{
 						u8CtrlStatus = DS_ACTION_NONE;
+						tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
+						u8ReturnStatus  = DS_ACTION_NONE;
+						tDisplayCtrl.bPowerStartupEvent =false;
+						tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+						tDisplayManageTask.u16Timer1 = TIME_DISABLE;					
 					}
 
 					switch (u8CtrlStatus)
@@ -744,6 +762,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 
 							break;							
 						default:
+							/* Nothing */
 							break;
 					}
 					break;
@@ -774,6 +793,11 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					else
 					{
 						u8CtrlStatus = DS_ACTION_NONE;
+						tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
+						tDisplayCtrl.bPowerStartupEvent =false;
+						tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+						tDisplayManageTask.u16Timer1 = TIME_DISABLE;
+						u8ReturnStatus  = DS_ACTION_NONE;						
 					}
 					
 					switch (u8CtrlStatus)
@@ -884,11 +908,13 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							break;
 							
 						default:
+							/* Nothing */
 							break;
 					}
 
 					break;
 			case DISPLAY_OFF_TOUCH_ON :  /* TBD */
+#if 0			
 					if(tDisplayCtrl.u8LastDisplayStatus != DISPLAY_OFF_TOUCH_ON)
 					{
 						if((tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_OFF) || (tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_ON))
@@ -993,8 +1019,13 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 														
 							break;							
 						default:
+							/* Nothing */
 							break;
 					}
+#endif				
+					u8ReturnStatus  = DS_ACTION_NONE;
+					tDisplayManageTask.u16Timer1 = TIME_DISABLE;
+					tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;	
 					break;
 			case DISPLAY_ON_TOUCH_ON :
 					if(tDisplayCtrl.u8LastDisplayStatus != DISPLAY_ON_TOUCH_ON)
@@ -1014,6 +1045,11 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					else
 					{
 						u8CtrlStatus = DS_ACTION_NONE;
+						tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
+						tDisplayCtrl.bPowerStartupEvent =false;
+						tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+						u8ReturnStatus  = DS_ACTION_NONE;
+						tDisplayManageTask.u16Timer1 = TIME_DISABLE;						
 					}
 
 					switch (u8CtrlStatus)
@@ -1130,10 +1166,12 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 														
 							break;							
 						default:
+							/* Nothing */
 							break;
 					}
 					break;					
 			default:
+				/* Nothing */
 				break;
 		}
 	}
@@ -1161,7 +1199,6 @@ static void C_Display_Management_ParaInit(void)
     tDisplayManageTask.u32Timeout = TIME_DISABLE;
 
 	tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
-	tDisplayCtrl.bBattProtectRecoverEvent = false;
 	tDisplayCtrl.bPowerStartupEvent = false;
 	tDisplayCtrl.u8LastDisplayStatus = DISPLAY_OFF_TOUCH_OFF;
 	tDisplayCtrl.u8CurrentDisplaySet = DISPLAY_OFF_TOUCH_OFF;
@@ -1221,8 +1258,8 @@ static void C_Display_Manage_Init(void)
 
                 tDisplayManageTask.u16Timer1 = TIME_DISABLE;
 
-				/* Delay 100ms =100ms + eeprom read time 91us */
-				tDisplayManageTask.u16Timer2 = TIME_101ms; 			
+				/* Delay 100ms =100ms + eeprom read time 91us + VBAT check 10ms */
+				tDisplayManageTask.u16Timer2 = TIME_90ms; 			
             }
             else
             {
@@ -1242,6 +1279,7 @@ static void C_Display_Manage_Init(void)
 
             break;
         default:
+        	/* Nothing */
             break;
     }
     HAL_UART_Printf("Component DM Init Done\n\r");
@@ -1275,17 +1313,21 @@ static void C_Display_Manage_Control(void)
         case EVENT_MESSAGE_DISPLAY_ENABLE :
 			if((tDisplayCtrl.u8DisplayEnLock == DISP_SEQ_LOCK_OFF) && (Memory_Pool_PowerStatus_Get() != POWER_OFF))
 			{	
+				tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_ON;
+				
 				tDisplayCtrl.u8CurrentDisplaySet = Memory_Pool_DisplayEnable_Get();
 				tDisplayCtrl.bBacklightSet = Memory_Pool_BacklightEnable_Get();
-
+								
 				if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
 				{
+					/* Action => do shutdown sequence*/
 					MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
 					tDisplayCtrl.u8CurrentDisplaySet = DISPLAY_OFF_TOUCH_OFF;
+					Memory_Pool_DisplayEnable_Set(DISPLAY_OFF_TOUCH_OFF);
 					u8Status = DS_ACTION_NONE;
-					tDisplayManageTask.u16Timer1 = TIME_5ms;
+					tDisplayManageTask.u16Timer1 = TIME_2ms;
 				}
-				else if((Memory_Pool_VBattProtectState_Get() == BATT_PROTECT_ON)|| (tDisplayCtrl.bDiagnosisProtect == true ))
+				else if(tDisplayCtrl.bDiagnosisProtect == true )
 				{	
 					/* Action => turn off the display, touch , back-light*/
 		            if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) || (Memory_Pool_TouchStatus_Get() == TOUCH_ON))
@@ -1334,7 +1376,6 @@ static void C_Display_Manage_Control(void)
 
 					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 					tDisplayCtrl.u8DispSeqStatus = u8Status;					
-					tDisplayCtrl.bBattProtectRecoverEvent = false; /* Recover disable */
 					tDisplayCtrl.bDiagnosisProtectLeve = false; /* Recover disable */
 				}
 				else
@@ -1351,7 +1392,7 @@ static void C_Display_Manage_Control(void)
 					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 					tDisplayCtrl.u8DispSeqStatus = u8Status;
 				}
-				tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_ON;
+				
 			}
 			else
 			{
@@ -1365,7 +1406,13 @@ static void C_Display_Manage_Control(void)
 
             break;
         case EVENT_MESSAGE_SCANNING :
+			if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
+			{
             Memory_Pool_ScanStatus_Set(M_DM_ScanningControl(Memory_Pool_ScanStatus_Get(), Memory_Pool_DisplayScan_Get()));
+			}			
+			else
+			{ /* Nothing */}
+
             break;
         case EVENT_MESSAGE_DIPLAY_REGISTER :
 #if (U625_TDDI_TD7800)   			
@@ -1400,6 +1447,7 @@ static void C_Display_Manage_Control(void)
 
 			break;
         default:
+        	/* Nothing */
             break;
     }
     Task_TaskDone();

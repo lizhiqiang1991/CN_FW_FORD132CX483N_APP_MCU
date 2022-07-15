@@ -440,13 +440,6 @@ static void C_Diagnosis_Action(void)
 	else
 	{/*Nothing*/}
 
-	if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS)) > 0U)
-	{
-		u32Temp|=(BIT_LCDERR_POS | BIT_LLOSS_POS | BIT_BLERR_POS | BIT_TCERR_POS | BIT_TSCERR_POS | BIT_DCERR_POS);
-	}
-	else
-	{/*Nothing*/}
-
 	if((u16GeneralDiagnosis&(BIT_A3_POWER_P1V2_ERROR_POS | BIT_A3_COMM_LOSS_ERROR_POS)) > 0U)
 	{
 		u32Temp|=BIT_LLOSS_POS;
@@ -643,8 +636,13 @@ static void C_Diagnosis_Control(void)
 				C_Diagnosis_IO_P1V2Good();
 				C_Diagnosis_IO_P3V3Good();
 				C_Diagnosis_IO_SerdesLock();
-#if defined(CX430_TDDI_NT51926)
+#if(CX430_TDDI_NT51926)
+				if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
+				{
 				C_Diagnosis_IO_DispFaultMaster((tDiagnosisTask.u16Timer2-1U));
+				}			
+				else
+				{ /* Nothing */}			
 #endif
 				C_Diagnosis_IO_LedInt((tDiagnosisTask.u16Timer2-1U));
 			}

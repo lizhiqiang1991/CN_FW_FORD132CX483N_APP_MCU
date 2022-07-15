@@ -241,6 +241,8 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		
 		case CMD_DISPLAY_ENABLE:
 			u8Temp = Memory_Pool_DisplayEnable_Reg_Get();
+            if(u8Temp != DISPLAY_OFF_TOUCH_ON)
+            {
 			if ((u8Temp & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
 			{                
 				Memory_Pool_BacklightEnable_Set(true);
@@ -256,8 +258,11 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 
 			Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
 			Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL4, EVENT_MESSAGE_DISANOSIS_ENABLE);
-		break;
+            }
+            else
+			{/*Nothing*/}
 		
+            break;
 		case CMD_DISPLAY_SHUTDOWN:
 			u8Temp = Memory_Pool_Shutdown_Get();
 			if ((u8Temp & BIT_SHDWN_POS) == SHUTDOWN_ENABLE)
@@ -533,7 +538,6 @@ void C_Communication_ParaInit(void)
 
 	Memory_Pool_CommunicationMask_Set(false);
 	Memory_Pool_I2CDesInit_Set(false);
-	Memory_Pool_LcdResetStatus_Set(false);
 	Memory_Pool_VBattProtectState_Set(false);
 	Memory_Pool_WriteFPNDeliveryStatusReg_Set(false);
 	Memory_Pool_WriteFPNDelivery_Set(false);

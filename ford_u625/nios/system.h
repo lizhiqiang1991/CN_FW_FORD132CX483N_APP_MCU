@@ -24,11 +24,15 @@
 #define TIME_10ms                  11
 #define TIME_11ms                  12
 #define TIME_12ms                  13
+#define TIME_13ms                  14
+#define TIME_14ms                  15
 #define TIME_15ms                  16
 #define TIME_17ms                  18
 #define TIME_20ms                  21
 #define TIME_25ms                  26
 #define TIME_30ms                  31
+#define TIME_31ms                  32
+#define TIME_32ms                  33
 #define TIME_33ms                  34
 #define TIME_34ms                  35
 #define TIME_35ms                  36
@@ -40,6 +44,7 @@
 #define TIME_50ms                  51
 #define TIME_51ms                  52
 #define TIME_72ms                  73
+#define TIME_80ms                  81
 #define TIME_84ms                  85
 #define TIME_90ms                  91
 #define TIME_100ms                 101

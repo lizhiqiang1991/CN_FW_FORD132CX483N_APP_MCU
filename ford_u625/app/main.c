@@ -135,6 +135,7 @@ void Main_TimerCore(void)
 	C_Diagnosis_Timer1();
 	C_Diagnosis_Timer2();
 	C_Power_Manage_Timer1();
+    C_Power_Manage_Timer2();
 	C_Display_Manage_Timer1();
 	C_Display_Manage_Timer2();
     C_Display_Manage_Timer3();
