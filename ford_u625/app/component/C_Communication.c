@@ -564,7 +564,6 @@ void C_Communication_ParaInit(void)
  ******************************************************************************/
 static void C_Communiction_Init(void)
 {
-	HAL_UART_Printf("Component COM Init Start\n");
 	switch (Task_Current_Event_Get())
 	{
 		case EVENT_FIRST :
@@ -573,7 +572,6 @@ static void C_Communiction_Init(void)
 		break;
 
 		case EVENT_TIMER_I2C_DES_INIT_DELAY :
-			HAL_UART_Printf("=> Event I2C Initial Delay...\n");
 			/* Check power ready and MCU is in the normal run mode */
 			if (Memory_Pool_PowerState_Get() == NORMAL_RUN_STATE)
 			{
@@ -606,7 +604,6 @@ static void C_Communiction_Init(void)
 		break;
 	}
 
-	HAL_UART_Printf("Component COM Init Done\n\r");
 	Task_TaskDone();
 }
 /******************************************************************************
@@ -618,17 +615,14 @@ static void C_Communiction_Init(void)
  ******************************************************************************/
 static void C_Communiction_Process(void)
 {
-	HAL_UART_Printf("Component COM Process Start\n");
 	switch (Task_Current_Event_Get())
 	{
 		case EVENT_FIRST :
-			HAL_UART_Printf("=> Event First...\n");
 			/* Enable EVENT_TIMER_INTB_ROUNTINE */
 			tCommunicationTask.u16Timer2 = TIME_2ms;
 		break;
 		
 		case EVENT_MESSAGE_EEPROM_CONTROL :
-			HAL_UART_Printf("=> Event Message for EEPROM Control...\n");
 			C_Communication_EEPROM_Write(Memory_Pool_EppromIndex_Get());
 		break;
 
@@ -649,7 +643,6 @@ static void C_Communiction_Process(void)
 			/* Nothing */
 		break;
 	}
-	HAL_UART_Printf("Component COM Process Done\n\r");
 	Task_TaskDone();
 }
 /******************************************************************************
@@ -661,8 +654,6 @@ static void C_Communiction_Process(void)
  ******************************************************************************/
 static void C_Communiction_Error(void)
 {
-	HAL_UART_Printf("Component COM Error Start\n");
-	HAL_UART_Printf("Component COM Error Done\n\r");
 	Task_TaskDone();
 }
 

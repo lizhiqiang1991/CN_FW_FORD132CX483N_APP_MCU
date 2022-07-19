@@ -1233,12 +1233,13 @@ static void C_Display_Manage_Init(void)
 				Memory_Pool_LcdResetStatus_Set(LCD_RESET_HIGH);
 				tDisplayCtrl.bPowerStartupEvent = true;
 #if (U625_TDDI_TD7800) 
-                /* Registers Detect TCH ATTN Module. */
-                MDetectTchAttn_Register(C_Display_Management_CallbackTCHState\
+                /* Registers Detect TCH ATTN Module. */          
+				MDetectTchAttn_Register(C_Display_Management_CallbackTCHState\
                 ,M_DM_TD7800_ATTN_Read\
-                ,C_Display_Management_CallbackTCHClickHandler\
+				,C_Display_Management_CallbackTCHClickHandler\
                 ,C_Display_Management_CallbackTCHClickRelHandler\
                 ,ATTN_TRI_FALLING);
+
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
                 /* Registers Detect TCH ATTN Module. */
                 MDetectTchAttn_Register(C_Display_Management_CallbackTCHState\
@@ -1246,6 +1247,7 @@ static void C_Display_Manage_Init(void)
                 ,C_Display_Management_CallbackTCHClickHandler\
                 ,C_Display_Management_CallbackTCHClickRelHandler\
                 ,ATTN_TRI_FALLING);
+		
 #else
 #endif
                 /* Registers Two Callback Functions for Entering Battery Protected and Leaving Battery Protected. */
@@ -1282,7 +1284,6 @@ static void C_Display_Manage_Init(void)
         	/* Nothing */
             break;
     }
-    HAL_UART_Printf("Component DM Init Done\n\r");
     Task_TaskDone();
 }
 /******************************************************************************
@@ -1425,8 +1426,10 @@ static void C_Display_Manage_Control(void)
             break;
 
         case EVENT_TIME_ATTN_POLLING :
+#if (!M_DETECT_TCH_ATTN_EX_INT)
             tDisplayManageTask.u16Timer2 = TIME_2ms;
             MDetectTchAttn_Routine2ms();
+#endif
         	break;
         case EVENT_TIME_INIT_POLLING :
 			if(Memory_Pool_PowerStatus_Get() != POWER_OFF)
@@ -1461,8 +1464,6 @@ static void C_Display_Manage_Control(void)
  ******************************************************************************/
 static void C_Display_Manage_Error(void)
 {
-    HAL_UART_Printf("Component DM Error Start\n");
-    HAL_UART_Printf("Component DM Error Done\n\r");
     Task_TaskDone();
 }
 

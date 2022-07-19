@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include "main.h"
-#include "hal_uart.h"
 #include "hal_adc.h"
 #include "hal_pwm.h"
 #include "hal_gpio.h"

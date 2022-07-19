@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Design version="12" xmlns="http://cypress.com/xsd/cydesignfile_v3">
-    <ToolInfo version="2.3.1.4663"/>
+    <ToolInfo version="2.3.0.4276"/>
     <Devices>
         <Device mpn="CY8C4147AZS-S245">
             <BlockConfig>
@@ -256,7 +256,6 @@
                         <Param id="portLevelConfig" value="false"/>
                     </Personality>
                 </Block>
-                <Block location="ioss[0].port[3].pin[0]"/>
                 <Block location="ioss[0].port[3].pin[1]">
                     <Alias value="U301_DISP_FAULT"/>
                     <Personality template="m0s8pin" version="1.0">
@@ -299,7 +298,7 @@
                         <Param id="DriveModes" value="CY_GPIO_DM_PULLUP"/>
                         <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
-                        <Param id="isrTrigger" value="CY_GPIO_INTR_BOTH"/>
+                        <Param id="isrTrigger" value="CY_GPIO_INTR_FALLING"/>
                         <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
                         <Param id="inFlash" value="true"/>
                         <Param id="portLevelConfig" value="false"/>
@@ -509,7 +508,6 @@
                         <Param id="portLevelConfig" value="false"/>
                     </Personality>
                 </Block>
-                <Block location="ioss[0].port[6].pin[2]"/>
                 <Block location="ioss[0].port[7].pin[0]">
                     <Alias value="DEBUG_UART_RX"/>
                     <Personality template="m0s8pin" version="1.0">

@@ -90,8 +90,6 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
                 Cy_SysLib_Delay(9U);	/* <=10ms */
                 if (HIGH_LEVEL == M_PM_CheckPowerPG(P1V2_PGOOD, 10U))
                 {
-                 	/* HAL_UART_Printf("=> P1V2 successful ...\n"); */
-
 					Cy_SysLib_Delay(1U);	/* 1ms */
                 	HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
 #if (U625_TDDI_TD7800)          
@@ -112,13 +110,11 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
                 }
                 else
                 {
-                    /* HAL_UART_Printf("=> P1V2 fail ...\n"); */
                     u8Return = P1V2_FAIL;
                 }
             }
             else
             {
-                /* HAL_UART_Printf("=> P3V3 fail ...\n"); */
                 u8Return = P3V3_FAIL;
             }
             break;

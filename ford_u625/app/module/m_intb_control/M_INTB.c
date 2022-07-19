@@ -76,7 +76,7 @@ static void mINTB_StateInit(uint16_t u16RoutineTime)
     /* Increates DeAsserted Timer. */
     mINTBControl.u16DeAssertedTimer = (mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)?\
     (mINTBControl.u16DeAssertedTimer + u16RoutineTime):\
-    (mINTBControl.u16DeAssertedTimer);
+    (MINTB_SATISFIED_DEASSERTED_TIME);
 
     mINTBControl.eStateMachine = INTB_SM_WAIT_TRIGGER;
 }
@@ -95,7 +95,7 @@ static void mINTB_StateWaitTrigger(uint16_t u16RoutineTime)
     /* Increates DeAsserted Timer. */
     mINTBControl.u16DeAssertedTimer = (mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)?\
     (mINTBControl.u16DeAssertedTimer + u16RoutineTime):\
-    (mINTBControl.u16DeAssertedTimer);
+    (MINTB_SATISFIED_DEASSERTED_TIME);
 
     if(mINTBControl.eStrategyCtrl == STRATEGY_CTRL_START)
     {
@@ -106,6 +106,8 @@ static void mINTB_StateWaitTrigger(uint16_t u16RoutineTime)
         mINTBControl.eStateMachine = INTB_SM_DEINIT;
     }
     else{/* Wait for trigger */}
+
+    HAL_UART_Printf("1 - INTB is H. \n");
 }
 
 static void mINTB_StateSetup(uint16_t u16RoutineTime)
@@ -114,6 +116,7 @@ static void mINTB_StateSetup(uint16_t u16RoutineTime)
     {
         mINTBControl.eStateMachine = INTB_SM_WAIT_TRIGGER;
         mINTBControl.u16DeAssertedTimer = 0;
+        HAL_UART_Printf("2 - INTB is H. \n");
     }
     else if(mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)
     {
@@ -139,9 +142,11 @@ static void mINTB_StateSetup(uint16_t u16RoutineTime)
         /* Increates Asserted Timer. */
         mINTBControl.u16AssertedTimer = (mINTBControl.u16AssertedTimer < MINTB_SATISFIED_ASSERTED_TIME)?\
         (mINTBControl.u16AssertedTimer + u16RoutineTime):\
-        (mINTBControl.u16AssertedTimer);
+        (MINTB_SATISFIED_ASSERTED_TIME);
         
         mINTBControl.eStateMachine = INTB_SM_HOLD_TIME;
+
+        HAL_UART_Printf("INTB is L. \n");
     }
 }
 
@@ -175,7 +180,9 @@ static void mINTB_StateHold(uint16_t u16RoutineTime)
         /* Increates DeAsserted Timer. */
         mINTBControl.u16DeAssertedTimer = (mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)?\
         (mINTBControl.u16DeAssertedTimer + u16RoutineTime):\
-        (mINTBControl.u16DeAssertedTimer);
+        (MINTB_SATISFIED_DEASSERTED_TIME);
+
+        HAL_UART_Printf("3.INTB is H. \n");
     }
 }
 
@@ -240,18 +247,18 @@ bool MINTB_StrategyControl(MINTB_StrategyCtrl_E eStrategyCtrl)
  * 
  * @dot
  * digraph INTBStateMachine{
- *  init [label = "Init:\n "];
- *  wait_trigger [label = "Wait Trigger:\n GPIO_INTB = H"];
- *  set_up [label = "Set Up:\n GPIO_INTB = L \n when time which GPIO_INTB \n is equal to H \n keeps more than 2ms."];
- *  hold [label = "Hold:\n GPIO_INTB = H \n when time which GPIO_INTB \n is equal to L keeps \n more than 2ms."];
- *  de_init [label = "Deinit:\n Rleases INTB Module."];
+ *  init [label = "Init: \n Increates set-time."];
+ *  wait_trigger [label = "Wait Trigger: \n 1.GPIO_INTB = H \n 2.Increates set-time. \n 3.Clears hold-time."];
+ *  set_up [label = "Set Up: \n 1.Increates set-time. \n 2.GPIO_INTB = L when set-time >= 2ms."];
+ *  hold [label = "Hold: \n 1.Clears set-time. \n 2.Increates hold-time. \n 3.GPIO_INTB = H when hold-time >= 2ms."];
+ *  de_init [label = "Deinit: \n Rleases INTB Module."];
  * 
  *  init -> wait_trigger; 
  *  wait_trigger -> set_up [label = "Receives set up interrupt."];
  *  set_up -> hold [label = "GPIO_INTB is from H to L."];
  *  set_up -> wait_trigger [label = "Receives cancelled interrupt."];
  *  hold -> wait_trigger [label = "GPIO_INTB is from L to H."];
- *  wait_trigger -> de_init [label = "Receives de-init interrupt."];
+ *  wait_trigger -> de_init [label = "Receives power-off interrupt."];
  * }
  * @enddot
  * 

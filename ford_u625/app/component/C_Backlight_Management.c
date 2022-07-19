@@ -14,12 +14,10 @@ static tbacklight_manage_task_def tBacklightManageTask;
  ******************************************************************************/
 static void C_Backlight_Manage_Init(void)
 {
-    HAL_UART_Printf("Component BL Init Start\n");
     HAL_PWM_CH4_Init();
     tBacklightManageTask.u16Timer1 = TIME_DISABLE;
     tBacklightManageTask.u16Timer2 = TIME_DISABLE;
     Task_ChangeState(TYPE_BACKLIGHT_MANAGE, LEVEL5, STATE_BACKLIGHT_MANAGE_CTRL, Backlight_Manage_State_Machine[STATE_BACKLIGHT_MANAGE_CTRL]);
-    HAL_UART_Printf("Component BL Init Done\n\r");
     Task_TaskDone();
 }
 
@@ -77,8 +75,6 @@ static void C_Backlight_Manager_Control(void)
  ******************************************************************************/
 static void C_Backlight_Manage_Error(void)
 {
-    HAL_UART_Printf("Component BL Error Start\n");
-    HAL_UART_Printf("Component BL Error Done\n\r");
     Task_TaskDone();
 }
 /******************************************************************************

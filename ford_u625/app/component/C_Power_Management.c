@@ -31,10 +31,8 @@ static void C_Power_Manage_ParaInit(void)
  ******************************************************************************/
 static void C_Power_Manage_Init(void)
 {
-    HAL_UART_Printf("Component PM Init Start\n");
     C_Power_Manage_ParaInit();
     Task_ChangeState(TYPE_POWER_MANAGE, LEVEL5, STATE_POWER_MANAGE_CTRL, Power_Manage_State_Machine[STATE_POWER_MANAGE_CTRL]);
-    HAL_UART_Printf("Component PM Init Done\n\r");
     Task_TaskDone();
 }
 /******************************************************************************
@@ -53,11 +51,9 @@ static void C_Power_Manager_Control(void)
     uint8_t u8PowerStatus;
     uint16_t u16BatteryVol = 0U;
 
-    HAL_UART_Printf("Component PM Control Start\n");
     switch (Task_Current_Event_Get())
     {
         case EVENT_FIRST :
-            HAL_UART_Printf("=> Event First...\n");
 
             /* Switch to  Power On mode. */
             Memory_Pool_PowerState_Set(START_UP_STATE);
@@ -65,7 +61,6 @@ static void C_Power_Manager_Control(void)
             Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
             break;
         case EVENT_MESSAGE :
-            HAL_UART_Printf("=> Event Message...\n");
             switch (Memory_Pool_PowerState_Get())
             {
                 case START_UP_STATE:
@@ -90,7 +85,6 @@ static void C_Power_Manager_Control(void)
                         Memory_Pool_PowerState_Set(OFF_POWER_STATE);
                         Memory_Pool_PowerStatus_Set(POWER_OFF);
                         Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
-                        HAL_UART_Printf("=> Start up fail ...\n");
                     }
                     else if (u8PowerStatus == P1V2_FAIL)
                     {
@@ -105,7 +99,6 @@ static void C_Power_Manager_Control(void)
                         Memory_Pool_PowerState_Set(OFF_POWER_STATE);
                         Memory_Pool_PowerStatus_Set(POWER_OFF);
                         Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
-                        HAL_UART_Printf("=> Start up fail ...\n");
                     }
                     else
                     { /*Nothing*/ }
@@ -153,7 +146,6 @@ static void C_Power_Manager_Control(void)
             }
             break;
         case EVENT_SYNCS_CHECK_PERIOD :
-			HAL_UART_Printf("=> Event SYNC Check period...\n");
 			u16SyncVol=Memory_Pool_SyncVol_Get();
 
 			if(u16SyncVol < SYNC_LOW_VOL)
@@ -182,7 +174,6 @@ static void C_Power_Manager_Control(void)
 			break;
 
         case EVENT_VBAT_CHECK:
-			HAL_UART_Printf("=> Even VBAT Voltage Check...\n");
             u16BatteryVol=Memory_Pool_BatteryVol_Get();
 
             if((u16BatteryVol < BP_VMINRCV_CFG) ||(u16BatteryVol > BP_VMAXRCV_CFG))
@@ -214,14 +205,12 @@ static void C_Power_Manager_Control(void)
                 Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
                 Memory_Pool_PowerStatus_Set(POWER_ON_READY);
                 Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
-                HAL_UART_Printf("=> Start up successful...\n");
             }
 			tPowerManageTask.u16Timer2=TIME_DISABLE;
 			break;
 		default:
 			break;
     }
-    HAL_UART_Printf("Component PM Control Done\n\r");
     Task_TaskDone();
 
 }
@@ -234,8 +223,6 @@ static void C_Power_Manager_Control(void)
  ******************************************************************************/
 static void C_Power_Manage_Error(void)
 {
-    HAL_UART_Printf("Component PM Error Start\n");
-    HAL_UART_Printf("Component PM Error Done\n\r");
     Task_TaskDone();
 }
 /******************************************************************************

@@ -1,6 +1,5 @@
 #include "M_TempertureProtect.h"
 #include <stdlib.h>
-#include "hal_uart.h"
 #include "hal_adc.h"
 #include "hal_pwm.h"
 #include "hal_gpio.h"
@@ -45,7 +44,6 @@ void M_TP_Init(void)
 {
 //	HAL_ADC_Init();
 
-	//HAL_UART_Printf("M: TP Init\r\n");
 }
 
 /******************************************************************************
@@ -61,11 +59,9 @@ void M_TP_Function_Execute(uint8_t u8Action)
 	{
 		case TP_INIT_ADCVALUE:
 
-			//HAL_UART_Printf("M:DC INIT ADC VALUE...\n");
 			break;
 
 		default:
-			//HAL_UART_Printf("M: Execute DC Exception...\r\n");
 			break;
 	}
 	M_TP_Status_Set(u8Action);
@@ -85,7 +81,6 @@ uint8_t M_TP_State_Maching(ttemperture_protect_manage_def *tTPM)
     {
         case TP_STATE_INIT:
             tTPM->u8TempertureProtectMode = TP_STATE_NORMAL;
-            //HAL_UART_Printf("M:DC INIT ADC VALUE...\n");
             break;
         case TP_STATE_NORMAL:
             if (tTPM->i16GetNowTemp >= TP_TEMP_OVERTEMP)

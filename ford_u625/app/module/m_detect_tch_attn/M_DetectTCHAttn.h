@@ -11,6 +11,8 @@ extern "C" {
 #include "main.h"
 
 /* -- Marco Define -- */
+#define M_DETECT_TCH_ATTN_EX_INT true
+
 /**
  * @brief 
  * 
@@ -46,7 +48,9 @@ CALLBACK_TCH_CLICK CallbackTchClick,\
 CALLBACK_TCH_CLICK_RELEASE CallbackTchClickRel,\
 MDetectTchAttn_ATTNTriggerType_E eAttnTriType);
 
+#if (!M_DETECT_TCH_ATTN_EX_INT)
 extern void MDetectTchAttn_Routine2ms(void);
+#endif
 
 #endif
 /* -- END -- */

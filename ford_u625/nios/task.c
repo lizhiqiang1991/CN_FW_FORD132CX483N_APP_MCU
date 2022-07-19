@@ -264,9 +264,6 @@ void Task_TaskDone(void)
 	__disable_irq();
 	u8index = gtqueue_manager.u8current_point;
 
-    //HAL_UART_Printf("Type{0x%02x} : Component Event = 0x%02x\n",gttask_recorder[u8index].ttask[0].u8type, gttask_recorder[u8index].ttask[gttask_recorder[u8index].u8current_point].u8event);
-	//HAL_UART_Printf("Type{0x%02x} : Task Num = 0x%02x\n\r",gttask_recorder[u8index].ttask[0].u8type, gttask_recorder[u8index].u8task_num);
-
     Task_ClearEvent(&gttask_recorder[u8index].ttask[gttask_recorder[u8index].u8current_point]);
     gttask_recorder[u8index].u8current_point = (gttask_recorder[u8index].u8current_point + 1) % RECORDER_QUEUE_SIZE;
     

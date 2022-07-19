@@ -11,12 +11,10 @@ static tdata_collecting_task_def tDataCollectingTask;
  ******************************************************************************/
 static void C_Data_Collecting_Init(void)
 {
-    HAL_UART_Printf("Component DC Init Start\n");
     M_DC_Init();
     M_DC_Function_Execute(DC_INIT_ADCVALUE);
     tDataCollectingTask.u16Timer1 = TIME_DISABLE;
     Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_CTRL, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_CTRL]);
-    HAL_UART_Printf("Component DC Init Done\n\r");
     Task_TaskDone();
 }
 /******************************************************************************

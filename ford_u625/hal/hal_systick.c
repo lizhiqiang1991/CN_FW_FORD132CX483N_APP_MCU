@@ -31,6 +31,6 @@ void HAL_SYSTICK_Init(systick_typedef tTick)
     }
     else
     {
-    	HAL_UART_Printf("H: SysTick parameter error...");
+    	/* Error */
     }
 }
