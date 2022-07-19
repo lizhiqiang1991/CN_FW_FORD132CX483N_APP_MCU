@@ -20,7 +20,6 @@ static void C_Power_Manage_ParaInit(void)
     Memory_Pool_SyncStatus_Set(SYNC_UNKNOW);
     Memory_Pool_SoftwareReset_Set(false);
     tPowerManageTask.u16Timer1 = TIME_DISABLE;
-    tPowerManageTask.u16Timer2 = TIME_DISABLE;
 }
 /******************************************************************************
  ;       Function Name			:	void C_Power_Manage_Init(void)
@@ -49,7 +48,6 @@ static void C_Power_Manager_Control(void)
 	uint32_t u32CommDisplayStatus=0U;
     uint16_t u16SyncVol;
     uint8_t u8PowerStatus;
-    uint16_t u16BatteryVol = 0U;
 
     switch (Task_Current_Event_Get())
     {
@@ -65,12 +63,13 @@ static void C_Power_Manager_Control(void)
             {
                 case START_UP_STATE:
                     u8PowerStatus = M_PM_Sequnce_Execute(Memory_Pool_PowerStatus_Get());
-                    /*Start AD Conversion*/
-                    M_DC_Function_Execute(DC_START_MEASURE);
 
                     if (u8PowerStatus == POWER_PASS)
                     {
-                        tPowerManageTask.u16Timer2 = TIME_10ms;
+						/* Enable power system successfully and switch to Normal Run mode. */
+						Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
+						Memory_Pool_PowerStatus_Set(POWER_ON_READY);
+						Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
                     }
                     else if (u8PowerStatus == P3V3_FAIL)
                     {
@@ -85,6 +84,13 @@ static void C_Power_Manager_Control(void)
                         Memory_Pool_PowerState_Set(OFF_POWER_STATE);
                         Memory_Pool_PowerStatus_Set(POWER_OFF);
                         Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                    }
+                    else if (u8PowerStatus == POWER_VBAT_FAIL)
+                    {
+						/* Disable power system. */
+						Memory_Pool_PowerState_Set(OFF_POWER_STATE);
+						Memory_Pool_PowerStatus_Set(POWER_OFF);
+						Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
                     }
                     else if (u8PowerStatus == P1V2_FAIL)
                     {
@@ -172,42 +178,6 @@ static void C_Power_Manager_Control(void)
 				tPowerManageTask.u16Timer1=TIME_2ms;
 			}
 			break;
-
-        case EVENT_VBAT_CHECK:
-            u16BatteryVol=Memory_Pool_BatteryVol_Get();
-
-            if((u16BatteryVol < BP_VMINRCV_CFG) ||(u16BatteryVol > BP_VMAXRCV_CFG))
-            {
-				/* Record 0xA3 Status */
-				u16Temp = Memory_Pool_GeneralDiagnosis_Get();
-				if(u16BatteryVol < BP_VMINRCV_CFG)
-				{
-					Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_ON_LOW_VOL_ERROR_POS); 
-				}
-				else if(u16BatteryVol > BP_VMAXRCV_CFG)
-				{
-					Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_ON_HIGH_VOL_ERROR_POS); 
-				}
-				else
-				{ /* Nothing */ }
-
-                /* Record power error status. */
-                Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);
-
-                /* Disable power system. */
-                Memory_Pool_PowerState_Set(OFF_POWER_STATE);
-                Memory_Pool_PowerStatus_Set(POWER_OFF);
-                Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);                            
-            }
-            else
-            {
-                /* Enable power system successfully and switch to Normal Run mode. */
-                Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
-                Memory_Pool_PowerStatus_Set(POWER_ON_READY);
-                Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
-            }
-			tPowerManageTask.u16Timer2=TIME_DISABLE;
-			break;
 		default:
 			break;
     }
@@ -248,29 +218,7 @@ void C_Power_Manage_Timer1(void)
     else
     { /* Nothing */ }
 }
-/******************************************************************************
- ;       Function Name			:	void C_Power_Manage_Timer2(void)
- ;       Function Description	:	This function for timing using
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void C_Power_Manage_Timer2(void)
-{
-    if (tPowerManageTask.u16Timer2 > TIME_UP)
-    {
-        tPowerManageTask.u16Timer2--;
-        if (tPowerManageTask.u16Timer2 == TIME_UP)
-        {
-            tPowerManageTask.u16Timer2 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_TIMER2);
-        }
-        else
-        { /* Nothing */ }
-    }
-    else
-    { /* Nothing */ }
-}
+
 void (*const Power_Manage_State_Machine[MAX_PM_STATE_NO])(void) =
 {   C_Power_Manage_Init, C_Power_Manager_Control, C_Power_Manage_Error };
 

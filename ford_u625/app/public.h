@@ -294,7 +294,8 @@
 #define POWER_PASS							0x00U
 #define P1V2_FAIL							0x01U
 #define P3V3_FAIL							0x02U
-#define POWER_CMD_FAIL						0x03U
+#define POWER_VBAT_FAIL						0x03U
+#define POWER_CMD_FAIL						0x04U
 
 #define DISPLAY_OFF_TOUCH_OFF				0x00U
 #define DISPLAY_ON_TOUCH_OFF				0x01U
