@@ -1,7 +1,8 @@
 #include "M_PowerManagement.h"
 #include "main.h"
 #include "M_INTB.h"
-
+#include "M_DataCollecting.h"
+#include "Memory_Pool.h"
 
 static uint8_t M_PM_CheckPowerPG(uint8_t u8Status, uint8_t u8Times)
 {
@@ -57,6 +58,8 @@ static uint8_t M_PM_CheckPowerPG(uint8_t u8Status, uint8_t u8Times)
 uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 {
     uint8_t u8Return;
+    uint16_t u16Temp=0U;
+	int16_t  s16VBatAdc = 0;
 
     switch (u8Action)
     {
@@ -81,45 +84,72 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
             HAL_GPIO_High( U301_P3V3_EN_PORT, U301_P3V3_EN_PIN);
             Cy_SysLib_Delay(9U);  /* <=10ms */
 
-            if (HIGH_LEVEL == M_PM_CheckPowerPG(P3V3_PGOOD, 12U)) /* about 1ms */
-            {
-				Cy_SysLib_Delay(2U);  /* 2ms */
-				Cy_SysLib_DelayUs(200U); /* 200us */
-                HAL_GPIO_High( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);
-				
-                Cy_SysLib_Delay(9U);	/* <=10ms */
-                if (HIGH_LEVEL == M_PM_CheckPowerPG(P1V2_PGOOD, 10U))
-                {
-					Cy_SysLib_Delay(1U);	/* 1ms */
-                	HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
+			/*Start AD Conversion*/
+            M_DC_Function_Execute(DC_START_MEASURE);
+
+	        if (HIGH_LEVEL == M_PM_CheckPowerPG(P3V3_PGOOD, 12U)) /* about 1ms */
+			{
+                Cy_SysLib_Delay(2U);  /* 2ms */
+			    Cy_SysLib_DelayUs(200U); /* 200us */
+                
+				s16VBatAdc = HAL_ADC0_Get_ADCRead(HAL_ADC_VBATT_VOLT);
+				s16VBatAdc = HAL_ADC0_Get_Channel_mVolt(HAL_ADC_VBATT_VOLT,(uint16_t)s16VBatAdc);	
+				if((s16VBatAdc < POWER_VMINRCV_ADC_CFG) ||(s16VBatAdc > POWER_VMAXRCV_ADC_CFG))
+				{
+					/* Record 0xA3 Status */
+					u16Temp = Memory_Pool_GeneralDiagnosis_Get();
+					if(s16VBatAdc < POWER_VMINRCV_ADC_CFG)
+					{
+						Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_ON_LOW_VOL_ERROR_POS); 
+					}
+					else if(s16VBatAdc > POWER_VMAXRCV_ADC_CFG)
+					{
+						Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_ON_HIGH_VOL_ERROR_POS); 
+					}
+					else
+					{ /* Nothing */ }
+					
+					/* Record power error status. */
+					Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);
+					u8Return = POWER_VBAT_FAIL;								   
+				}
+				else
+				{	
+	                HAL_GPIO_High( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);				
+	                Cy_SysLib_Delay(9U);	/* <=10ms */
+					
+	                if (HIGH_LEVEL == M_PM_CheckPowerPG(P1V2_PGOOD, 10U))
+	                {
+						Cy_SysLib_Delay(1U);	/* 1ms */
+	                	HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
 #if (U625_TDDI_TD7800)          
-                    HAL_GPIO_High( U301_SS_PORT, U301_SS_PIN);
+	                    HAL_GPIO_High( U301_SS_PORT, U301_SS_PIN);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 #else
 #endif
-					Cy_SysLib_Delay(11U); /* 11ms */
-					HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
+						Cy_SysLib_Delay(11U); /* 11ms */
+						HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
 
-					Cy_SysLib_Delay(101U); /* 101ms */
-                    HAL_GPIO_High( U301_PDB_PORT, U301_PDB_PIN);
-                    HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
-                    /* INTB Init. */
-                    MINTB_StrategyControl(STRATEGY_CTRL_INIT);
-			
-                    u8Return = POWER_PASS;
-                }
-                else
-                {
-                    u8Return = P1V2_FAIL;
-                }
-            }
-            else
-            {
-                u8Return = P3V3_FAIL;
-            }
-            break;
+						Cy_SysLib_Delay(101U); /* 101ms */
+	                    HAL_GPIO_High( U301_PDB_PORT, U301_PDB_PIN);
+	                    HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
+	                    /* INTB Init. */
+	                    MINTB_StrategyControl(STRATEGY_CTRL_INIT);
+				
+	                    u8Return = POWER_PASS;
+	                }
+	                else
+	                {
+	                    u8Return = P1V2_FAIL;
+	                }
+				}
+	       	}
+			else
+			{
+	            u8Return = P3V3_FAIL;
+			}
+           	break;
         case POWER_OFF:
-
 			Cy_SysLib_Delay(6U); /* 6ms */
             /* INTB Deinit */
 			MINTB_StrategyControl(STRATEGY_CTRL_DEINIT);

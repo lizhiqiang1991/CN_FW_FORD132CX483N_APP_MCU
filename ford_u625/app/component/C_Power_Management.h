@@ -13,8 +13,6 @@
 
 #include "main.h"
 #include "M_PowerManagement.h"
-#include "M_DataCollecting.h"
-#include "M_BatteryProtect.h"
 
 // Power Management State Machine Define
 // The Max Number of State
@@ -26,7 +24,6 @@
 typedef struct
 {
     uint16_t u16Timer1;
-    uint16_t u16Timer2;
     uint32_t u32Timeout;
 } tpower_manage_task_def;
 
@@ -37,7 +34,6 @@ typedef struct
 #define NORMAL_DISABLE_STATE		0x04U
 
 #define EVENT_SYNCS_CHECK_PERIOD	EVENT_TIMER1
-#define EVENT_VBAT_CHECK    	    EVENT_TIMER2
 
 #define SYNC_HIGH_VOL				70U /*Analog value as 7V*/
 #define SYNC_LOW_VOL				22U /*Analog value as 2.2V*/
