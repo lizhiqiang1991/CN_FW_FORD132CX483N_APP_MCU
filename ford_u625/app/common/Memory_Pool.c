@@ -1679,16 +1679,8 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             /* Clear all latched flags when actual status released*/
             gtDiagnosisInfo.u32DisplayStatus=(gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get();
 
-            /* Compares display status if sending INTB. */
-            if(gtDiagnosisInfo.u32DisplayStatus != gtDiagnosisInfo.u32DisplayStatusPreHostCommand)
-            {
-                /* Do Nothing */
-            }
-            else
-            {
-                /* Clear INT_ERROR  */
-                gtDiagnosisInfo.u8IntStatus = gtDiagnosisInfo.u8IntStatus & (~BIT_INT_ERR_POS);
-            }
+            /* Clear INT_ERROR  */
+            gtDiagnosisInfo.u8IntStatus = gtDiagnosisInfo.u8IntStatus & (~BIT_INT_ERR_POS);
 
             /* Updates previous display status. */
             gtDiagnosisInfo.u32DisplayStatusPreHostCommand = gtDiagnosisInfo.u32DisplayStatus;
@@ -1721,6 +1713,10 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             /* Cancels INTB strategy if it is at set-up time. */
             Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_CANCEL_INTB_STRATEGY);
             *(pDataBuffer + 1U) = gtDiagnosisInfo.u8IntStatus & 0x0FU;
+#if (INT_TCH_LATCH)
+            /* Clear INT_TCH */
+            gtDiagnosisInfo.u8IntStatus &= (~BIT_INT_TCH_POS);
+#endif
             *pLength = LEN_INTERRUPT_STATUS + LEN_SUBADDRESS;
             break;
 

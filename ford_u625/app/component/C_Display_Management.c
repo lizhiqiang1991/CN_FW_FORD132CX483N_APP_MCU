@@ -65,7 +65,9 @@ static void C_Display_Management_CallbackTCHClickHandler(void)
  */
 static void C_Display_Management_CallbackTCHClickRelHandler(void)
 {
+#if (!INT_TCH_LATCH)
     Memory_Pool_IntStatus_Set(Memory_Pool_IntStatus_Get() & ~BIT_INT_TCH_POS);
+#endif
 }
 /**
  * @brief When SDM's Battery Voltage is at invaild reange,
