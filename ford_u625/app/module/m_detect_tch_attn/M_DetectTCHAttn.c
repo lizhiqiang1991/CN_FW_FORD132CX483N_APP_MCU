@@ -111,13 +111,13 @@ static void MDetectTchAttn_Callback_BothEdgeISR(void)
             Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_NUM, M_DETECT_TCH_ATTN_ISR_SETTING_FALLING);
             if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
             {
-
+                HAL_UART_Printf("ATTN Rising Edge ISR - touch not ready. \n");
             }
             else
             {
+                HAL_UART_Printf("ATTN Rising Edge ISR - touch ready. \n");
                 mDetectTchAttnControl.CallbackTchClickRel();
             }
-            HAL_UART_Printf("ATTN Rising Edge ISR. \n");
         }
     }
     
@@ -292,13 +292,27 @@ MDetectTchAttn_ATTNTriggerType_E eAttnTriType)
     return true;
 }
 
-#if (!M_DETECT_TCH_ATTN_EX_INT)
 /**
  * @brief 
  * 
  */
 void MDetectTchAttn_Routine2ms(void)
 {
+
+#if (M_DETECT_TCH_ATTN_EX_INT)
+    if(mDetectTchAttnControl.CallbackTchAttnDiGet() == ATTN_TRI_RISING)
+    {
+        if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
+        {
+            HAL_UART_Printf("MDetectTchAttn_Routine2ms - touch not ready. \n");
+        }
+        else
+        {
+            HAL_UART_Printf("MDetectTchAttn_Routine2ms - touch ready - Clear. \n");
+            mDetectTchAttnControl.CallbackTchClickRel();
+        }
+    }
+#else
     switch(mDetectTchAttnControl.eStateMachine)
     {
         default:
@@ -316,6 +330,7 @@ void MDetectTchAttn_Routine2ms(void)
             MDetectTchAttn_SMTouchAlertWaitRel();
             break;
     }
-}
 #endif
+}
+
 /* -- END -- */

@@ -1428,10 +1428,9 @@ static void C_Display_Manage_Control(void)
             break;
 
         case EVENT_TIME_ATTN_POLLING :
-#if (!M_DETECT_TCH_ATTN_EX_INT)
             tDisplayManageTask.u16Timer2 = TIME_2ms;
             MDetectTchAttn_Routine2ms();
-#endif
+
         	break;
         case EVENT_TIME_INIT_POLLING :
 			if(Memory_Pool_PowerStatus_Get() != POWER_OFF)

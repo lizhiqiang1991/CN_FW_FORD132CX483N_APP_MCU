@@ -107,7 +107,6 @@ static void mINTB_StateWaitTrigger(uint16_t u16RoutineTime)
     }
     else{/* Wait for trigger */}
 
-    HAL_UART_Printf("1 - INTB is H. \n");
 }
 
 static void mINTB_StateSetup(uint16_t u16RoutineTime)
@@ -116,7 +115,6 @@ static void mINTB_StateSetup(uint16_t u16RoutineTime)
     {
         mINTBControl.eStateMachine = INTB_SM_WAIT_TRIGGER;
         mINTBControl.u16DeAssertedTimer = 0;
-        HAL_UART_Printf("2 - INTB is H. \n");
     }
     else if(mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)
     {
@@ -145,8 +143,6 @@ static void mINTB_StateSetup(uint16_t u16RoutineTime)
         (MINTB_SATISFIED_ASSERTED_TIME);
         
         mINTBControl.eStateMachine = INTB_SM_HOLD_TIME;
-
-        HAL_UART_Printf("INTB is L. \n");
     }
 }
 
@@ -182,7 +178,6 @@ static void mINTB_StateHold(uint16_t u16RoutineTime)
         (mINTBControl.u16DeAssertedTimer + u16RoutineTime):\
         (MINTB_SATISFIED_DEASSERTED_TIME);
 
-        HAL_UART_Printf("3.INTB is H. \n");
     }
 }
 
