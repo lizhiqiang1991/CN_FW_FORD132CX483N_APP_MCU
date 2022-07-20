@@ -11,7 +11,7 @@ extern "C" {
 #include "main.h"
 
 /* -- Marco Define -- */
-#define M_DETECT_TCH_ATTN_EX_INT true
+#define M_DETECT_TCH_ATTN_EX_INT false
 
 /**
  * @brief 
