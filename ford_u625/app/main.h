@@ -29,9 +29,9 @@
 #define INT_TCH_LATCH       false
 #elif (CX430_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN  false
-#define FORD_SPSSV1P0		true
+#define FORD_SPSSV1P0		false
 #define FORD_SPSSV1P1		false
-#define FORD_I2CCOMV1P9		false
+#define FORD_I2CCOMV1P9		true
 #define INT_TCH_LATCH       false
 #elif (U717_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN  true

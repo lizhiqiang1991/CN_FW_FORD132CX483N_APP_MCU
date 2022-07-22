@@ -24,7 +24,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #else
 #endif
 
-const uint8_t cmu8McuVersion[] = { "v1.01.01" };
+const uint8_t cmu8McuVersion[] = { "v1.01.02" };
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1674,8 +1674,9 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
         case CMD_DISPLAY_STATUS:
             *(pDataBuffer + 1U) = gtDiagnosisInfo.u32DisplayStatus & 0xFFU;
             *(pDataBuffer + 2U) = (gtDiagnosisInfo.u32DisplayStatus >> 8U) & 0xC7U;
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)
             *(pDataBuffer + 3U) = (gtDiagnosisInfo.u32DisplayStatus >> 16U) & 0x00;
-
+#endif
             /* Clear all latched flags when actual status released*/
             gtDiagnosisInfo.u32DisplayStatus=(gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get();
 
@@ -1857,6 +1858,8 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 6U) = cmu8McuVersion[5];
             *(pDataBuffer + 7U) = cmu8McuVersion[6];
             *(pDataBuffer + 8U) = cmu8McuVersion[7];
+			*(pDataBuffer + 9U) = cmu8McuVersion[8];
+			*(pDataBuffer + 10U) = cmu8McuVersion[9];
             *pLength = LEN_MCU_VERSION_GET + LEN_SUBADDRESS;
             break;
         case CMD_JUMP_TO_BOOTLOADER:
