@@ -11,8 +11,8 @@ extern "C" {
 #include "main.h"
 
 /* -- Marco Define -- */
-#define M_DETECT_TCH_ATTN_EX_INT false
-
+#define M_DETECT_TCH_ATTN_EX_INT true
+#define M_DETECT_TCH_WAIT_TDDI_RESET_TIME 10U /* 10ms */
 /**
  * @brief 
  * 

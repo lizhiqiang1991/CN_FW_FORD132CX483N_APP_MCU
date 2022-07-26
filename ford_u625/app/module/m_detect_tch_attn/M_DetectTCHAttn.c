@@ -34,6 +34,13 @@ typedef enum
     TCH_ALERT_WAIT_RELEASE,
 }MDetectTchAttn_StateMachine_E;
 
+typedef enum
+{
+    TDDI_BOOT_SETTING_WAITTDDI_READY = 0U,
+    TDDI_BOOT_SETTING_WAITHOST_RETTDDI,
+    TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT,
+}MDetectTchAttn_TDDIBootSetting_E;
+
 /* -- Type Define -- */
 /**
  * @brief 
@@ -50,6 +57,8 @@ typedef struct
     CALLBACK_TCH_ATTN_DI_GET CallbackTchAttnDiGet;
     CALLBACK_TCH_CLICK CallbackTchClick;
     CALLBACK_TCH_CLICK_RELEASE CallbackTchClickRel;
+    MDetectTchAttn_TDDIBootSetting_E eTddiBootSetting;
+    uint16_t u16WaitBootTDDIResetTimer;
 }MDetectTchAttn_Control;
 
 /* -- Global Variables -- */
@@ -68,6 +77,8 @@ static MDetectTchAttn_Control mDetectTchAttnControl =
     .CallbackTchAttnDiGet = NULL,
     .CallbackTchClick = NULL,
     .CallbackTchClickRel = NULL,
+    .eTddiBootSetting = TDDI_BOOT_SETTING_WAITTDDI_READY,
+    .u16WaitBootTDDIResetTimer = 0U,
 };
 
 #if (M_DETECT_TCH_ATTN_EX_INT)
@@ -85,7 +96,8 @@ static cy_stc_sysint_t tExternalInterruptConfig =
  */
 static void MDetectTchAttn_Callback_BothEdgeISR(void)
 {
-    if(!mDetectTchAttnControl.bRegisterPass)
+    if((!mDetectTchAttnControl.bRegisterPass)\
+        ||(mDetectTchAttnControl.eTddiBootSetting != TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT))
     {
         /* Waiting Register Finished. */
     }
@@ -298,20 +310,40 @@ MDetectTchAttn_ATTNTriggerType_E eAttnTriType)
  */
 void MDetectTchAttn_Routine2ms(void)
 {
-
 #if (M_DETECT_TCH_ATTN_EX_INT)
-    if(mDetectTchAttnControl.CallbackTchAttnDiGet() == ATTN_TRI_RISING)
+    switch(mDetectTchAttnControl.eTddiBootSetting)
     {
-        if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
-        {
-            HAL_UART_Printf("MDetectTchAttn_Routine2ms - touch not ready. \n");
-        }
-        else
-        {
-            HAL_UART_Printf("MDetectTchAttn_Routine2ms - touch ready - Clear. \n");
-            mDetectTchAttnControl.CallbackTchClickRel();
-        }
-    }
+        default:
+            break;
+
+        case TDDI_BOOT_SETTING_WAITTDDI_READY:
+            if(mDetectTchAttnControl.CallbackTchAttnDiGet() == ATTN_TRI_RISING)
+            {
+                HAL_UART_Printf("MDetectTchAttn_Routine2ms - touch ready - Clear. \n");
+                mDetectTchAttnControl.CallbackTchClick();
+                mDetectTchAttnControl.eTddiBootSetting = TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT;
+            }
+            else
+            {
+                /* NA */
+            }
+            break;
+
+        case TDDI_BOOT_SETTING_WAITHOST_RETTDDI:
+            if(mDetectTchAttnControl.u16WaitBootTDDIResetTimer < M_DETECT_TCH_WAIT_TDDI_RESET_TIME)
+            {
+                mDetectTchAttnControl.u16WaitBootTDDIResetTimer += 2U;
+            }
+            else
+            {
+                mDetectTchAttnControl.u16WaitBootTDDIResetTimer = M_DETECT_TCH_WAIT_TDDI_RESET_TIME;
+                mDetectTchAttnControl.eTddiBootSetting = TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT;
+            }
+            break;
+
+        case TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT:
+            break;
+    }  
 #else
     switch(mDetectTchAttnControl.eStateMachine)
     {
