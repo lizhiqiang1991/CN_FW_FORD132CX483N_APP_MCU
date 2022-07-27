@@ -317,15 +317,14 @@ void MDetectTchAttn_Routine2ms(void)
             break;
 
         case TDDI_BOOT_SETTING_WAITTDDI_READY:
-            if(mDetectTchAttnControl.CallbackTchAttnDiGet() == ATTN_TRI_RISING)
+            if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
             {
-                HAL_UART_Printf("MDetectTchAttn_Routine2ms - touch ready - Clear. \n");
-                mDetectTchAttnControl.CallbackTchClick();
-                mDetectTchAttnControl.eTddiBootSetting = TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT;
+                /* Wait */
             }
             else
             {
-                /* NA */
+                mDetectTchAttnControl.CallbackTchClick();
+                mDetectTchAttnControl.eTddiBootSetting = TDDI_BOOT_SETTING_RELEASE_ATTN_DETECT;
             }
             break;
 
