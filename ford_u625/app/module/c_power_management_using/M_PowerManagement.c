@@ -108,9 +108,7 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 					}
 					else
 					{ /* Nothing */ }
-					
-					/* Record power error status. */
-					Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);
+
 					u8Return = POWER_VBAT_FAIL;								   
 				}
 				else

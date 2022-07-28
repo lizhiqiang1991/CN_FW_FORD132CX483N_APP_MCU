@@ -8,7 +8,9 @@
 #include "M_BacklightControl.h"
 #include "M_FPNCtrl.h"
 #include "M_FixedFlashAccess.h"
+#include "main.h"
 #include "public.h"
+#include "ICDiagApp.h"
 
 /* -- Marco Define -- */
 #define CCOMMUNICATION_EEPROM_FACTORYDATA_USED_SIZE 25U
@@ -132,7 +134,7 @@ static void C_Communication_EEPROM_Write(uint8_t u8Case)
 				Memory_Pool_WriteFPNDelivery_Set(false);
 				tFPNCtrlDelivery.FPN_Status_t.INT_WRT = FPN_ENABLE;
 				Memory_Pool_FPNDeliverystatusInfo_Set(&tFPNCtrlDelivery.FPN_Status_t);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_CHECKSUM_ERR)
 			{
@@ -140,13 +142,13 @@ static void C_Communication_EEPROM_Write(uint8_t u8Case)
 				Memory_Pool_WriteFPNDelivery_Set(false);
 				tFPNCtrlDelivery.FPN_Status_t.CKSUM_ERR = FPN_ENABLE;
 				Memory_Pool_FPNDeliverystatusInfo_Set(&tFPNCtrlDelivery.FPN_Status_t);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_WRITE_NO_DATA)
 			{   
 				Memory_Pool_WriteFPNDeliveryStatusReg_Set(false);
 				Memory_Pool_WriteFPNDelivery_Set(false);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else
 			{ /* Nothing */ }
@@ -169,7 +171,7 @@ static void C_Communication_EEPROM_Write(uint8_t u8Case)
 				Memory_Pool_WriteSerNumFPN_Set(false);
 				tFPNCtrlSerNum.FPN_Status_t.INT_WRT = FPN_ENABLE;
 				Memory_Pool_FPNSerialstatusInfo_Set(&tFPNCtrlSerNum.FPN_Status_t);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_CHECKSUM_ERR)
 			{   
@@ -177,13 +179,13 @@ static void C_Communication_EEPROM_Write(uint8_t u8Case)
 				Memory_Pool_WriteSerNumFPN_Set(false);
 				tFPNCtrlSerNum.FPN_Status_t.CKSUM_ERR = FPN_ENABLE;
 				Memory_Pool_FPNSerialstatusInfo_Set(&tFPNCtrlSerNum.FPN_Status_t);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_WRITE_NO_DATA)
 			{   
 				Memory_Pool_WriteSerNumPNStatusReg_Set(false);
 				Memory_Pool_WriteSerNumFPN_Set(false);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}			
 			else
 			{ /* Nothing */ } 
@@ -205,13 +207,13 @@ static void C_Communication_EEPROM_Write(uint8_t u8Case)
 				Memory_Pool_WriteProductPhaseFPN_Set(false);
 				tFPNProductionByte.FPN_Status_t.INT_WRT = FPN_ENABLE;
 				Memory_Pool_FPNSProductPhaseStatusInfo_Set(&tFPNProductionByte.FPN_Status_t);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_WRITE_NO_DATA)
 			{   
 				Memory_Pool_WriteProductPhasePNStatusReg_Set(false);
 				Memory_Pool_WriteProductPhaseFPN_Set(false);
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}			
 			else
 			{ /* Nothing */ } 
@@ -232,11 +234,11 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 	switch (u8Message)
 	{
 		case CMD_BACKLIGHT_PWM:
-			Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE);
+			(void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE);
 		break;
 		
 		case CMD_DISPLAY_SCANNING:
-			Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_SCANNING);
+			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_SCANNING);
 		break;
 		
 		case CMD_DISPLAY_ENABLE:
@@ -256,8 +258,8 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			}
 			Memory_Pool_DisplayEnable_Set(u8Temp);
 
-			Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
-			Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL4, EVENT_MESSAGE_DISANOSIS_ENABLE);
+			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+			(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL4, EVENT_MESSAGE_DISANOSIS_ENABLE);
             }
             else
 			{/*Nothing*/}
@@ -269,57 +271,48 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			{
 				Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
 				Memory_Pool_BacklightEnable_Set(false);
-				Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 			else
 			{/* Nothing */ }
-		break;
-			
-		case CMD_TOUCH_RESET:
-			/* Nothing */
-		break;
-			
+		break;		
 		case CMD_FACTORY_MODE:
 			if (Memory_Pool_FactoryMode_Get() == NORMAL_MODE)
 			{
 				Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
 				Memory_Pool_PowerStatus_Set(POWER_ON_READY);
-				Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 			else if (Memory_Pool_FactoryMode_Get() == OTP_MODE)
 			{
 				/*In standby mode, Switch to OTP mode. OTP mode need to enable back-light function . */
 				Memory_Pool_BacklightEnable_Set(true);
-				Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+				(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
 				/* Disable diagnosis functions*/
 				Memory_Pool_DiagnosisEnable_Set(false);
-				Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
+				(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
 			}
 			else if (Memory_Pool_FactoryMode_Get() == TPT_MODE)
 			{
 				/*Switch to TPT mode. TPT mode need to enable back-light function and wait display enable. */
 				Memory_Pool_BacklightEnable_Set(true);
-				Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+				(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
 				/* Disable diagnosis functions*/
 				Memory_Pool_DiagnosisEnable_Set(false);
-				Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
+				(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
 			}
 			else if (Memory_Pool_FactoryMode_Get() == NORMAL_DISALBE_MODE)
 			{
 				Memory_Pool_PowerState_Set(NORMAL_DISABLE_STATE);
 				Memory_Pool_PowerStatus_Set(POWER_ON_READY);
-				Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 			else
 			{ /* Nothing */ }
 		break;
 			
 		case CMD_DERATING_ENABLE:
-			Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE1);
-		break;
-		
-		case CMD_WATCHDOG_ENABLE:
-			/* Nothing */
+			(void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE1);
 		break;
 			
 		case CMD_UPDATE_REQUEST:
@@ -333,9 +326,14 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		case CMD_SERIAL_NUMBER_DATA:
 		case CMD_LOCK_PRODUCTION_PHASE_BYTE:
 		case PRODUCTION_PHASE_BYTE:
-			Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_EEPROM_CONTROL);
+			(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_EEPROM_CONTROL);
 		break;
-		
+#if(BACKDOOR_ICDIAG_OPEN)
+		case ICDIAG_CMD_ICFETCH:
+		case ICDIAG_CMD_ICCTRL:
+			(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL4, EVENT_MESSAGE_DISANOSIS_ENABLE);
+		break;
+#endif
 		default:
 			/* Nothing */
 		break;
@@ -416,7 +414,7 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 						/* MCU returns data.*/
 						M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
 						Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
-						Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+						(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 					}
 					else if(M_COM_RxMSGCRC8Value_Check(mu8RxBuff, u8DataLength) == false)
 					{
@@ -554,6 +552,10 @@ void C_Communication_ParaInit(void)
 
 	/* Registers INTB Module */
 	MINTB_Register(M_DM_INTB_Ctrl,INTB_INT_TYPE_FALLING);
+
+#if(BACKDOOR_ICDIAG_OPEN)
+	ICDIAG_Initialize();
+#endif
 }
 /******************************************************************************
  ;       Function Name			:	void C_Power_Manage_Init(void)
@@ -588,9 +590,8 @@ static void C_Communiction_Init(void)
 #if(DEBUG_POWER_UP)				
 				HAL_GPIO_Toggle( U301_INTB_IN_PORT,  U301_INTB_IN_PIN); 
 #endif  				
-				/* Changes event from EVENT_TIMER1 to EVENT_FIRST  */
-				Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_FIRST);
-				Task_ChangeState(TYPE_COMMUNICATION, LEVEL5, STATE_COMMUNICATION_PROCESS, Communication_State_Machine[STATE_COMMUNICATION_PROCESS]);
+				/* Changes state from STATE_COMMUNICATION_INIT to STATE_COMMUNICATION_PROCESS  */
+				(void)Task_ChangeState(TYPE_COMMUNICATION, LEVEL5, STATE_COMMUNICATION_PROCESS, Communication_State_Machine[STATE_COMMUNICATION_PROCESS]);
 			}
 			else
 			{
@@ -620,6 +621,7 @@ static void C_Communiction_Process(void)
 		case EVENT_FIRST :
 			/* Enable EVENT_TIMER_INTB_ROUNTINE */
 			tCommunicationTask.u16Timer2 = TIME_2ms;
+			tCommunicationTask.u16Timer1 = TIME_DISABLE;
 		break;
 		
 		case EVENT_MESSAGE_EEPROM_CONTROL :
@@ -640,7 +642,7 @@ static void C_Communiction_Process(void)
 		break;
 
 		default:
-			/* Nothing */
+			(void)Task_ChangeState(TYPE_COMMUNICATION, LEVEL5, STATE_COMMUNICATION_ERROR, Communication_State_Machine[STATE_COMMUNICATION_ERROR]);
 		break;
 	}
 	Task_TaskDone();
@@ -673,7 +675,7 @@ void C_Communication_Timer1(void)
 		if (tCommunicationTask.u16Timer1 == TIME_UP)
 		{
 			tCommunicationTask.u16Timer1 = TIME_DISABLE;
-			Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL3, EVENT_TIMER1);
+			(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL3, EVENT_TIMER1);
 		}
 		else
 		{ /* Nothing */ }
@@ -696,7 +698,7 @@ void C_Communication_Timer2(void)
 		if (tCommunicationTask.u16Timer2 == TIME_UP)
 		{
 			tCommunicationTask.u16Timer2 = TIME_DISABLE;
-			Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL3, EVENT_TIMER2);
+			(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL3, EVENT_TIMER2);
 		}
 		else
 		{ /* Nothing */ }

@@ -4,6 +4,7 @@
 #include "Memory_Pool.h"
 #include "C_Communication.h"
 #include "main.h"
+#include "ICDiagApp.h"
 
 static tdiagnosis_task_def tDiagnosisTask;
 static tgpio_debounce_def tLedInt;
@@ -45,9 +46,6 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 				Memory_Pool_LEDDiagnosis_Set(u64LEDDiagnosis);
 				/* Clear corresponded registers to let LP8864 detect again. */
 				M_GPIOSense_LED_Driver_DiagClear();
-				
-				/* Record power error status. */
-				Memory_Pool_PowerErrorStatus_Set(ERROR_LP8864_LED_INT);
 			}
 			else
 			{
@@ -87,9 +85,6 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				tDiagCtrl.u16NT51926CommTime=0U;
 				u64Temp=M_GPIOSense_DisplayFault_Read()&BIT_A3_PANEL_DISPFAULT_ALL_POS;
 				Memory_Pool_NT51926Diagnosis_Set(u64Temp);
-
-				/* Record power error status. */
-				Memory_Pool_PowerErrorStatus_Set(ERROR_PIN_DISP_FAULT);
 			}
 			else
 			{
@@ -125,10 +120,6 @@ static void C_Diagnosis_IO_SerdesLock(void)
 			/* Record 0xA3 status*/
 			u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 			Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_COMM_LOSS_ERROR_POS);
-			
-			/* Record power error status. */
-			Memory_Pool_PowerErrorStatus_Set(ERROR_PIN_948_LOCK);
-
 		}
 		else if((M_GPIOSense_LevelDeboucne(U301_LOCK_PORT, U301_LOCK_PIN, &tSerdesLock) == true) && (tSerdesLock.u8NewGPIOStatus == GPIO_HIGH))
 		{
@@ -287,9 +278,6 @@ static void C_Diagnosis_IO_P1V2Good(void)
 			/* Record 0xA3 status*/
 			u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 			Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_P1V2_ERROR_POS);
-
-			/* Record power error status. */
-			Memory_Pool_PowerErrorStatus_Set(ERROR_TPS74501_P1V2_PG);
 		}
 		else if((M_GPIOSense_LevelDeboucne(U301_P1V2_PGOOD_PORT, U301_P1V2_PGOOD_PIN, &tP1V2Good) == true) && (tP1V2Good.u8NewGPIOStatus == GPIO_HIGH))
 		{
@@ -323,9 +311,6 @@ static void C_Diagnosis_IO_P3V3Good(void)
 			/* Record 0xA3 status*/
 			u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 			Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_P3V3_ERROR_POS);
-
-			/* Record power error status. */
-			Memory_Pool_PowerErrorStatus_Set(ERROR_LM63625_P3V3_PG);
 		}
 		else
 		{/*Nothing*/}
@@ -380,14 +365,14 @@ static void C_Diagnosis_ParaInit(void)
 	tFpcTx.u8NewGPIOStatus = GPIO_HIGH;
 	tFpcTx.u8CurrentGPIOStatus = GPIO_HIGH;
 	tFpcTx.u8DebounceMax = DEBOUNCE_3_TIMES;
-	tFpcTx.blEnable = false;
+	tFpcTx.blEnable = true;
 
 	tFpcRx.u8DebounceHigh = NUMBER_ZERO;
 	tFpcRx.u8DebounceLow = NUMBER_ZERO;
 	tFpcRx.u8NewGPIOStatus = GPIO_HIGH;
 	tFpcRx.u8CurrentGPIOStatus = GPIO_HIGH;
 	tFpcRx.u8DebounceMax = DEBOUNCE_3_TIMES;
-	tFpcTx.blEnable = false;
+	tFpcRx.blEnable = true;
 
 	tP1V2Good.u8DebounceHigh = NUMBER_ZERO;
 	tP1V2Good.u8DebounceLow = NUMBER_ZERO;
@@ -402,6 +387,11 @@ static void C_Diagnosis_ParaInit(void)
 	tP3V3Good.u8CurrentGPIOStatus = GPIO_HIGH;
 	tP3V3Good.u8DebounceMax = DEBOUNCE_3_TIMES;
 	tP3V3Good.blEnable = true;
+
+#if(BACKDOOR_ICDIAG_OPEN)
+	ICDIAG_Initialize();
+#endif
+	
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -510,7 +500,7 @@ static void C_Diagnosis_Action(void)
 		{
 			tDiagCtrl.DiagProtectAction=DIAG_ACTION_SHUTDOWN;
 			Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
-			Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+			(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 		}
 		else if(((u16GeneralDiagnosis&(BIT_A3_POWER_P1V2_ERROR_POS | BIT_A3_COMM_LOSS_ERROR_POS )) > 0U)
 			|| (u64LEDDiagnosis > 0UL))
@@ -590,7 +580,7 @@ static void C_Diagnosis_Init(void)
 			if(Memory_Pool_PowerState_Get() == NORMAL_RUN_STATE)
 			{
 				tDiagnosisTask.u16Timer1 = TIME_DISABLE;
- 				Task_ChangeState(TYPE_DIAGNOSIS, LEVEL5, STATE_DIAGNOSIS_CTRL, Diagnosis_State_Machine[STATE_DIAGNOSIS_CTRL]);
+ 				(void)Task_ChangeState(TYPE_DIAGNOSIS, LEVEL5, STATE_DIAGNOSIS_CTRL, Diagnosis_State_Machine[STATE_DIAGNOSIS_CTRL]);
 			}
 			else
 			{
@@ -651,9 +641,19 @@ static void C_Diagnosis_Control(void)
 			//C_Diagnosis_Action();
 			tDiagnosisTask.u16Timer2 = TIME_10ms;
 		break;
+#if(BACKDOOR_ICDIAG_OPEN)
+		case EVENT_MESSAGE_ICDIAG:
+			if(Memory_Pool_DiagnosisEnable_Get() == true)
+			{			
+				ICDIAG_Main();
+			}
+			else
+			{/*Nothing*/}
+		break;			
+#endif
 
 		default:
-			Task_ChangeState(TYPE_DIAGNOSIS, LEVEL5, STATE_DIAGNOSIS_ERROR, Diagnosis_State_Machine[STATE_DIAGNOSIS_ERROR]);
+			(void)Task_ChangeState(TYPE_DIAGNOSIS, LEVEL5, STATE_DIAGNOSIS_ERROR, Diagnosis_State_Machine[STATE_DIAGNOSIS_ERROR]);
 		break;
 	}
 	Task_TaskDone();
@@ -684,7 +684,7 @@ void C_Diagnosis_Timer1(void)
 		if (tDiagnosisTask.u16Timer1 == TIME_UP)
 		{
 			tDiagnosisTask.u16Timer1 = TIME_DISABLE;
-			Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL3, EVENT_TIMER1);
+			(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL3, EVENT_TIMER1);
 		}
 		else
 		{ /* Nothing */ }
@@ -707,7 +707,7 @@ void C_Diagnosis_Timer2(void)
 		if (tDiagnosisTask.u16Timer2 == TIME_UP)
 		{
 			tDiagnosisTask.u16Timer2 = TIME_DISABLE;
-			Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL3, EVENT_TIMER2);
+			(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL3, EVENT_TIMER2);
 		}
 		else
 		{ /* Nothing */ }

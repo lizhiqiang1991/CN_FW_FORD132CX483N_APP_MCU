@@ -31,7 +31,7 @@ static void C_Power_Manage_ParaInit(void)
 static void C_Power_Manage_Init(void)
 {
     C_Power_Manage_ParaInit();
-    Task_ChangeState(TYPE_POWER_MANAGE, LEVEL5, STATE_POWER_MANAGE_CTRL, Power_Manage_State_Machine[STATE_POWER_MANAGE_CTRL]);
+    (void)Task_ChangeState(TYPE_POWER_MANAGE, LEVEL5, STATE_POWER_MANAGE_CTRL, Power_Manage_State_Machine[STATE_POWER_MANAGE_CTRL]);
     Task_TaskDone();
 }
 /******************************************************************************
@@ -56,7 +56,7 @@ static void C_Power_Manager_Control(void)
             /* Switch to  Power On mode. */
             Memory_Pool_PowerState_Set(START_UP_STATE);
             Memory_Pool_PowerStatus_Set(POWER_ON);
-            Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+            (void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
             break;
         case EVENT_MESSAGE :
             switch (Memory_Pool_PowerState_Get())
@@ -69,7 +69,7 @@ static void C_Power_Manager_Control(void)
 						/* Enable power system successfully and switch to Normal Run mode. */
 						Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
 						Memory_Pool_PowerStatus_Set(POWER_ON_READY);
-						Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+						(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
                     }
                     else if (u8PowerStatus == P3V3_FAIL)
                     {
@@ -77,20 +77,17 @@ static void C_Power_Manager_Control(void)
 						u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 						Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_ON_P3V3_ERROR_POS);  
 
-                        /* Record power error status. */
-			            Memory_Pool_PowerErrorStatus_Set(ERROR_LM63625_P3V3_PG);
-
                         /* Disable power system. */
                         Memory_Pool_PowerState_Set(OFF_POWER_STATE);
                         Memory_Pool_PowerStatus_Set(POWER_OFF);
-                        Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                        (void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
                     }
                     else if (u8PowerStatus == POWER_VBAT_FAIL)
                     {
 						/* Disable power system. */
 						Memory_Pool_PowerState_Set(OFF_POWER_STATE);
 						Memory_Pool_PowerStatus_Set(POWER_OFF);
-						Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+						(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
                     }
                     else if (u8PowerStatus == P1V2_FAIL)
                     {
@@ -98,13 +95,10 @@ static void C_Power_Manager_Control(void)
 						u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 						Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_ON_P1V2_ERROR_POS);
 
-                        /* Record power error status. */
-			            Memory_Pool_PowerErrorStatus_Set(ERROR_TPS74501_P1V2_PG);
-
                         /* Disable power system. */
                         Memory_Pool_PowerState_Set(OFF_POWER_STATE);
                         Memory_Pool_PowerStatus_Set(POWER_OFF);
-                        Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                        (void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
                     }
                     else
                     { /*Nothing*/ }
@@ -135,11 +129,11 @@ static void C_Power_Manager_Control(void)
 
                     /* Disable diagnosis functions*/
                     Memory_Pool_DiagnosisEnable_Set(false);
-                    Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
+                    (void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
 
                     /*Disable display functions */
                     Memory_Pool_DisplayEnable_Set(DISPLAY_OFF_TOUCH_OFF);
-                    Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+                    (void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
                     break;
                 case NORMAL_RUN_STATE:
                     /* Delay 100ms to enable SYNC detection function periodically. */
@@ -171,7 +165,7 @@ static void C_Power_Manager_Control(void)
 				Memory_Pool_SyncStatus_Set(SYNC_DISABLE);
 				Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
 				Memory_Pool_BacklightEnable_Set(false);
-				Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 			else
 			{
@@ -179,6 +173,7 @@ static void C_Power_Manager_Control(void)
 			}
 			break;
 		default:
+			(void)Task_ChangeState(TYPE_POWER_MANAGE, LEVEL5, STATE_POWER_MANAGE_ERROR, Power_Manage_State_Machine[STATE_POWER_MANAGE_ERROR]);
 			break;
     }
     Task_TaskDone();
@@ -210,7 +205,7 @@ void C_Power_Manage_Timer1(void)
         if (tPowerManageTask.u16Timer1 == TIME_UP)
         {
             tPowerManageTask.u16Timer1 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL3, EVENT_TIMER1);
+            (void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL3, EVENT_TIMER1);
         }
         else
         { /* Nothing */ }

@@ -14,7 +14,7 @@ static void C_Data_Collecting_Init(void)
     M_DC_Init();
     M_DC_Function_Execute(DC_INIT_ADCVALUE);
     tDataCollectingTask.u16Timer1 = TIME_DISABLE;
-    Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_CTRL, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_CTRL]);
+    (void)Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_CTRL, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_CTRL]);
     Task_TaskDone();
 }
 /******************************************************************************
@@ -66,7 +66,7 @@ static void C_Data_Collecting_Control(void)
 			tDataCollectingTask.u16Timer1 = TIME_10ms;
 			break;
 		default:
-			Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_ERROR, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_ERROR]);
+			(void)Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_ERROR, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_ERROR]);
 			break;
 	}
 	Task_TaskDone();
@@ -97,7 +97,7 @@ void C_Data_Collecting_Timer1(void)
         if (tDataCollectingTask.u16Timer1 == TIME_UP)
         {
             tDataCollectingTask.u16Timer1 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_DATA_COLLECTING, LEVEL3, EVENT_TIMER1);
+            (void)Task_ChangeEvent(TYPE_DATA_COLLECTING, LEVEL3, EVENT_TIMER1);
         }
 		else
 		{ /* Nothing */ }

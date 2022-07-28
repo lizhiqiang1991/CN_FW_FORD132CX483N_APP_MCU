@@ -2,18 +2,20 @@
 #include "public.h"
 #include "C_Diagnosis.h"
 #include "C_Communication.h"
+#include "C_Display_Management.h"
 #include "M_FPNCtrl.h"
+#include "ICDiagApp.h"
 
 tcommunication_def gtCommunicationInfo;
 tdata_collection_def gtDataCollectInfo;
 tbacklight_def gtBacklightInfo;
 ttemperture_def gtTemperatureInfo;
 tbatt_protect_def gtBattProtectInfo;
-tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U, .u8ErrorPowerStatus = 0x00U};
+tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U};
 tpower_management_def gtPowerManageInfo;
 
 tu625_def gtU625Info = { .bI2cDesBusInit = false, .bI2cMcuBusInit = false };
-tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW };
+tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U };
 
 #if(U625_TDDI_TD7800)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x2EU, .u8Subversion = 0x02U };
@@ -55,7 +57,7 @@ void Memory_Pool_FPNDelivery_Get(uint8_t *pSetValue, uint8_t u8Length)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPNSoft_Set(uint8_t *pSetValue, uint8_t u8Length)
+void Memory_Pool_FPNSoft_Set(const uint8_t *pSetValue, uint8_t u8Length)
 {
     memcpy(gtCommunicationInfo.mu8FPNSoft, pSetValue, u8Length);
 }
@@ -77,7 +79,7 @@ void Memory_Pool_FPNSoft_Get(uint8_t *pSetValue, uint8_t u8Length)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPNCore_Set(uint8_t *pSetValue, uint8_t u8Length)
+void Memory_Pool_FPNCore_Set(const  uint8_t *pSetValue, uint8_t u8Length)
 {
     memcpy(gtCommunicationInfo.mu8FPNCore, pSetValue, u8Length);
 }
@@ -99,7 +101,7 @@ void Memory_Pool_FPNCore_Get(uint8_t *pSetValue, uint8_t u8Length)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPNMain_Set(uint8_t *pSetValue, uint8_t u8Length)
+void Memory_Pool_FPNMain_Set(const uint8_t *pSetValue, uint8_t u8Length)
 {
     memcpy(gtCommunicationInfo.mu8FPNMain, pSetValue, u8Length);
 }
@@ -1074,7 +1076,7 @@ void Memory_Pool_DisplayStatus_Set(uint32_t u32SetValue)
         if((u8TempRegVal & BIT_INT_ERR_POS) == NUMBER_ZERO)
         {
            /* Send INTB Strategy Control Msg. */  
-           Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);     
+           (void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);     
         }
     }
 }
@@ -1288,53 +1290,29 @@ bool Memory_Pool_I2CMcuInit_Get(void)
 {
     return gtU625Info.bI2cMcuBusInit;
 }
-#if(U625_TDDI_TD7800)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 /******************************************************************************
- ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Name			:	void Memory_Pool_NT51926_Vcom_Set(uint16_t u16SetValue)
  ;       Function Description	:
- ;       Parameters				:	void
- ;       Return Values			:
- ;       Source ID				:
- ******************************************************************************/
-void Memory_Pool_TD7800_Set(uint8_t *pSetValue, uint8_t u8Length)
-{
-    memcpy(gtDisplayManageInfo.mu8TD7800Temp, pSetValue, u8Length);
-}
-/******************************************************************************
- ;       Function Name			:	void Main_I2cSlaveInit(void)
- ;       Function Description	:
- ;       Parameters				:	void
- ;       Return Values			:
- ;       Source ID				:
- ******************************************************************************/
-void Memory_Pool_TD7800_Get(uint8_t *pSetValue, uint8_t u8Length)
-{
-    memcpy(pSetValue, gtDisplayManageInfo.mu8TD7800Temp, u8Length);
-}
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-/******************************************************************************
- ;       Function Name			:	void Memory_Pool_NT51926_Set(uint8_t *pSetValue, uint8_t u8Length))
- ;       Function Description	:
- ;       Parameters				:	uint8_t *pSetValue, uint8_t u8Length
+ ;       Parameters				:	uint32_t u32SetValue
  ;       Return Values			:	void
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_NT51926_Set(uint8_t *pSetValue, uint8_t u8Length)
+void Memory_Pool_NT51926_Vcom_Set(uint32_t u32SetValue)
 {
-    memcpy(gtDisplayManageInfo.mu8NT51926Temp, pSetValue, u8Length);
+	gtDisplayManageInfo.u32NT51926_Vcom = u32SetValue;
 }
 /******************************************************************************
- ;       Function Name			:	void Memory_Pool_NT51926_Get(uint8_t *pSetValue, uint8_t u8Length)
+ ;       Function Name			:	uint32_t Memory_Pool_NT51926_Vcom_Get(void)
  ;       Function Description	:
- ;       Parameters				:	uint8_t *pSetValue, uint8_t u8Length
- ;       Return Values			:	void
+ ;       Parameters				:	void
+ ;       Return Values			:	uint32_t gtDisplayManageInfo.u32NT51926_Vcom
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_NT51926_Get(uint8_t *pSetValue, uint8_t u8Length)
+uint32_t Memory_Pool_NT51926_Vcom_Get(void)
 {
-    memcpy(pSetValue, gtDisplayManageInfo.mu8NT51926Temp, u8Length);
+	return gtDisplayManageInfo.u32NT51926_Vcom; 
 }		
-#else
 #endif
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1624,39 +1602,7 @@ uint8_t Memory_Pool_PowerState_Get(void)
 {
     return gtPowerManageInfo.u8PowerState;
 }
-/******************************************************************************
- ;       Function Name			:	void Memory_Pool_PowerErrorStatus_Set(uint8_t u8SetValue)
- ;       Function Description	:   Record power error status.
- ;       Parameters				:	uint8_t u8SetValue
- ;       Return Values			:   void
- ;       Source ID				:
- ******************************************************************************/
-void Memory_Pool_PowerErrorStatus_Set(uint8_t u8SetValue)
-{
-    switch (u8SetValue)
-    {
-        case ERROR_TPS74501_P1V2_PG:
-            gtDiagnosisInfo.u8ErrorPowerStatus |= (uint8_t)ERROR_TPS74501_P1V2_PG;
-            break;
-        case ERROR_LM63625_P3V3_PG:
-            gtDiagnosisInfo.u8ErrorPowerStatus |= (uint8_t)ERROR_LM63625_P3V3_PG;
-            break;
-        case ERROR_LP8864_LED_INT:
-            gtDiagnosisInfo.u8ErrorPowerStatus |= (uint8_t)ERROR_LP8864_LED_INT;
-            break;
-        case ERROR_PIN_948_LOCK:
-            gtDiagnosisInfo.u8ErrorPowerStatus |= (uint8_t)ERROR_PIN_948_LOCK;
-            break;
-        case ERROR_PIN_DISP_FAULT:
-            gtDiagnosisInfo.u8ErrorPowerStatus |= (uint8_t)ERROR_PIN_DISP_FAULT;
-            break;
-        case ERROR_VBAT_FAULT:
-            gtDiagnosisInfo.u8ErrorPowerStatus |= (uint8_t)ERROR_VBAT_FAULT;
-            break;            
-        default:
-            break;
-    }
-}
+
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -1668,6 +1614,10 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 {
     uint8_t u8Counter;
     uint8_t u8Temp;
+
+#if(BACKDOOR_ICDIAG_OPEN)
+	uint8_t *u8I2CICDiagBuffer;
+#endif
 
     switch (*pDataBuffer)
     {
@@ -1712,7 +1662,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             break;
         case CMD_INTERRUPT_STATUS:
             /* Cancels INTB strategy if it is at set-up time. */
-            Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_CANCEL_INTB_STRATEGY);
+            (void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_CANCEL_INTB_STRATEGY);
             *(pDataBuffer + 1U) = gtDiagnosisInfo.u8IntStatus & 0x0FU;
 #if (INT_TCH_LATCH)
             /* Clear INT_TCH */
@@ -1826,17 +1776,6 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 4U) = gtDataCollectInfo.i16BacklightTemperature >> 8U;
             *pLength = LEN_TEMPERATURE_GET + LEN_SUBADDRESS;
             break;
-        case CMD_TEMPERATURE_ADC_GET:
-            *(pDataBuffer + 1U) = gtDataCollectInfo.i16PCBATemperatureADC;
-            *(pDataBuffer + 2U) = gtDataCollectInfo.i16PCBATemperatureADC >> 8U;
-            *(pDataBuffer + 3U) = gtDataCollectInfo.i16BacklightTemperatureADC;
-            *(pDataBuffer + 4U) = gtDataCollectInfo.i16BacklightTemperatureADC >> 8U;
-            *pLength = LEN_TEMPERATURE_ADC_GET + LEN_SUBADDRESS;
-            break;
-		case CMD_POWER_ERROR_STATUS:
-			*(pDataBuffer + 1U) = gtDiagnosisInfo.u8ErrorPowerStatus;
-			*pLength = LEN_POWER_ERROR_STATUS + LEN_SUBADDRESS;
-			break;
         case CMD_VOLTAGE_GET:
             *(pDataBuffer + 1U) = gtDataCollectInfo.u16BatteryVol;
             *(pDataBuffer + 2U) = gtDataCollectInfo.u16BatteryVol >> 8U;
@@ -1885,18 +1824,17 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 1U) = u8Temp;
             *pLength = LEN_DERATING_ENABLE + LEN_SUBADDRESS;
             break;
-		case CMD_WATCHDOG_ENABLE:
-            *(pDataBuffer + 1U) = 0;//TBD: watchdog flag
-            *pLength = LEN_WATCHDOG_ENABLE + LEN_SUBADDRESS;
-            break;
         case CMD_PRODUCTION_PHASE_BYTE_GET:
             *(pDataBuffer + 1U) = gtCommunicationInfo.u8ProductionPhase;
             *pLength = LEN_PRODUCTION_PHASE_BYTE + LEN_SUBADDRESS;
             break;
 		case CMD_VCOM_VALUE_GET:
-			*(pDataBuffer + 1U) = 0;//TBD:VCOM value
-			*(pDataBuffer + 2U) = 0;
+			*(pDataBuffer + 1U) = (uint8_t)(gtDisplayManageInfo.u32NT51926_Vcom & 0xFFU);
+			*(pDataBuffer + 2U) = (uint8_t)((gtDisplayManageInfo.u32NT51926_Vcom >> 8U) & 0xFFU);
+			*(pDataBuffer + 3U) = (uint8_t)((gtDisplayManageInfo.u32NT51926_Vcom >> 16U) & 0xFFU);
             *pLength = LEN_VCOM_VALUE_GET + LEN_SUBADDRESS;
+
+			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_TDDI_VCOM);
 			break;
 		case CMD_PCBATEMPINFO:
 			*(pDataBuffer + 1U) = (gtDataCollectInfo.i16PCBATemperature+40U);
@@ -1953,6 +1891,79 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 6U) = gtDataCollectInfo.i16FPCRxOutADC>>8U;
             *pLength = LEN_FPCRXOUTVOLTAGE_INFO + LEN_SUBADDRESS;
 			break;
+			
+#if(BACKDOOR_ICDIAG_OPEN)			
+		case ICDIAG_CMD_READ:
+			u8I2CICDiagBuffer = ICDIAG_GetRxBuffer();
+			*(pDataBuffer + 1U) = (uint8_t)(*u8I2CICDiagBuffer);
+			*(pDataBuffer + 2U) = (uint8_t)(*(u8I2CICDiagBuffer+1U));
+			*(pDataBuffer + 3U) = (uint8_t)(*(u8I2CICDiagBuffer+2U));
+			*(pDataBuffer + 4U) = (uint8_t)(*(u8I2CICDiagBuffer+3U));
+			*(pDataBuffer + 5U) = (uint8_t)(*(u8I2CICDiagBuffer+4U));
+			*(pDataBuffer + 6U) = (uint8_t)(*(u8I2CICDiagBuffer+5U));
+			*(pDataBuffer + 7U) = (uint8_t)(*(u8I2CICDiagBuffer+6U));
+			*(pDataBuffer + 8U) = (uint8_t)(*(u8I2CICDiagBuffer+7U));
+			*(pDataBuffer + 9U) = (uint8_t)(*(u8I2CICDiagBuffer+8U));
+			*(pDataBuffer + 10U) = (uint8_t)(*(u8I2CICDiagBuffer+9U));
+			*(pDataBuffer + 11U) = (uint8_t)(*(u8I2CICDiagBuffer+10U));
+			*(pDataBuffer + 12U) = (uint8_t)(*(u8I2CICDiagBuffer+11U));
+			*(pDataBuffer + 13U) = (uint8_t)(*(u8I2CICDiagBuffer+12U));
+			*(pDataBuffer + 14U) = (uint8_t)(*(u8I2CICDiagBuffer+13U));
+			*(pDataBuffer + 15U) = (uint8_t)(*(u8I2CICDiagBuffer+14U));
+			*(pDataBuffer + 16U) = (uint8_t)(*(u8I2CICDiagBuffer+15U));
+			*(pDataBuffer + 17U) = (uint8_t)(*(u8I2CICDiagBuffer+16U));
+			*(pDataBuffer + 18U) = (uint8_t)(*(u8I2CICDiagBuffer+17U));
+			*(pDataBuffer + 19U) = (uint8_t)(*(u8I2CICDiagBuffer+18U));
+			*(pDataBuffer + 20U) = (uint8_t)(*(u8I2CICDiagBuffer+19U));
+			*(pDataBuffer + 21U) = (uint8_t)(*(u8I2CICDiagBuffer+20U));
+			*(pDataBuffer + 22U) = (uint8_t)(*(u8I2CICDiagBuffer+21U));
+			*(pDataBuffer + 23U) = (uint8_t)(*(u8I2CICDiagBuffer+22U));
+			*(pDataBuffer + 24U) = (uint8_t)(*(u8I2CICDiagBuffer+23U));
+			*(pDataBuffer + 25U) = (uint8_t)(*(u8I2CICDiagBuffer+24U));
+			*(pDataBuffer + 26U) = (uint8_t)(*(u8I2CICDiagBuffer+25U));
+			*(pDataBuffer + 27U) = (uint8_t)(*(u8I2CICDiagBuffer+26U));
+			*(pDataBuffer + 28U) = (uint8_t)(*(u8I2CICDiagBuffer+27U));
+			*(pDataBuffer + 29U) = (uint8_t)(*(u8I2CICDiagBuffer+28U));
+			*(pDataBuffer + 30U) = (uint8_t)(*(u8I2CICDiagBuffer+29U));
+			*(pDataBuffer + 31U) = (uint8_t)(*(u8I2CICDiagBuffer+30U));
+			*(pDataBuffer + 32U) = (uint8_t)(*(u8I2CICDiagBuffer+31U));
+			*(pDataBuffer + 33U) = (uint8_t)(*(u8I2CICDiagBuffer+32U));
+			*(pDataBuffer + 34U) = (uint8_t)(*(u8I2CICDiagBuffer+33U));
+			*(pDataBuffer + 35U) = (uint8_t)(*(u8I2CICDiagBuffer+34U));
+			*(pDataBuffer + 36U) = (uint8_t)(*(u8I2CICDiagBuffer+35U));
+			*(pDataBuffer + 37U) = (uint8_t)(*(u8I2CICDiagBuffer+36U));
+			*(pDataBuffer + 38U) = (uint8_t)(*(u8I2CICDiagBuffer+37U));
+			*(pDataBuffer + 39U) = (uint8_t)(*(u8I2CICDiagBuffer+38U));
+			*(pDataBuffer + 40U) = (uint8_t)(*(u8I2CICDiagBuffer+39U));
+			*(pDataBuffer + 41U) = (uint8_t)(*(u8I2CICDiagBuffer+40U));
+			*(pDataBuffer + 42U) = (uint8_t)(*(u8I2CICDiagBuffer+41U));
+			*(pDataBuffer + 43U) = (uint8_t)(*(u8I2CICDiagBuffer+42U));
+			*(pDataBuffer + 44U) = (uint8_t)(*(u8I2CICDiagBuffer+43U));
+			*(pDataBuffer + 45U) = (uint8_t)(*(u8I2CICDiagBuffer+44U));
+			*(pDataBuffer + 46U) = (uint8_t)(*(u8I2CICDiagBuffer+45U));
+			*(pDataBuffer + 47U) = (uint8_t)(*(u8I2CICDiagBuffer+46U));
+			*(pDataBuffer + 48U) = (uint8_t)(*(u8I2CICDiagBuffer+47U));
+			*(pDataBuffer + 49U) = (uint8_t)(*(u8I2CICDiagBuffer+48U));
+			*(pDataBuffer + 50U) = (uint8_t)(*(u8I2CICDiagBuffer+49U));
+			*(pDataBuffer + 51U) = (uint8_t)(*(u8I2CICDiagBuffer+50U));
+			*(pDataBuffer + 52U) = (uint8_t)(*(u8I2CICDiagBuffer+51U));
+			*(pDataBuffer + 53U) = (uint8_t)(*(u8I2CICDiagBuffer+52U));
+			*(pDataBuffer + 54U) = (uint8_t)(*(u8I2CICDiagBuffer+53U));
+			*(pDataBuffer + 55U) = (uint8_t)(*(u8I2CICDiagBuffer+54U));
+			*(pDataBuffer + 56U) = (uint8_t)(*(u8I2CICDiagBuffer+55U));
+			*(pDataBuffer + 57U) = (uint8_t)(*(u8I2CICDiagBuffer+56U));
+			*(pDataBuffer + 58U) = (uint8_t)(*(u8I2CICDiagBuffer+57U));
+			*(pDataBuffer + 59U) = (uint8_t)(*(u8I2CICDiagBuffer+58U));
+			*(pDataBuffer + 60U) = (uint8_t)(*(u8I2CICDiagBuffer+59U));
+			*(pDataBuffer + 61U) = (uint8_t)(*(u8I2CICDiagBuffer+60U));
+			*(pDataBuffer + 62U) = (uint8_t)(*(u8I2CICDiagBuffer+61U));
+			*(pDataBuffer + 63U) = (uint8_t)(*(u8I2CICDiagBuffer+62U));
+			*(pDataBuffer + 64U) = (uint8_t)(*(u8I2CICDiagBuffer+63U));			
+			
+            *pLength = LEN_ICDIAG_INFO + LEN_SUBADDRESS;
+			break;
+#endif
+			
         default:
             break;
     }
@@ -1969,6 +1980,10 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
     uint8_t u8Counter;
     uint8_t u8Cmd = *pCmdBuffer;
     uint16_t u16DataTemp = NUMBER_ZERO;
+#if(BACKDOOR_ICDIAG_OPEN)
+		uint32_t u32DataAddr=0UL;
+		uint8_t  u8DiagBuf =0U;
+#endif 
 
     switch (u8Cmd)
     {
@@ -1999,9 +2014,6 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
                 gtBacklightInfo.bDeratingEnable = false;
             }
             break;
-		case CMD_WATCHDOG_ENABLE:
-			//TBD
-			break;
         case CMD_LOCK_DELIVERY_ASSEMBLY:
             gtCommunicationInfo.tFPNDeliverystatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
             gtCommunicationInfo.bWriteFPNDeliveryStatusReg = FPN_ENABLE;
@@ -2040,6 +2052,17 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
             gtCommunicationInfo.bWriteProductPhasePNStatusReg = FPN_ENABLE;
             gtCommunicationInfo.bWriteProductPhaseFPN = FPN_ENABLE;
             break;
+#if(BACKDOOR_ICDIAG_OPEN)
+		case ICDIAG_CMD_ICFETCH:
+			u32DataAddr=(uint32_t)((uint32_t)pCmdBuffer[4]|((uint32_t)pCmdBuffer[5]<<8U)|((uint32_t)pCmdBuffer[6]<<16U)|((uint32_t)pCmdBuffer[7]<<24U));
+			ICDIAG_CmdTrigger(pCmdBuffer[0], pCmdBuffer[1], pCmdBuffer[2], pCmdBuffer[3], u32DataAddr, pCmdBuffer[8], &u8DiagBuf);
+		break;
+
+		case ICDIAG_CMD_ICCTRL:           
+            u32DataAddr=(uint32_t)((uint32_t)pCmdBuffer[4]|((uint32_t)pCmdBuffer[5]<<8U)|((uint32_t)pCmdBuffer[6]<<16U)|((uint32_t)pCmdBuffer[7]<<24U));
+			ICDIAG_CmdTrigger(pCmdBuffer[0], pCmdBuffer[1], pCmdBuffer[2], pCmdBuffer[3], u32DataAddr, pCmdBuffer[8], &pCmdBuffer[9]);
+		break;
+#endif			
         default:
             break;
     }

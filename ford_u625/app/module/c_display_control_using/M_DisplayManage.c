@@ -416,39 +416,35 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
  ;       Return Values			:	void
  ;		Source ID				:
  ******************************************************************************/
-void M_DM_VCOM_Get(uint8_t *pReturnData)
+uint32_t M_DM_VCOM_Get(void)
 {
-#if (U625_TDDI_TD7800) 
-	uint8_t u8SendData;
-    uint8_t mu8ReturnData[4U];
+	uint8_t u8PageSwitch[2]={0x1EU,0x10U};
+	uint8_t u8DataAddress=0x01U;
+	uint8_t u8ReadData[3];
+	uint32_t u32ReadData;
 
-    /* Clear all data. */
-    memset(mu8ReturnData, 0xFFU, sizeof(mu8ReturnData));
-
-    u8SendData = 0xD5U;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(mu8ReturnData), 100U);	
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-    uint8_t mu8SendData[3];
-    uint8_t mu8ReturnData[4U];
-
-    /* Clear all data. */
-    memset(mu8ReturnData, 0xFFU, sizeof(mu8ReturnData));
-
-	mu8SendData[0] = 0x1EU;
-	mu8SendData[1] = 0x10U;
     /* Switch Page to CMD1_P0.*/
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, (sizeof(mu8SendData)-1U), 100U);
-	
-	mu8SendData[2] = 0x02U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], sizeof(mu8SendData[2]), 100U);
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &pReturnData[0], sizeof(mu8ReturnData), 100U);
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, sizeof(u8PageSwitch), 100U);
+#if 0
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, u8ReadData, 1U, 100U);
+#endif
+	/*Write data address.*/
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 01h.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 100U);
+	/*Write data address.*/
+	u8DataAddress=0x02U;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 02h.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 100U);
+	/*Write data address.*/
+	u8DataAddress=0x03U;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 03h.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 100U);
 
-	mu8SendData[2] = 0x03U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], sizeof(mu8SendData[2]), 100U);
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &pReturnData[1], sizeof(mu8ReturnData), 100U);
-#else
-#endif	
+	u32ReadData = ((((uint32_t)u8ReadData[2])<<16U) | (((uint32_t)u8ReadData[1])<<8U) | ((uint32_t)u8ReadData[0]));
+	return u32ReadData;
 }
 /******************************************************************************
  ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
@@ -459,9 +455,7 @@ void M_DM_VCOM_Get(uint8_t *pReturnData)
  ******************************************************************************/
 void M_DM_VCOM_Set(uint8_t *pSetData)
 {
-#if (U625_TDDI_TD7800) 
-	HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, pSetData, 5U, 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 	uint8_t mu8SendData[4];
 			
 	mu8SendData[0] = 0x1EU;
@@ -476,168 +470,11 @@ void M_DM_VCOM_Set(uint8_t *pSetData)
 	mu8SendData[2] = 0x02U;
 	mu8SendData[3] = pSetData[0];
 	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], (sizeof(mu8SendData[2]) + 1U), 100U);
-#else
 #endif
 
 
 }
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_Fault_Enable_Get(uint8_t *pReturnData)
-{
-#if (U625_TDDI_TD7800)
-    uint8_t u8SendData;
-    uint8_t mu8ReturnData[5U];
 
-    /* Clear all data. */
-    memset(mu8ReturnData, 0xFFU, sizeof(mu8ReturnData));
-
-    u8SendData = 0xB5U;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(mu8ReturnData), 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-
-#else
-#endif
-}
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_Fault_Enable_Set(uint8_t *pSetData)
-{
-#if (U625_TDDI_TD7800)
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, pSetData, 6U, 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-	
-#else
-#endif
-
-}
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_DisplayStatus_Get(uint8_t *pReturnData)
-{
-#if (U625_TDDI_TD7800)
-
-    uint8_t u8SendData;
-    uint8_t u8ReturnData;
-
-    /* Clear all data. */
-    u8ReturnData = 0xFFU;
-
-    u8SendData = 0xAU;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(u8ReturnData), 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-	
-#else
-#endif	
-}
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_FW_DisplayStatus_Get(uint8_t *pReturnData)
-{
-#if (U625_TDDI_TD7800)
-    uint8_t u8SendData;
-    uint8_t mu8ReturnData[2U];
-
-    /* Clear all data. */
-    memset(mu8ReturnData, 0xFFU, sizeof(mu8ReturnData));
-
-    u8SendData = 0x0FU;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(mu8ReturnData), 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-		
-#else
-#endif
-}
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_DisplayID1_Get(uint8_t *pReturnData)
-{
-#if (U625_TDDI_TD7800)
-    uint8_t u8SendData;
-    uint8_t u8ReturnData;
-
-    /* Clear all data. */
-    u8ReturnData = 0xFFU;
-
-    u8SendData = 0xDAU;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(u8ReturnData), 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-		
-#else
-#endif	
-}
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_DisplayID2_Get(uint8_t *pReturnData)
-{
-#if (U625_TDDI_TD7800)
-    uint8_t u8SendData;
-    uint8_t u8ReturnData;
-
-    /* Clear all data. */
-    u8ReturnData = 0xFFU;
-
-    u8SendData = 0xDBU;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(u8ReturnData), 100U);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-	
-#else
-#endif	
-}
-/******************************************************************************
- ;       Function Name			:	void M_TC_Control(uint8_t u8Status)
- ;       Function Description	:	This state for error condition
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-void M_DM_DisplayID3_Get(uint8_t *pReturnData)
-{
-    uint8_t u8SendData;
-    uint8_t u8ReturnData;
-
-    /* Clear all data. */
-    u8ReturnData = 0xFFU;
-
-    u8SendData = 0xDCU;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
-    HAL_I2C_Master_Read(TD7800_MASTER_ADDRESS, pReturnData, sizeof(u8ReturnData), 100U);
-}
 /******************************************************************************
 ;       Function Name			:	void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel)
 ;       Function Description	:
@@ -658,58 +495,6 @@ void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel)
 }
 #if (U625_TDDI_TD7800)
 /******************************************************************************
- ;       Function Name           :   void M_TC_Control(uint8_t u8Status)
- ;       Function Description    :   This state for error condition
- ;       Parameters              :   void
- ;       Return Values           :   void
- ;       Source ID               :
- ******************************************************************************/
-void M_DM_TD7800_Unlock(void)
-{
-    uint8_t mu8SendData[2U];
-
-    mu8SendData[0U] = 0xB0U;
-    mu8SendData[1U] = 0x00U;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
-
-    mu8SendData[0U] = 0xE5U;
-    mu8SendData[1U] = 0x03U;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
-
-}
-/******************************************************************************
- ;       Function Name           :   void M_TC_Control(uint8_t u8Status)
- ;       Function Description    :   This state for error condition
- ;       Parameters              :   void
- ;       Return Values           :   void
- ;       Source ID               :
- ******************************************************************************/
-void M_DM_TD7800_Lock(void)
-{
-    uint8_t mu8SendData[2U];
-
-    mu8SendData[0U] = 0xE5U;
-    mu8SendData[1U] = 0x00U;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
-
-    mu8SendData[0U] = 0xB0U;
-    mu8SendData[1U] = 0x03U;
-    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
-}
-/******************************************************************************
- ;       Function Name           :   void M_TC_Control(uint8_t u8Status)
- ;       Function Description    :   This state for error condition
- ;       Parameters              :   void
- ;       Return Values           :   void
- ;       Source ID               :
- ******************************************************************************/
-void M_DM_TD7800_TouchReset(void)
-{
-    HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-    Cy_SysLib_Delay(90);
-    HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-}
-/******************************************************************************
 ;       Function Name			:	void M_DM_TD7800_ATTN_Read(void)
 ;       Function Description	:
 ;       Parameters				:	void
@@ -724,21 +509,6 @@ uint8_t M_DM_TD7800_ATTN_Read(void)
 	return u8Level;
 }
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-/******************************************************************************
- ;       Function Name           :   void M_DM_NT51926_TouchReset(void)
- ;       Function Description    :   This state for error condition
- ;       Parameters              :   void
- ;       Return Values           :   void
- ;       Source ID               :
- ******************************************************************************/
-void M_DM_NT51926_TouchReset(void)
-{
-    HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-    Cy_SysLib_Delay(90);
-    HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-}
-
-
 /******************************************************************************
 ;       Function Name			:	uint8_t M_DM_NT51926_ATTN_Read(void)
 ;       Function Description	:

@@ -14,7 +14,7 @@ static tbattery_protect_task_def tBatteryProtectTask;
 static void C_Battery_Protect_Init(void)
 {
 	tBatteryProtectTask.u16Timer1 = TIME_DISABLE;
-	Task_ChangeState(TYPE_BATTERY_PROTECT, LEVEL5, STATE_BATTERY_PROTECT_CTRL, Battery_Protect_State_Machine[STATE_BATTERY_PROTECT_CTRL]);
+	(void)Task_ChangeState(TYPE_BATTERY_PROTECT, LEVEL5, STATE_BATTERY_PROTECT_CTRL, Battery_Protect_State_Machine[STATE_BATTERY_PROTECT_CTRL]);
 	Task_TaskDone();
 }
 /******************************************************************************
@@ -36,7 +36,7 @@ static void C_Battery_Protect_Control(void)
 			M_BP_State_Maching((uint16_t)(tBatteryProtectTask.u16Timer1-1));
 		break;
 		default:
-			Task_ChangeState(TYPE_BATTERY_PROTECT, LEVEL5, STATE_BATTERY_PROTECT_ERROR, Battery_Protect_State_Machine[STATE_BATTERY_PROTECT_ERROR]);
+			(void)Task_ChangeState(TYPE_BATTERY_PROTECT, LEVEL5, STATE_BATTERY_PROTECT_ERROR, Battery_Protect_State_Machine[STATE_BATTERY_PROTECT_ERROR]);
 		break;
 	}
 	Task_TaskDone();
@@ -67,7 +67,7 @@ void C_Battery_Protect_Timer1(void)
 		if (tBatteryProtectTask.u16Timer1 == TIME_UP)
 		{
 			tBatteryProtectTask.u16Timer1 = TIME_DISABLE;
-			Task_ChangeEvent(TYPE_BATTERY_PROTECT, LEVEL3, EVENT_TIMER1);
+			(void)Task_ChangeEvent(TYPE_BATTERY_PROTECT, LEVEL3, EVENT_TIMER1);
 		}
 		else
 		{ /* Nothing */ }

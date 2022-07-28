@@ -10,14 +10,13 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-/*---------------------------- Include File ---------------------------------*/
-#include "public.h"
 
 /*---------------------------- Definition -----------------------------------*/
 #define U625_TDDI_TD7800    false
 #define CX430_TDDI_NT51926    true
 #define U717_TDDI_NT51926    false
 
+#define BACKDOOR_ICDIAG_OPEN	false
 
 #define DEBUG_POWER_UP false
 
@@ -43,7 +42,12 @@
 
 #define LOOP_MAX 0xFFFFFFFFUL
 
+/*---------------------------- Include File ---------------------------------*/
+#include "public.h"
+
+/*------------------------------- global Var.-- -----------------------------*/
 extern int16_t MainTestDeratingTemperature;
+
 /*---------------------------- Declare Function -----------------------------*/
 void Main_TimerAssign(void);
 void Main_TimerCore(void);

@@ -130,12 +130,8 @@ typedef struct
 
     uint8_t u8FactoryMode;
 	
-#if (U625_TDDI_TD7800)
-    uint8_t mu8TD7800Temp[128U];
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)	
-	uint8_t mu8NT51926Temp[128U];
-#else
-#endif
+	uint32_t u32NT51926_Vcom;
+
 } tdisplay_management_def;
 
 typedef struct
@@ -160,8 +156,6 @@ typedef struct
     uint16_t u16GeneralDiagnosis;
     uint64_t u64LEDDriverDiagnosis;
     uint64_t u64NT51926Diagnosis;
-
-    uint8_t u8ErrorPowerStatus;
 } tdiagnosis_def;
 
 typedef struct
@@ -170,15 +164,6 @@ typedef struct
     bool bI2cMcuBusInit;
 } tu625_def;
 
-typedef enum
-{
-    ERROR_TPS74501_P1V2_PG  = 0x01U,
-    ERROR_LM63625_P3V3_PG   = 0x02U,
-    ERROR_LP8864_LED_INT    = 0x04U,
-    ERROR_PIN_948_LOCK      = 0x08U,
-    ERROR_PIN_DISP_FAULT    = 0X10U,
-    ERROR_VBAT_FAULT        = 0X20U,   
-}POWER_ERROR_DETECT;
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -193,13 +178,13 @@ typedef enum
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPNSoft_Set(uint8_t *pSetValue, uint8_t u8Length);
+void Memory_Pool_FPNSoft_Set(const uint8_t *pSetValue, uint8_t u8Length);
 void Memory_Pool_FPNSoft_Get(uint8_t *pSetValue, uint8_t u8Length);
 
-void Memory_Pool_FPNCore_Set(uint8_t *pSetValue, uint8_t u8Length);
+void Memory_Pool_FPNCore_Set(const uint8_t *pSetValue, uint8_t u8Length);
 void Memory_Pool_FPNCore_Get(uint8_t *pSetValue, uint8_t u8Length);
 
-void Memory_Pool_FPNMain_Set(uint8_t *pSetValue, uint8_t u8Length);
+void Memory_Pool_FPNMain_Set(const uint8_t *pSetValue, uint8_t u8Length);
 void Memory_Pool_FPNMain_Get(uint8_t *pSetValue, uint8_t u8Length);
 
 void Memory_Pool_FPNDelivery_Set(uint8_t *pSetValue, uint8_t u8Length);
@@ -363,15 +348,10 @@ uint8_t Memory_Pool_PowerStatus_Get(void);
 void Memory_Pool_PowerState_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_PowerState_Get(void);
 
-#if(U625_TDDI_TD7800)
-	void Memory_Pool_TD7800_Set(uint8_t *pSetValue, uint8_t u8Length);
-	void Memory_Pool_TD7800_Get(uint8_t *pSetValue, uint8_t u8Length);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-	void Memory_Pool_NT51926_Set(uint8_t *pSetValue, uint8_t u8Length);
-	void Memory_Pool_NT51926_Get(uint8_t *pSetValue, uint8_t u8Length);
-#else
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+	void Memory_Pool_NT51926_Vcom_Set(uint32_t u32SetValue);
+	uint32_t Memory_Pool_NT51926_Vcom_Get(void);
 #endif
-
 
 void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer);
 void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength);
@@ -415,8 +395,6 @@ void Memory_Pool_FPNSProductPhaseStatusInfo_Set(tProduct_pn_status_info_def * pD
 
 void Memory_Pool_FPNProductionPhase_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_FPNProductionPhase_Get(void);
-
-void Memory_Pool_PowerErrorStatus_Set(uint8_t u8SetValue);
 
 #endif
 

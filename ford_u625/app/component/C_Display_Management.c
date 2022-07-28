@@ -32,12 +32,16 @@ static tdisplay_ctrl_def tDisplayCtrl;
  */
 static MDetectTchAttn_TouchController_E C_Display_Management_CallbackTCHState(void)
 {
+	uint8_t u8Return;
     if(Memory_Pool_TouchStatus_Get() != TOUCH_ON)
     {
-        return TCH_CONTROLLER_NOTREADY;
+        u8Return = TCH_CONTROLLER_NOTREADY;
     }
-
-    return TCH_CONTROLLER_READY;
+	else
+	{
+    	u8Return = TCH_CONTROLLER_READY;
+	}
+	return u8Return;
 }
 /**
  * @brief When SDM Detects The behavior of Clicking for TP,
@@ -52,7 +56,7 @@ static void C_Display_Management_CallbackTCHClickHandler(void)
 {
     Memory_Pool_IntStatus_Set(Memory_Pool_IntStatus_Get() | BIT_INT_TCH_POS);
     /* Send INTB Strategy Control Msg. */
-    Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+    (void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 }
 /**
  * @brief When SDM Detects The behavior of Leaving Click for TP,
@@ -87,7 +91,7 @@ static void C_Display_Management_CallbackEnteringBatteryProtected(uint8_t u8BpSt
 	/* Action => do shutdown2 sequence*/
 	Memory_Pool_VBattProtectState_Set(BATT_PROTECT_ON);
 	Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
-	Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+	(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 	(void)u8BpStatus;
 }
 /**
@@ -120,7 +124,7 @@ static void C_Display_Management_CallbackEnteringDiagnosisProtected(void)
 	MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
 	/* Action => turn off the display, touch , back-light*/
 	tDisplayCtrl.bDiagnosisProtect = true;
-	Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+	(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
 }
 /**
  * @brief When SDM's Diagnosis not detect error,
@@ -135,136 +139,9 @@ static void C_Display_Management_CallbackLeavingDiagnosisProtected(void)
 {
 	tDisplayCtrl.bDiagnosisProtect = false;
 	tDisplayCtrl.bDiagnosisProtectLeve = true;	
-	Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+	(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
 }
 
-/******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
- ;       Function Description	:	This state will do power management initialize
- ;       Parameters				:	void
- ;       Return Values			:	void
- ;		Source ID				:
- ******************************************************************************/
-static void C_Display_Management_RegContrl(uint8_t *pCommand)
-{
-    uint8_t u8Command = *(pCommand + 1U);
-    uint8_t u8Action = *pCommand;
-    uint8_t mu8Data[16U] = { 0 };
-    switch (u8Command)
-    {
-        case SCMD_DISPLAY_STATUS_GET:
-            mu8Data[0U] = LEN_DISPLAY_STATUS_GET;
-            mu8Data[1U] = SCMD_DISPLAY_STATUS_GET;
-            M_DM_DisplayStatus_Get(&mu8Data[2U]);
-#if (U625_TDDI_TD7800)		
-            Memory_Pool_TD7800_Set(mu8Data, LEN_DISPLAY_STATUS_GET + LEN_LEN + LEN_SCMD);
-            Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-		
-#else
-#endif			
-            break;
-        case SCMD_FW_DISPLAY_STATUS_GET:
-            mu8Data[0U] = LEN_FW_DISPLAY_STATUS_GET;
-            mu8Data[1U] = SCMD_FW_DISPLAY_STATUS_GET;
-            M_DM_FW_DisplayStatus_Get(&mu8Data[2U]);
-#if (U625_TDDI_TD7800)			
-            Memory_Pool_TD7800_Set(mu8Data, LEN_FW_DISPLAY_STATUS_GET + LEN_LEN + LEN_SCMD);
-            Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-		
-#else
-#endif			
-            break;
-#if (U625_TDDI_TD7800)
-        case SCMD_DISPLAY_ID1_GET:
-            mu8Data[0U] = LEN_DISPLAY_ID1_GET;
-            mu8Data[1U] = SCMD_DISPLAY_ID1_GET;
-            M_DM_DisplayID1_Get(&mu8Data[2U]);
-            Memory_Pool_TD7800_Set(mu8Data, LEN_DISPLAY_ID1_GET + LEN_LEN + LEN_SCMD);
-            Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-            break;
-        case SCMD_DISPLAY_ID2_GET:
-            mu8Data[0U] = LEN_DISPLAY_ID2_GET;
-            mu8Data[1U] = SCMD_DISPLAY_ID2_GET;
-            M_DM_DisplayID2_Get(&mu8Data[2U]);
-            Memory_Pool_TD7800_Set(mu8Data, LEN_DISPLAY_ID2_GET + LEN_LEN + LEN_SCMD);
-            Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-            break;
-        case SCMD_DISPLAY_ID3_GET:
-            mu8Data[0U] = LEN_DISPLAY_ID3_GET;
-            mu8Data[1U] = SCMD_DISPLAY_ID3_GET;
-            M_DM_DisplayID3_Get(&mu8Data[2U]);
-            Memory_Pool_TD7800_Set(mu8Data, LEN_DISPLAY_ID3_GET + LEN_LEN + LEN_SCMD);
-            Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-            break;
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-				
-#else
-#endif
-
-        case SCMD_FAULT_DETECT_ENABLE:
-            if (u8Action == I2C_WRITE)
-            {
-#if (U625_TDDI_TD7800)         
-                Memory_Pool_TD7800_Get(mu8Data, (LEN_FAULT_DETECT_ENABLE + LEN_LEN + LEN_SCMD));
-                M_DM_Fault_Enable_Set(&mu8Data[1U]);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-				
-#else
-#endif				
-            }
-            else if (u8Action == I2C_READ)
-            {
-#if (U625_TDDI_TD7800)             
-                mu8Data[0U] = LEN_FAULT_DETECT_ENABLE;
-                mu8Data[1U] = SCMD_FAULT_DETECT_ENABLE;
-                M_DM_Fault_Enable_Get(&mu8Data[2U]);
-                Memory_Pool_TD7800_Set(mu8Data, LEN_FAULT_DETECT_ENABLE + LEN_LEN + LEN_SCMD);
-                Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-				
-#else
-#endif				
-            }
-            else
-            { /* Nothing */ }
-            break;
-        case SCMD_VCOM_SET:
-            if (u8Action == I2C_WRITE)
-            {
-#if (U625_TDDI_TD7800)             
-                Memory_Pool_TD7800_Get(mu8Data, (LEN_VCOM_SET + LEN_LEN + LEN_SCMD));
-                M_DM_TD7800_Unlock();
-                M_DM_VCOM_Set(&mu8Data[1U]);
-                M_DM_TD7800_Lock();
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-		
-#else
-#endif				
-            }
-            else if (u8Action == I2C_READ)
-            {
-#if (U625_TDDI_TD7800)             
-                mu8Data[0U] = LEN_VCOM_SET;
-                mu8Data[1U] = SCMD_VCOM_SET;
-                M_DM_VCOM_Get(&mu8Data[2U]);
-                Memory_Pool_TD7800_Set(mu8Data, LEN_VCOM_SET + LEN_LEN + LEN_SCMD);
-                Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_TD7800_REG_READY);
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-
-#else
-#endif
-
-            }
-            else
-            { /* Nothing */ }
-            break;
-        default:
-        	/* Nothing */
-            break;
-    }
-}
 /******************************************************************************
  ;       Function Name			:	uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetValue)
  ;       Function Description	:	This state will do display 
@@ -296,7 +173,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Disable backlight function */
 							Memory_Pool_BacklightEnable_Set(false);				          
 							M_DM_BacklightControl(tDisplayCtrl.bBacklightSet, Memory_Pool_LockLoss_Get());
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)											
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)											
 							/* Read 0x00 status. */
 							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
@@ -350,7 +227,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{
 								Memory_Pool_PowerState_Set(OFF_POWER_STATE);
 								Memory_Pool_PowerStatus_Set(POWER_OFF);
-								Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+								(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 							}
 							else
 							{ /* Nothing */ }
@@ -400,6 +277,12 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS);
+
+								/* Read TDDI Vcom value */
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+								Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());			
+#endif
+
 							}
 							else
 							{
@@ -421,7 +304,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Set 0x00 BL_ST bit */							
 							if (tDisplayCtrl.bBacklightSet == true)
 							{
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)								
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)								
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_BL_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_BL_ST_POS);
 #endif								
@@ -578,6 +461,11 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS);
+
+								/* Read TDDI Vcom value */
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+								Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());			
+#endif							
 							}
 							else
 							{
@@ -599,7 +487,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Set 0x00 BL_ST bit */							
 							if (tDisplayCtrl.bBacklightSet == true)
 							{
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)								
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)								
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_BL_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_BL_ST_POS);
 #endif
@@ -691,7 +579,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Disable backlight function */
 							Memory_Pool_BacklightEnable_Set(false);				          
 							M_DM_BacklightControl(tDisplayCtrl.bBacklightSet, Memory_Pool_LockLoss_Get());
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)
 							/* Read 0x00 status. */
 							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
@@ -746,7 +634,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{
 								Memory_Pool_PowerState_Set(OFF_POWER_STATE);
 								Memory_Pool_PowerStatus_Set(POWER_OFF);
-								Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+								(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 							}
 							else
 							{ /* Nothing */ }
@@ -854,7 +742,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Set 0x00 BL_ST bit */							
 							if (tDisplayCtrl.bBacklightSet == true)
 							{
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)								
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)								
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_BL_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_BL_ST_POS); 
 #endif								
@@ -950,7 +838,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Disable backlight function */
 							Memory_Pool_BacklightEnable_Set(false);				          
 							M_DM_BacklightControl(tDisplayCtrl.bBacklightSet, Memory_Pool_LockLoss_Get());
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)
 							/* Read 0x00 status. */
 							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
@@ -1115,7 +1003,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Set 0x00 BL_ST bit */
 							if (tDisplayCtrl.bBacklightSet == true)
 							{
-#if(U717_TDDI_NT51926 || FORD_SPSS_CRC_ROLL_EN)								
+#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)								
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_BL_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_BL_ST_POS); 
 #endif								
@@ -1181,7 +1069,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 }
 
 /******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
+ ;       Function Name			:	static void C_Display_Management_ParaInit(void)
  ;       Function Description	:	This state will do power management initialize
  ;       Parameters				:	void
  ;       Return Values			:	void
@@ -1209,7 +1097,7 @@ static void C_Display_Management_ParaInit(void)
 	tDisplayCtrl.bDiagnosisProtect = false;
 }
 /******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
+ ;       Function Name			:	static void C_Display_Manage_Init(void)
  ;       Function Description	:	This state will do power management initialize
  ;       Parameters				:	void
  ;       Return Values			:	void
@@ -1279,7 +1167,7 @@ static void C_Display_Manage_Init(void)
 			HAL_GPIO_Toggle( U301_INTB_IN_PORT,  U301_INTB_IN_PIN); 
 #endif
 	        tDisplayManageTask.u16Timer2 = TIME_DISABLE;
-	        Task_ChangeState(TYPE_DISPLAY_MANAGE, LEVEL5, STATE_DISPLAY_MANAGE_CTRL, Display_Manage_State_Machine[STATE_DISPLAY_MANAGE_CTRL]);
+	        (void)Task_ChangeState(TYPE_DISPLAY_MANAGE, LEVEL5, STATE_DISPLAY_MANAGE_CTRL, Display_Manage_State_Machine[STATE_DISPLAY_MANAGE_CTRL]);
 
             break;
         default:
@@ -1289,7 +1177,7 @@ static void C_Display_Manage_Init(void)
     Task_TaskDone();
 }
 /******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Control(void)
+ ;       Function Name			:	static void C_Display_Manage_Control(void)
  ;       Function Description	:	This state will do power on/off sequence
  ;       Parameters				:	void
  ;       Return Values			:	void
@@ -1300,13 +1188,6 @@ static void C_Display_Manage_Control(void)
 	uint8_t u8Status = tDisplayCtrl.u8DispSeqStatus;
     uint32_t u32Temp=0U;
 	uint32_t u32CommDisplayStatus=0U;
-	
-#if (U625_TDDI_TD7800)
-    uint8_t mu8Temp[2U];
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-    uint8_t mu8Temp[8U];
-#else
-#endif
 
     switch (Task_Current_Event_Get())
     {
@@ -1399,7 +1280,7 @@ static void C_Display_Manage_Control(void)
 			}
 			else
 			{
-				Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+				(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
             }
 			
             break;
@@ -1417,14 +1298,15 @@ static void C_Display_Manage_Control(void)
 			{ /* Nothing */}
 
             break;
-        case EVENT_MESSAGE_DIPLAY_REGISTER :
-#if (U625_TDDI_TD7800)   			
-            Memory_Pool_TD7800_Get(mu8Temp, sizeof(mu8Temp));
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-			Memory_Pool_NT51926_Get(mu8Temp, sizeof(mu8Temp));
-#else
+        case EVENT_MESSAGE_TDDI_VCOM :
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+			if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
+			{	
+				Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());
+			}			
+			else
+			{ /* Nothing */}				
 #endif
-            C_Display_Management_RegContrl(mu8Temp);
             break;
 
         case EVENT_TIME_ATTN_POLLING :
@@ -1450,14 +1332,15 @@ static void C_Display_Manage_Control(void)
 			{ /* Nothing */ }
 
 			break;
+			
         default:
-        	/* Nothing */
+        	(void)Task_ChangeState(TYPE_DISPLAY_MANAGE, LEVEL5, STATE_DISPLAY_MANAGE_ERROR, Display_Manage_State_Machine[STATE_DISPLAY_MANAGE_ERROR]);
             break;
     }
     Task_TaskDone();
 }
 /******************************************************************************
- ;       Function Name			:	void C_Power_Manage_Error(void)
+ ;       Function Name			:	static void C_Display_Manage_Error(void)
  ;       Function Description	:	This state for error condition
  ;       Parameters				:	void
  ;       Return Values			:	void
@@ -1484,7 +1367,7 @@ void C_Display_Manage_Timer1(void)
         if (tDisplayManageTask.u16Timer1 == TIME_UP)
         {
             tDisplayManageTask.u16Timer1 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL3, EVENT_TIMER1);
+            (void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL3, EVENT_TIMER1);
         }
 		else
 		{ /* Nothing */ }
@@ -1507,7 +1390,7 @@ void C_Display_Manage_Timer2(void)
         if (tDisplayManageTask.u16Timer2 == TIME_UP)
         {
             tDisplayManageTask.u16Timer2 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL3, EVENT_TIMER2);
+            (void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL3, EVENT_TIMER2);
         }
 		else
 		{ /* Nothing */ }
@@ -1530,7 +1413,7 @@ void C_Display_Manage_Timer3(void)
         if (tDisplayManageTask.u16Timer3 == TIME_UP)
         {
             tDisplayManageTask.u16Timer3 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL3, EVENT_TIMER3);
+            (void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL3, EVENT_TIMER3);
         }
 		else
 		{ /* Nothing */ }

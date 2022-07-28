@@ -18,7 +18,7 @@ static void C_Temperture_Protect_Init(void)
     tTempertureProtectManager.u8TempertureProtectMode = TP_STATE_INIT;
     tTempertureProtectManager.bTempertureProtectEnable = true;
     tTempertureProtectTask.u16Timer1 = TIME_DISABLE;
-    Task_ChangeState(TYPE_TEMPERTURE_PROTECT, LEVEL5, STATE_TEMPERTURE_PROTECT_CTRL, Temperture_Protect_State_Machine[STATE_TEMPERTURE_PROTECT_CTRL]);
+    (void)Task_ChangeState(TYPE_TEMPERTURE_PROTECT, LEVEL5, STATE_TEMPERTURE_PROTECT_CTRL, Temperture_Protect_State_Machine[STATE_TEMPERTURE_PROTECT_CTRL]);
     Task_TaskDone();
 }
 /******************************************************************************
@@ -43,11 +43,11 @@ static void C_Temperture_Protect_Control(void)
                 tTempertureProtectManager.bTempertureProtectEnable = true;
             break;
         case EVENT_TIMER1 :
-            Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL3, EVENT_MESSAGE);
+            (void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL3, EVENT_MESSAGE);
             tTempertureProtectTask.u16Timer1 = TIME_2ms;
             break;
         default:
-            Task_ChangeState(TYPE_TEMPERTURE_PROTECT, LEVEL5, STATE_TEMPERTURE_PROTECT_ERROR, Temperture_Protect_State_Machine[STATE_TEMPERTURE_PROTECT_ERROR]);
+            (void)Task_ChangeState(TYPE_TEMPERTURE_PROTECT, LEVEL5, STATE_TEMPERTURE_PROTECT_ERROR, Temperture_Protect_State_Machine[STATE_TEMPERTURE_PROTECT_ERROR]);
             break;
     }
     Task_TaskDone();
@@ -78,7 +78,7 @@ void C_Temperture_Protect_Timer1(void)
 		if (tTempertureProtectTask.u16Timer1 == TIME_UP)
 		{
 			tTempertureProtectTask.u16Timer1 = TIME_DISABLE;
-			Task_ChangeEvent(TYPE_TEMPERTURE_PROTECT, LEVEL3, EVENT_TIMER1);
+			(void)Task_ChangeEvent(TYPE_TEMPERTURE_PROTECT, LEVEL3, EVENT_TIMER1);
 		}
         else
         { /* Nothing */ }

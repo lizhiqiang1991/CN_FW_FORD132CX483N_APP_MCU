@@ -17,7 +17,7 @@ static void C_Backlight_Manage_Init(void)
     HAL_PWM_CH4_Init();
     tBacklightManageTask.u16Timer1 = TIME_DISABLE;
     tBacklightManageTask.u16Timer2 = TIME_DISABLE;
-    Task_ChangeState(TYPE_BACKLIGHT_MANAGE, LEVEL5, STATE_BACKLIGHT_MANAGE_CTRL, Backlight_Manage_State_Machine[STATE_BACKLIGHT_MANAGE_CTRL]);
+    (void)Task_ChangeState(TYPE_BACKLIGHT_MANAGE, LEVEL5, STATE_BACKLIGHT_MANAGE_CTRL, Backlight_Manage_State_Machine[STATE_BACKLIGHT_MANAGE_CTRL]);
     Task_TaskDone();
 }
 
@@ -35,7 +35,7 @@ static void C_Backlight_Manager_Control(void)
         case EVENT_FIRST:
             tBacklightManageTask.u16Timer1 = TIME_6ms;
             tBacklightManageTask.u16Timer2 = TIME_10ms;
-            Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE);
+            (void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE);
             break;
 
         case EVENT_MESSAGE:
@@ -62,6 +62,10 @@ static void C_Backlight_Manager_Control(void)
             tBacklightManageTask.u16Timer2 = TIME_10ms;
             MBacklightControl_DeratingModuleRoutine10ms();
             break;
+			
+		default:
+			(void)Task_ChangeState(TYPE_BACKLIGHT_MANAGE, LEVEL5, STATE_BACKLIGHT_MANAGE_ERROR, Backlight_Manage_State_Machine[STATE_BACKLIGHT_MANAGE_ERROR]);
+			break;
     }
     
     Task_TaskDone();
@@ -92,7 +96,7 @@ void C_Backlight_Manage_Timer1(void)
         if (tBacklightManageTask.u16Timer1 == TIME_UP)
         {
             tBacklightManageTask.u16Timer1 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL3, EVENT_TIMER1);
+            (void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL3, EVENT_TIMER1);
         }
         else
         { /* Nothing */ }
@@ -108,7 +112,7 @@ void C_Backlight_Manage_Timer2(void)
         if (tBacklightManageTask.u16Timer2 == TIME_UP)
         {
             tBacklightManageTask.u16Timer2 = TIME_DISABLE;
-            Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL3, EVENT_TIMER2);
+            (void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL3, EVENT_TIMER2);
         }
         else
         { /* Nothing */ }

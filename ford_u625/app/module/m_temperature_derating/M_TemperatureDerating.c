@@ -78,7 +78,7 @@ static int16_t gBLDeratingLimitTemp = TEMP_DERATING_DEFAULT_DERA_TEMP;
  * 2.If the time is equal to zero,The state is changed to derating.
  * 
  */
-static uint16_t gu16InitWaitTimer = TEMP_DERATING_INIT_WAIT_TIME_OUT;
+
 /**
  * @brief A look up table for catching the PWM duty according to backlight temperature. 
  * 
@@ -189,7 +189,7 @@ DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Init(void)
 #if(DERATINGAPP_FLOAT_OPERATION)
     float BLTemperature = (float)(Memory_Pool_PCBATemp_Get());
 #else
-    int16_t BLTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
+
 #endif 
     
 #if(TEMP_DERATINGAPP_TEST)

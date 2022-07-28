@@ -1,4 +1,6 @@
+#include "main.h"
 #include "M_Communication.h"
+#include "ICDiagApp.h"
 
 static tcommunication_info_def tCommunicationInfo;
 
@@ -167,8 +169,6 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 		case CMD_MAIN_CALI_PART_NUMBER:
 		case CMD_DETIAL_DIAGNOSIS_GET:
 		case CMD_TEMPERATURE_GET:
-		case CMD_TEMPERATURE_ADC_GET:
-		case CMD_POWER_ERROR_STATUS:
 		case CMD_VOLTAGE_GET:
 		case CMD_PRESENT_BACKLIGHT_PWM_GET:
 		case CMD_PRODUCTION_PHASE_BYTE_GET:
@@ -250,17 +250,6 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			}
 		break;
 
-		case CMD_TOUCH_RESET:
-			if(u8Length == (LEN_SUBADDRESS+LEN_TOUCH_RESET))
-			{
-				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
-			}
-			else
-			{
-				u8CheckResult=FORMAT_LEN_FAIL;
-			}
-		break;
-
 		case CMD_FACTORY_MODE:
 			if(u8Length == LEN_SUBADDRESS)
 			{
@@ -282,17 +271,6 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 				u8CheckResult=FORMAT_READ_CHECK_SAFETY;
 			}
 			else if(u8Length == (LEN_SUBADDRESS+LEN_DERATING_ENABLE))
-			{
-				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
-			}
-			else
-			{
-				u8CheckResult=FORMAT_LEN_FAIL;
-			}
-		break;
-
-		case CMD_WATCHDOG_ENABLE:
-			if(u8Length == (LEN_SUBADDRESS+LEN_WATCHDOG_ENABLE))
 			{
 				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
 			}
@@ -380,8 +358,38 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			}
 		break;
 
-
-			
+#if(BACKDOOR_ICDIAG_OPEN)
+		case ICDIAG_CMD_ICFETCH:
+			if(u8Length == (LEN_SUBADDRESS+LEN_ICDIAG_FETCH))
+			{
+				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
+			}
+			else
+			{
+				u8CheckResult=FORMAT_LEN_FAIL;
+			}
+		break;
+		case ICDIAG_CMD_READ:
+			if(u8Length == LEN_SUBADDRESS)
+			{
+				u8CheckResult=FORMAT_READ_CHECK_SAFETY;
+			}
+			else
+			{
+				u8CheckResult=FORMAT_LEN_FAIL;
+			}
+		break;			
+		case ICDIAG_CMD_ICCTRL:
+			if(u8Length == (LEN_SUBADDRESS+LEN_ICDIAG_ICCTRL))
+			{
+				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
+			}
+			else
+			{
+				u8CheckResult=FORMAT_LEN_FAIL;
+			}
+		break;
+#endif			
 		default:
 			u8CheckResult=FORMAT_UNSUPPORT_SUBADDRESS;
 		break;

@@ -44,18 +44,22 @@
 
 #define NUMBER_ZERO							0x00U
 
-#define BUFFER_SIZE 						32U
+#if (BACKDOOR_ICDIAG_OPEN ==true)
+	#define BUFFER_SIZE 					80U
+#else
+	#define BUFFER_SIZE 					32U
+#endif
 
-//Read/Write Action
+/*Read/Write Action*/
 #define I2C_WRITE							0x00U
 #define I2C_READ							0x01U
 
-//Data Byte Format Position
+/*Data Byte Format Position*/
 #define CMD_SUBADDRESS_POS					0x00U
 #define CMD_DATA1_POS						0x01U
 #define CMD_DATA2_POS						0x02U
 
-//Display Status Shift
+/*Display Status Shift*/
 #define SHIFT_LCDERR_POS					0x00U
 #define SHIFT_BLERR_POS						0x01U
 #define SHIFT_TERR_POS						0x02U
@@ -97,7 +101,7 @@
 #define BIT_INT_TCH_POS						0x04U
 #define BIT_INT_ROT_POS						0x08U
 
-//Display Status Bit Format Position
+/*Display Status Bit Format Position*/
 #define BIT_LCDERR_POS						0x00000001UL
 #define BIT_BLERR_POS						0x00000002UL
 #define BIT_TERR_POS						0x00000004UL
@@ -113,15 +117,15 @@
 #define BIT_DISPERR_POS						0x00008000UL
 #define BIT_ALL_ERROR_POS					(BIT_TCERR_POS | BIT_TSCERR_POS | BIT_LLOSS_POS | BIT_DCERR_POS | BIT_TERR_POS | BIT_BLERR_POS | BIT_LCDERR_POS | BIT_DISPERR_POS)
 
-//FPN Lock Bit Format Position
+/*FPN Lock Bit Format Position*/
 #define BIT_WRT_ST_POS						0x01U
 #define BIT_INT_WRT_POS						0x02U
 #define BIT_CKSUM_ERR_POS					0x04U
 
-//De-rating Enable Bit Format Position
+/*De-rating Enable Bit Format Position*/
 #define BIT_DERATING_EN_POS					0x01U
 
-//Custom Command
+/*Custom Command*/
 #define CMD_DISPLAY_STATUS					0x00U
 #define CMD_DISPLAY_IDENTIFICATION			0x01U
 #define CMD_BACKLIGHT_PWM					0x02U
@@ -135,14 +139,12 @@
 #define CMD_SERIAL_NUMBER					0x34U
 #define CMD_MAIN_CALI_PART_NUMBER			0x35U
 #define CMD_DETIAL_DIAGNOSIS_GET			0xA3U
-#define CMD_TOUCH_RESET                     0xB0U
+
 #define CMD_FACTORY_MODE					0xB1U
 #define CMD_TEMPERATURE_GET					0xB2U
-#define CMD_TEMPERATURE_ADC_GET				0xB3U
-#define CMD_POWER_ERROR_STATUS				0xB4U
+
 #define CMD_VOLTAGE_GET						0xB8U
 #define CMD_DERATING_ENABLE					0xBAU
-#define CMD_WATCHDOG_ENABLE					0xBBU
 #define CMD_PRESENT_BACKLIGHT_PWM_GET		0xBCU
 #define CMD_PRODUCTION_PHASE_BYTE_GET		0xBDU
 #define CMD_VCOM_VALUE_GET					0xBEU
@@ -181,10 +183,10 @@
 #define CMD_MCU_VERSION_GET					0xDFU
 #define CMD_JUMP_TO_BOOTLOADER				0xF4U
 
-//Custom Command Length
+/*Custom Command Length*/
 #define LEN_SUBADDRESS						0x01U
 
-//Custom Command Data Length
+/*Custom Command Data Length*/
 #if(FORD_I2CCOMV1P9)
 #define LEN_DISPLAY_STATUS					0x02U
 #else
@@ -234,7 +236,7 @@
 
 #define LEN_LOCK_PRODUCTION_PHASE_BYTE		0x01U
 #define LEN_PRODUCTION_PHASE_BYTE			0x01U
-#define LEN_VCOM_VALUE_GET					0x02U
+#define LEN_VCOM_VALUE_GET					0x03U
 #define LEN_WRITE_DEL_SER_PART_NUMBER	    0x1AU
 #define LEN_PCBATEMPERATURE_INFO			0x06U
 #define LEN_BACKLIGHTTEMPERATURE_INFO		0x06U
@@ -259,10 +261,10 @@
 #define LEN_FAULT_DETECT_ENABLE				0x05U
 #define LEN_VCOM_SET						0x04U
 
-//Custom Rolling Counter Length
+/*Custom Rolling Counter Length*/
 #define LEN_ROLLING_COUNTER					0x01U
 
-//Custom CRC8 Length
+/*Custom CRC8 Length*/
 #define LEN_CRC8							0x01U
 
 #define LEN_UPDATE_REQUEST					0x01U
@@ -271,6 +273,14 @@
 #define LEN_CHECKSUM						0x01U
 #define LEN_SCMD							0x01U
 #define LEN_LOCK_FPN						0x01U
+
+/*Backdoor suubaddress data Length*/
+#if (BACKDOOR_ICDIAG_OPEN == true)
+	#define LEN_ICDIAG_INFO					64U
+	#define LEN_ICDIAG_FETCH				8U
+	#define LEN_ICDIAG_ICCTRL				72U
+#endif
+
 
 #define SHUTDOWN_DISABLE					0x00U
 #define SHUTDOWN_ENABLE						0x01U

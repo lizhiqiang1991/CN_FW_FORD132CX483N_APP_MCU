@@ -181,9 +181,6 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 				/* Record 0xA3 Status */
 				u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 				Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_LOW_VOL_ERROR_POS);
-
-				/* Record power error status. */
-			    Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);
 			}
 			else
 			{/*Nothing*/}
@@ -229,9 +226,6 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 				/* Record 0xA3 Status */
 				u16Temp = Memory_Pool_GeneralDiagnosis_Get();
 				Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_POWER_HIGH_VOL_ERROR_POS);
-
-				/* Record power error status. */
-			    Memory_Pool_PowerErrorStatus_Set(ERROR_VBAT_FAULT);	
 			}
 			else
 			{/*Nothing*/}
