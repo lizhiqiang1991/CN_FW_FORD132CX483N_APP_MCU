@@ -384,10 +384,14 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			{
 				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
 			}
+			else if((u8Length >=(LEN_SUBADDRESS + 9U)) || (u8Length<(LEN_SUBADDRESS+LEN_ICDIAG_ICCTRL)))
+			{
+				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
+			}
 			else
 			{
 				u8CheckResult=FORMAT_LEN_FAIL;
-			}
+			}			
 		break;
 #endif			
 		default:

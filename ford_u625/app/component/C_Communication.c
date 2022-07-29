@@ -328,12 +328,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		case PRODUCTION_PHASE_BYTE:
 			(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_EEPROM_CONTROL);
 		break;
-#if(BACKDOOR_ICDIAG_OPEN)
-		case ICDIAG_CMD_ICFETCH:
-		case ICDIAG_CMD_ICCTRL:
-			(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL4, EVENT_MESSAGE_DISANOSIS_ENABLE);
-		break;
-#endif
+		
 		default:
 			/* Nothing */
 		break;
