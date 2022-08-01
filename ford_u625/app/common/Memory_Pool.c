@@ -5,6 +5,7 @@
 #include "C_Display_Management.h"
 #include "M_FPNCtrl.h"
 #include "ICDiagApp.h"
+#include "M_TemperatureDerating.h"
 
 tcommunication_def gtCommunicationInfo;
 tdata_collection_def gtDataCollectInfo;
@@ -1628,7 +1629,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 3U) = (gtDiagnosisInfo.u32DisplayStatus >> 16U) & 0x00;
 #endif
             /* Clear all latched flags when actual status released*/
-            gtDiagnosisInfo.u32DisplayStatus=(gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get();
+            gtDiagnosisInfo.u32DisplayStatus = (gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get();
 
             /* Clear INT_ERROR  */
             gtDiagnosisInfo.u8IntStatus = gtDiagnosisInfo.u8IntStatus & (~BIT_INT_ERR_POS);
@@ -1963,6 +1964,19 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *pLength = LEN_ICDIAG_INFO + LEN_SUBADDRESS;
 			break;
 #endif
+
+#if(BACKDOOR_WRITE_DERATINGDATA)
+        case CMD_DERATING_THRESHOLD_GET:
+            /* Read Derating Limited Temperatures */
+            TemperatureDerating_LimitedTemperature_Get((pDataBuffer + 1U), TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH);
+            *pLength = TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH + LEN_SUBADDRESS;
+            break;
+        case CMD_DERATING_TABLE_GET:
+            /* Read Derating Table */
+            TemperatureDerating_DeratingTable_Get((pDataBuffer + 1U), TEMP_DERATING_TABLE_TEMPERATURE_LENGTH);
+            *pLength = TEMP_DERATING_TABLE_TEMPERATURE_LENGTH + LEN_SUBADDRESS;
+            break;
+#endif
 			
         default:
             break;
@@ -2062,7 +2076,12 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
             u32DataAddr=(uint32_t)((uint32_t)pCmdBuffer[4]|((uint32_t)pCmdBuffer[5]<<8U)|((uint32_t)pCmdBuffer[6]<<16U)|((uint32_t)pCmdBuffer[7]<<24U));
 			ICDIAG_CmdTrigger(pCmdBuffer[0], pCmdBuffer[1], pCmdBuffer[2], pCmdBuffer[3], u32DataAddr, pCmdBuffer[8], &pCmdBuffer[9]);
 		break;
-#endif			
+#endif
+
+#if(BACKDOOR_WRITE_DERATINGDATA)
+        case CMD_DERATING_DATA_SET:
+            TemperatureDerating_DeratingCalibrationData_Set(pCmdBuffer + 1U);
+#endif		
         default:
             break;
     }

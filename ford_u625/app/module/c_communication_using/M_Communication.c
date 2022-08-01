@@ -1,6 +1,7 @@
 #include "main.h"
 #include "M_Communication.h"
 #include "ICDiagApp.h"
+#include "M_TemperatureDerating.h"
 
 static tcommunication_info_def tCommunicationInfo;
 
@@ -180,6 +181,9 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 		case CMD_FPCTXOUTVOLINFO:
 		case CMD_FPCRXOUTVOLINFO:
 		case CMD_MCU_VERSION_GET:
+#if (BACKDOOR_WRITE_DERATINGDATA)
+		case CMD_DERATING_THRESHOLD_GET:
+		case CMD_DERATING_TABLE_GET:
 			if(u8Length == LEN_SUBADDRESS)
 			{
 				u8CheckResult=FORMAT_READ_CHECK_SAFETY;
@@ -189,7 +193,18 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 				u8CheckResult=FORMAT_LEN_FAIL;
 			}
 		break;
+		case CMD_DERATING_DATA_SET:
+			if(u8Length == LEN_SUBADDRESS + LEN_DERATING_SETTING_DATA)
+			{
+				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
+			}
+			else
+			{
+				u8CheckResult=FORMAT_LEN_FAIL;
+			}
+		break;
 
+#endif
 		case CMD_BACKLIGHT_PWM:
 			if(u8Length == LEN_SUBADDRESS)
 			{

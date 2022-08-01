@@ -35,6 +35,7 @@
 #include "Common.h"
 #include "main.h"
 
+#include "M_TemperatureDerating.h"
 /*---------------------------- Definition -----------------------------------*/
 #define DRIVER_FALSE						0x00U
 #define DRIVER_TRUE							0x01U
@@ -183,6 +184,12 @@
 #define CMD_MCU_VERSION_GET					0xDFU
 #define CMD_JUMP_TO_BOOTLOADER				0xF4U
 
+#if (BACKDOOR_WRITE_DERATINGDATA)
+#define CMD_DERATING_THRESHOLD_GET          0x7CU
+#define CMD_DERATING_TABLE_GET              0x7DU
+#define CMD_DERATING_DATA_SET				0x7EU
+#endif
+
 /*Custom Command Length*/
 #define LEN_SUBADDRESS						0x01U
 
@@ -281,6 +288,10 @@
 	#define LEN_ICDIAG_ICCTRL				72U
 #endif
 
+#if (BACKDOOR_WRITE_DERATINGDATA)
+#define LEN_DERATING_TABLE TEMP_DERATING_TABLE_TEMPERATURE_LENGTH
+#define LEN_DERATING_SETTING_DATA 3U
+#endif
 
 #define SHUTDOWN_DISABLE					0x00U
 #define SHUTDOWN_ENABLE						0x01U

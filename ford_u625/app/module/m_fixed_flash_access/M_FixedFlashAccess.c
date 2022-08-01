@@ -20,9 +20,9 @@ bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ExternalSetBuf
 {
     bool bReturn;   
     if(((u32AddrOffset % FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE) != 0)\
-        && (u32AddrOffset > (FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE - FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))\
-        && (ExternalSetBuffer == NULL)\
-        && (ExternalSetBufferSize <= FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
+        || (u32AddrOffset > (FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE - FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))\
+        || (ExternalSetBuffer == NULL)\
+        || (ExternalSetBufferSize <= FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
     {
         bReturn = false;
     }
@@ -50,9 +50,9 @@ bool MFixedFlashAccess_ReadPage(uint32_t u32AddrOffset, uint8_t *ExternalGetBuff
     bool bReturn;
 
     if(((u32AddrOffset % FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE) != 0)\
-        && (u32AddrOffset > (FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE - FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))\
-        && (ExternalGetBuffer == NULL)\
-        && (ExternalGetBufferSize <= FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
+        || (u32AddrOffset > (FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE - FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))\
+        || (ExternalGetBuffer == NULL)\
+        || (ExternalGetBufferSize <= FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
     {
         bReturn = false;
     }

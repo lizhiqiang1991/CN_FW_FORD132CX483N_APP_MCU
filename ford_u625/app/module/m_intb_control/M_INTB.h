@@ -35,7 +35,7 @@ typedef void (*CALLBACK_SDM_INTB_DO_SET)(uint8_t u8DigitalLevel);
 /* -- Extern Functions -- */
 extern bool MINTB_Register(CALLBACK_SDM_INTB_DO_SET CallbackSDMIntbDoSet, MINTB_InttruptType_E eInterruptType);
 extern bool MINTB_StrategyControl(MINTB_StrategyCtrl_E eStrategyCtrl);
-extern void MINTB_Routine2ms(uint16_t u16RoutineTime);
+extern void MINTB_Routine(uint16_t u16RoutineTimeMs);
 
 #endif
 /* -- END -- */

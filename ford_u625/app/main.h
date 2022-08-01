@@ -11,14 +11,12 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-/*---------------------------- Definition -----------------------------------*/
+#include <stdbool.h>
+
+/* -- Marco Define -- */
 #define U625_TDDI_TD7800    false
 #define CX430_TDDI_NT51926    true
 #define U717_TDDI_NT51926    false
-
-#define BACKDOOR_ICDIAG_OPEN	false
-
-#define DEBUG_POWER_UP false
 
 #if(U625_TDDI_TD7800)
 #define FORD_SPSS_CRC_ROLL_EN  true
@@ -26,24 +24,33 @@
 #define FORD_SPSSV1P1		false
 #define FORD_I2CCOMV1P9		true
 #define INT_TCH_LATCH       false
+#define BACKDOOR_WRITE_DERATINGDATA false
+#define BACKDOOR_ICDIAG_OPEN	false
+#define DEBUG_POWER_UP false
 #elif (CX430_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN  false
 #define FORD_SPSSV1P0		false
 #define FORD_SPSSV1P1		false
 #define FORD_I2CCOMV1P9		true
 #define INT_TCH_LATCH       false
+#define BACKDOOR_WRITE_DERATINGDATA true
+#define BACKDOOR_ICDIAG_OPEN	false
+#define DEBUG_POWER_UP false
 #elif (U717_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN  true
 #define FORD_SPSSV1P0		false
 #define FORD_SPSSV1P1		false
 #define FORD_I2CCOMV1P9		false
 #define INT_TCH_LATCH       false
+#define BACKDOOR_WRITE_DERATINGDATA false
+#define BACKDOOR_ICDIAG_OPEN	false
+#define DEBUG_POWER_UP false
 #endif
 
-#define LOOP_MAX 0xFFFFFFFFUL
-
-/*---------------------------- Include File ---------------------------------*/
+/* -- Includes -- */
 #include "public.h"
+
+#define LOOP_MAX 0xFFFFFFFFUL
 
 /*------------------------------- global Var.-- -----------------------------*/
 extern int16_t MainTestDeratingTemperature;

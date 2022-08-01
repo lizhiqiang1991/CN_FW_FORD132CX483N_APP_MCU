@@ -9,14 +9,6 @@ extern "C" {
 #include "main.h"
 
 /* -- Marco Define -- */
-#define M_BACKLIGHT_CONTROL_TEMP_RESOLUTION 1 /* It's resolution of backlight temperature */
-
-#define M_BACKLIGHT_CONTROL_TEMP_DERATING_THRESHOLD (70 * M_BACKLIGHT_CONTROL_TEMP_RESOLUTION) /* It's that derating threshold of backlight temperature */
-#define M_BACKLIGHT_CONTROL_TEMP_DERATING_BL_START_REDUCE_THRESHOLD (83 * M_BACKLIGHT_CONTROL_TEMP_RESOLUTION) /* It's that derating threshold of backlight temperature */
-
-#define M_BACKLIGHT_CONTROL_TEMP_SHUTDOWN_THRESHOLD (92 * M_BACKLIGHT_CONTROL_TEMP_RESOLUTION) /* It's that shutdown threshold of backlight temperature */
-#define M_BACKLIGHT_CONTROL_TEMP_RELEASE_SHUTDOWN_THRESHOLD (90 * M_BACKLIGHT_CONTROL_TEMP_RESOLUTION) /* It's that leave shutdown threshold of backlight temperature */
-
 /**
  * @brief The define const values for controling backlight state machine.
  * 

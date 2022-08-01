@@ -36,7 +36,32 @@ static MINTB_Control mINTBControl =
 };
 
 /* -- Local Functions -- */
+/**
+ * @brief Pulls INTB pins low to alert host.
+ * 
+ * @details 1.Clears deasserted time. 
+ * 
+ */
+static void mINTB_SendEvent(uint16_t u16RoutineTime)
+{
+    /* Sets up INTB */
+    if(mINTBControl.eInterruptType == INTB_INT_TYPE_RISING)
+    {
+        mINTBControl.CallbackSDMIntbDoSet(1U);
+    }
+    else
+    {
+        mINTBControl.CallbackSDMIntbDoSet(0U);
+    }
 
+    /* Clears DeAsserted Time */
+    mINTBControl.u16DeAssertedTimer = 0;
+    
+    /* Increates Asserted Timer. */
+    mINTBControl.u16AssertedTimer = (mINTBControl.u16AssertedTimer < MINTB_SATISFIED_ASSERTED_TIME)?\
+    (mINTBControl.u16AssertedTimer + u16RoutineTime):\
+    (MINTB_SATISFIED_ASSERTED_TIME);
+}
 /**
  * @brief Waits for registering callback func. which controls INTB GPIO and trigger type.
  * 
@@ -47,9 +72,15 @@ static MINTB_Control mINTBControl =
  */
 static void mINTB_StateWaitRegister(uint16_t u16RoutineTime)
 {
-    if(mINTBControl.eStrategyCtrl == STRATEGY_CTRL_INIT)
+    if((mINTBControl.eStrategyCtrl == STRATEGY_CTRL_INIT)\
+        && (mINTBControl.CallbackSDMIntbDoSet != NULL)\
+        && (mINTBControl.eInterruptType != INTB_INT_TYPE_DEFAULT))
     {
         mINTBControl.eStateMachine = INTB_SM_INIT;
+    }
+    else
+    {
+        /* Wait */
     }
 
     (void)u16RoutineTime;
@@ -99,7 +130,16 @@ static void mINTB_StateWaitTrigger(uint16_t u16RoutineTime)
 
     if(mINTBControl.eStrategyCtrl == STRATEGY_CTRL_START)
     {
-        mINTBControl.eStateMachine = INTB_SM_SETUP_TIME;
+        if(mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)
+        {
+            mINTBControl.u16DeAssertedTimer+=u16RoutineTime;
+            mINTBControl.eStateMachine = INTB_SM_SETUP_TIME;
+        }
+        else
+        {
+            mINTB_SendEvent(u16RoutineTime);         
+            mINTBControl.eStateMachine = INTB_SM_HOLD_TIME;
+        }       
     }
     else if(mINTBControl.eStrategyCtrl == STRATEGY_CTRL_DEINIT)
     {
@@ -124,24 +164,7 @@ static void mINTB_StateSetup(uint16_t u16RoutineTime)
     }
     else
     {
-        /* Sets up INTB */
-        if(mINTBControl.eInterruptType == INTB_INT_TYPE_RISING)
-        {
-            mINTBControl.CallbackSDMIntbDoSet(1U);
-        }
-        else
-        {
-            mINTBControl.CallbackSDMIntbDoSet(0U);
-        }
-
-        /* Clears DeAsserted Time */
-        mINTBControl.u16DeAssertedTimer = 0;
-        
-        /* Increates Asserted Timer. */
-        mINTBControl.u16AssertedTimer = (mINTBControl.u16AssertedTimer < MINTB_SATISFIED_ASSERTED_TIME)?\
-        (mINTBControl.u16AssertedTimer + u16RoutineTime):\
-        (MINTB_SATISFIED_ASSERTED_TIME);
-        
+        mINTB_SendEvent(u16RoutineTime);        
         mINTBControl.eStateMachine = INTB_SM_HOLD_TIME;
     }
 }
@@ -177,7 +200,6 @@ static void mINTB_StateHold(uint16_t u16RoutineTime)
         mINTBControl.u16DeAssertedTimer = (mINTBControl.u16DeAssertedTimer < MINTB_SATISFIED_DEASSERTED_TIME)?\
         (mINTBControl.u16DeAssertedTimer + u16RoutineTime):\
         (MINTB_SATISFIED_DEASSERTED_TIME);
-
     }
 }
 
@@ -207,7 +229,7 @@ bool MINTB_Register(CALLBACK_SDM_INTB_DO_SET CallbackSDMIntbDoSet\
 ,MINTB_InttruptType_E eInterruptType)
 {
     if((CallbackSDMIntbDoSet == NULL)\
-        || ((eInterruptType != INTB_INT_TYPE_RISING) && (eInterruptType != INTB_INT_TYPE_FALLING))\
+        || ((eInterruptType != INTB_INT_TYPE_RISING) && (eInterruptType != INTB_INT_TYPE_FALLING))
         || (mINTBControl.eStateMachine != INTB_SM_WAIT_REGISTER))
     {
         return false;
@@ -258,7 +280,7 @@ bool MINTB_StrategyControl(MINTB_StrategyCtrl_E eStrategyCtrl)
  * @enddot
  * 
  */
-void MINTB_Routine2ms(uint16_t u16RoutineTime)
+void MINTB_Routine(uint16_t u16RoutineTime)
 {
     switch(mINTBControl.eStateMachine)
     {

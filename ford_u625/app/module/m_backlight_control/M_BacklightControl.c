@@ -98,17 +98,18 @@ static void MBacklightControl_UpdateTERR(MBacklightControlUpdateTERR_E eMBLUpdat
                 break;
 
             case E_MBL_TERR_CLEAR:
-                Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() & (~BIT_TERR_POS));
+                Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TERR_POS));
                 break;
 
             case E_MBL_TERR_SET:
                 Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() | (BIT_TERR_POS));
+                Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() | (BIT_TERR_POS));
                 break;
         }
     }
     else
     {
-        Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() & (~BIT_TERR_POS));
+        Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TERR_POS));
     }
 }
 /**
@@ -143,7 +144,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateInit(void)
     /* Registers callback function for sending PWM signal. */
     MPWMDimming_RegisterPWMDriverCtrl(MBacklightControl_SendPWMSignal);
     /* Init temperature derating module. */
-    TemperatureDerating_Init(M_BACKLIGHT_CONTROL_TEMP_DERATING_THRESHOLD);
+    TemperatureDerating_Init();
     /* Clears TERR */
     MBacklightControl_UpdateTERR(E_MBL_TERR_CLEAR);
 
@@ -211,7 +212,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateNormal(void)
     uint16_t u16TempHostPWM = Memory_Pool_BacklightDuty_Get();
     MBacklightControlStateMachine_E TempBacklightStateMachine;
 
-    StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*M_BACKLIGHT_CONTROL_TEMP_RESOLUTION;
+    StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
 
     if(StateMachineControl.eMBLCtrlDeratingEn != E_MBL_ENABLE_DERATING)
     {
@@ -222,7 +223,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateNormal(void)
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
-    else if(StateMachineControl.AmbientTemperature > M_BACKLIGHT_CONTROL_TEMP_DERATING_THRESHOLD)
+    else if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_DERATING_TEMP))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_DERATING;
     }
@@ -273,7 +274,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     uint16_t u16TempDeratingPWM = (uint16_t)(((uint32_t)DeratingApp_DeratingOutData_Get() * (uint32_t)FULLPWM) / (uint32_t)TEMP_DERATING_FULL_OUTDATA);
     MBacklightControlStateMachine_E TempBacklightStateMachine;
 
-    StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*M_BACKLIGHT_CONTROL_TEMP_RESOLUTION;
+    StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
 
     if(StateMachineControl.eMBLCtrlDeratingEn != E_MBL_ENABLE_DERATING)
     {
@@ -284,11 +285,11 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
-    else if(StateMachineControl.AmbientTemperature > M_BACKLIGHT_CONTROL_TEMP_SHUTDOWN_THRESHOLD)
+    else if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_SHUTDOWN_TEMP))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
-    else if(StateMachineControl.AmbientTemperature <= M_BACKLIGHT_CONTROL_TEMP_DERATING_THRESHOLD)
+    else if(StateMachineControl.AmbientTemperature <= TemperatureDerating_GetLimitedTemperature(LIMITED_DERATING_TEMP))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
     }
@@ -303,7 +304,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     u16TempHostPWM;
 
     /* Sets or clears TERR  */
-    if(StateMachineControl.AmbientTemperature >= M_BACKLIGHT_CONTROL_TEMP_DERATING_BL_START_REDUCE_THRESHOLD)
+    if(StateMachineControl.AmbientTemperature >= TemperatureDerating_GetLimitedTemperature(LIMITED_REDUCE_BL_TEMP))
     {
         MBacklightControl_UpdateTERR(E_MBL_TERR_SET);
     }
@@ -350,7 +351,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateShutdown(void)
 {
     MBacklightControlStateMachine_E TempBacklightStateMachine;
 
-    StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*M_BACKLIGHT_CONTROL_TEMP_RESOLUTION;
+    StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
 
     if(StateMachineControl.eMBLCtrlDeratingEn != E_MBL_ENABLE_DERATING)
     {
@@ -361,7 +362,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateShutdown(void)
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
-    else if(StateMachineControl.AmbientTemperature > M_BACKLIGHT_CONTROL_TEMP_RELEASE_SHUTDOWN_THRESHOLD)
+    else if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_SHUTDOWN_REL_TEMP))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
