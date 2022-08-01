@@ -200,6 +200,8 @@ void ICDIAG_CmdTrigger(uint8_t u8Cmd, uint8_t u8ICType, uint8_t u8Channel, uint8
 				/*Pack I2C write or control package for driver API*/
 				if(u8ICType == ICDIAG_ICTYPE_I2C)
 				{
+					I2CICDiagCtrl.u8ICRxLen = 0U;
+					
 					I2CICDiagCtrl.u8ICType=u8ICType;
 					I2CICDiagCtrl.u8Channel=u8Channel;
 					I2CICDiagCtrl.u8DeviceAddr=u8DeviceAddr;

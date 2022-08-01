@@ -10,7 +10,6 @@
 #define FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE (FIXED_FLASH_ACCESS_ROW_BYTE_SIZE * FIXED_FLASH_ACCESS_ROW_SIZE)
 
 /* -- Global Variables -- */
-static uint32_t gu32MCUDiagWriteBuff[64];
 static uint8_t MDiagFlashAccess_Buffer[FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE] = {0x00};
 
 /******************************************************************************

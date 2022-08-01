@@ -611,10 +611,12 @@ static void C_Diagnosis_Control(void)
 			if(Memory_Pool_DiagnosisEnable_Get() == true)
 			{
 				tDiagnosisTask.u16Timer2 = TIME_1000ms;
+				tDiagnosisTask.u16Timer1 = TIME_1000ms;
 			}
 			else
 			{
 				tDiagnosisTask.u16Timer2 = TIME_DISABLE;
+				tDiagnosisTask.u16Timer1 = TIME_DISABLE;
 			}
 		break;
 
@@ -649,6 +651,7 @@ static void C_Diagnosis_Control(void)
 			}
 			else
 			{/*Nothing*/}
+			tDiagnosisTask.u16Timer1 = TIME_10ms;
 		break;			
 #endif
 
