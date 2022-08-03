@@ -92,8 +92,6 @@ static void Main_BspInit(void)
     (void) cybsp_init();
     (void) Main_UartInit();
     (void) Main_SysTickInit();
-    (void) HAL_PWM_CH4_Init();
-
     HAL_UART_Printf("Initial Complete!\n");
 }
 /******************************************************************************

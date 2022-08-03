@@ -1,38 +1,127 @@
-/******************************************************************************
-;				Program		:	HAL_PWM.c
-;				Function	:	PWM Function
-;				Chip		:	Cypress CY8C4149AZI-S598
-;				Clock		:	IMO Internal 48MHz
-;				Date		:	2021 / 09 / 03
-;				Author		:
-;				Describe	:	PWM Output Setting:
-;								(1) PWM4 frequency is 500Hz
-;								(2) PWM4 period counter are 32768.
-;								(3) PWM4 pin is P8.0.
-******************************************************************************/
-/*---------------------------- Include File ---------------------------------*/
+/**
+ * @file hal_pwm.c
+ * 
+ * @author orlando huang (orlando.huang@auo.com)
+ * 
+ * @brief 
+ * 
+ * @version 0.1
+ * 
+ * @date 2022-08-02
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+/* -- Includes -- */
 #include "main.h"
 #include "hal_pwm.h"
-/*---------------------------- Declare Global Variable ----------------------*/
-/*---------------------------- Start Program --------------------------------*/
-/******************************************************************************
-;       Function Name			:	uint32_t HAL_PWM_CH4_Init(void)
-;       Function Description	:	Initialize PWM channel 4 output function.
-;       Parameters				:	void
-;       Return Values			:	Return initial status.
-;		Source ID				:	U625_PWM-001
-******************************************************************************/
+
+/* -- Marco Define -- */
+
+/* -- Data Type Define -- */
+typedef void (*CALLBACK_IRQ_CC)(void);
+
+typedef struct
+{
+	cy_stc_sysint_t IntPwmConfig;
+	cy_stc_sysint_t *pIntPwmConfig;
+	uint32_t u32Compare0Value;
+	bool bUpdateLock;
+	uint32_t u32InttruptStatus;
+	CALLBACK_IRQ_CC CallbackInttruptCC;
+	
+}HALPwm_Config;
+
+/* -- Global Variables -- */
+static HALPwm_Config HALPwmConfig = \
+{
+	.IntPwmConfig = {.intrSrc = PWM_OUT_DIM_IRQ, .intrPriority = 3U},
+	.pIntPwmConfig = NULL,
+	.u32Compare0Value = 0U,
+	.u32InttruptStatus = 0U,
+	.bUpdateLock = false,
+	.CallbackInttruptCC = NULL,
+};
+
+/* -- Local Functions -- */
+/**
+ * @brief 
+ * 
+ */
+static void HAL_PWM_CH4_CallbackInterruptCC(void)
+{
+    /* Get all the enabled pending interrupts */
+	HALPwmConfig.u32InttruptStatus = Cy_TCPWM_GetInterruptStatusMasked(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM);
+
+    if (0UL != (CY_TCPWM_INT_ON_TC & HALPwmConfig.u32InttruptStatus))
+    {
+        /* Handle the Terminal Count event */
+    }
+    
+    if (0UL != (CY_TCPWM_INT_ON_CC & HALPwmConfig.u32InttruptStatus))
+    {
+        /* Handle the Compare/Capture event */
+        if(!HALPwmConfig.bUpdateLock)
+		{
+			/* Bypass */
+		}
+		else
+		{
+			Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, HALPwmConfig.u32Compare0Value);
+			HALPwmConfig.bUpdateLock = false;
+		}
+    }
+	
+	/* Clear the interrupt */
+	Cy_TCPWM_ClearInterrupt(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, HALPwmConfig.u32InttruptStatus);
+}
+/**
+ * @brief 
+ * 
+ * @param CallbackIrqCC 
+ */
+static bool HAL_PWM_CH4_RegisterIntCallback(HALPwm_Config tHalPwmconfig)
+{
+	if((tHalPwmconfig.pIntPwmConfig == NULL)\
+		|| (tHalPwmconfig.CallbackInttruptCC == NULL))
+	{
+		return false;
+	}
+	else
+	{
+		Cy_SysInt_Init(tHalPwmconfig.pIntPwmConfig, tHalPwmconfig.CallbackInttruptCC);
+		NVIC_ClearPendingIRQ(tHalPwmconfig.pIntPwmConfig->intrSrc);
+		NVIC_EnableIRQ(tHalPwmconfig.pIntPwmConfig->intrSrc);
+	}
+}
+
+/* -- Global Functions -- */
+/**
+ * @brief 
+ * 
+ * @return uint32_t 
+ */
 uint32_t HAL_PWM_CH4_Init(void)
 {
 	cy_rslt_t cyStatus;
 
     cyStatus = Cy_TCPWM_PWM_Init(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, &PWM_OUT_DIM_config);
-    if(cyStatus == CY_TCPWM_SUCCESS)
+    
+	if(cyStatus == CY_TCPWM_SUCCESS)
     {
-    	Cy_TCPWM_PWM_Enable(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM);				/* Enable the initialized PWM */
-    	Cy_TCPWM_TriggerStart(PWM_OUT_DIM_HW, PWM_OUT_DIM_MASK);			/* Then start the PWM */
-		//Cy_TCPWM_TriggerReloadOrIndex(PWM_OUT_DIM_HW, PWM_OUT_DIM_MASK);	/* Then start the PWM */
-		HAL_PWM_Duty_Output(PWM_OUT_DIM_NUM, 0);
+		Cy_TCPWM_PWM_Enable(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM);
+		Cy_TCPWM_TriggerStart(PWM_OUT_DIM_HW, PWM_OUT_DIM_MASK);
+		HALPwmConfig.pIntPwmConfig = &(HALPwmConfig.IntPwmConfig);
+		HALPwmConfig.CallbackInttruptCC = HAL_PWM_CH4_CallbackInterruptCC;
+		/* Register CC Inttrupt callback */
+		if(!HAL_PWM_CH4_RegisterIntCallback(HALPwmConfig))
+		{
+			cyStatus = RSLT_FAIL;
+		}
+		else
+		{
+
+		}
     }
 	else
 	{
@@ -41,52 +130,50 @@ uint32_t HAL_PWM_CH4_Init(void)
 
 	return cyStatus;
 }
-/******************************************************************************
-;       Function Name			:	void HAL_PWM_CH4_DeInit(void)
-;       Function Description	:	PWM deinit
-;       Parameters				:
-;       Return Values			:
-;		Source ID				:	U625_PWM-002
-******************************************************************************/
+/**
+ * @brief 
+ * 
+ */
 void HAL_PWM_CH4_DeInit(void)
 {
-	HAL_PWM_Duty_Output(PWM_OUT_DIM_NUM, 0);
+	Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, 0U);
 	Cy_TCPWM_PWM_Disable(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM);
 }
-
-
-/******************************************************************************
-;       Function Name			:	void HAL_PWM_Duty_Output(uint32_t u32Channel, uint8_t u8Duty)
-;       Function Description	:	Output PWM duty cycles.
-;       Parameters				:	[u32Channel] - PWM output channel.
-;									[u8Duty] - Duty range 0% ~ 100%, unit is 1%.
-;       Return Values			:	Return initial status.
-;		Source ID				:	U625_PWM-002
-******************************************************************************/
-void HAL_PWM_Duty_Output(uint32_t u32Channel, uint8_t u8Duty)
-{
-	float fDutyAdjust = 0.0;
-
-	fDutyAdjust = (UNIT_DUTY * u8Duty) + ((u8Duty * UNIT_DUTY) * DUTY_CORRECTION);
-//	while (0UL == (CY_TCPWM_INT_ON_CC & Cy_TCPWM_GetInterruptMask(PWM4_OUT_DIM_HW, PWM4_OUT_DIM_NUM)));	//avoid pwm working is not completed
-    (void)Cy_TCPWM_PWM_SetCompare0(TCPWM, u32Channel, (uint32_t)(fDutyAdjust));
-}
-
-
-/******************************************************************************
-;       Function Name			:	void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust)
-;       Function Description	:	Output PWM duty cycles.
-;       Parameters				:	[u32Channel] - PWM output channel.
-;									[u32DutyAdjust] - Duty range 0 ~ 32767, unit is 1.
-;       Return Values			:	Return initial status.
-;		Source ID				:	U625_PWM-002
-;		CTWu Add 20210907
-******************************************************************************/
+/**
+ * @brief 
+ * 
+ * @param u32Channel 
+ * 
+ * @param u32DutyAdjust 
+ * 
+ */
 void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust)
 {
-	while (0UL == (CY_TCPWM_INT_ON_CC & Cy_TCPWM_GetInterruptMask(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM)));	//avoid pwm working is not completed
-    Cy_TCPWM_PWM_SetCompare0(TCPWM, u32Channel, u32DutyAdjust);
+	uint32_t u32Compare0 = Cy_TCPWM_PWM_GetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM);
+
+	if(u32Compare0 >= PWM_OUT_DIM_config.period0)
+	{
+		if(u32Compare0 > u32DutyAdjust)
+		{
+			Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, u32DutyAdjust);
+		}
+		else
+		{
+			/* NA */
+		}
+	}
+	else
+	{
+		if(HALPwmConfig.bUpdateLock)
+		{
+			/* Wait */
+		}
+		else
+		{
+			HALPwmConfig.u32Compare0Value = u32DutyAdjust;
+			HALPwmConfig.bUpdateLock = true;
+		}
+	}
+	(void)u32Channel;
 }
-/*---------------------------------------------------------------------------*/
-
-
+/* -- END -- */

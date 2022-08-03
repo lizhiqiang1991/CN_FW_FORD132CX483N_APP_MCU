@@ -288,7 +288,7 @@ static uint16_t MPWMDimming_NextStepBLPWM_Calculate(uint16_t u16CurrentPWMVal)
         }
         else
         {
-            u16NextStepBLPWMVal = ((u8DimmingStepCnt+1)*(MPWMDimmingControl.u8PWMpreStep) - u16CurrentPWMVal*FIXEDPOINT_10)/FIXEDPOINT_10;
+            u16NextStepBLPWMVal = 0;
         }
     }
     else
@@ -318,7 +318,7 @@ static uint16_t MPWMDimming_BLPWM_Output(uint16_t u16TargetBLPWM_10bit)
     /* Excutes PWM Driver Callback Func. */
     if(CallbackPWMDriver != NULL)
     {
-        CallbackPWMDriver(u16BLPWMVal_16bit);	
+        CallbackPWMDriver(u16BLPWMVal_16bit);
     }
     else
     {
