@@ -96,7 +96,7 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	uint8_t u8PageSwitch[2]={0x1EU,0x22U};
 	uint8_t u8DDataAddress=0x01U;
 	uint8_t u8ReadData[5];
-	uint8_t u8ReadData2[9];
+	uint8_t u8ReadData2[10];
 
 	/*Switch Page to CMD2_P2.*/
 	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 100U);
@@ -187,6 +187,12 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
 	/*Read data from 0Ah.*/
 	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[8], 1U, 100U);
+
+	/*Write data address.*/
+    u8DDataAddress=0x1FU;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
+	/*Read data from 0Ah.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[9], 1U, 100U);
 
     
 	for(i8Counter=4; i8Counter>=0; i8Counter--)

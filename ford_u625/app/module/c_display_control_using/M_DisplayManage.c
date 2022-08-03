@@ -43,9 +43,9 @@ void M_DM_BacklightControl( bool bEnable, bool bLockLoss)
     }
 }
 /******************************************************************************
- ;       Function Name			:	void M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss, uint8_t u8LcdCurrentStatus)
+ ;       Function Name			:	void M_DM_TouchControl(uint8_t u8Command, bool bLockLoss, uint8_t u8LcdCurrentStatus)
  ;       Function Description	:	Touch function control
- ;       Parameters				:	uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss, uint8_t u8LcdCurrentStatus
+ ;       Parameters				:	uint8_t u8Command, bool bLockLoss, uint8_t u8LcdCurrentStatus
  ;       Return Values			:	uint8_t u8ReturnStatus
  ;		Source ID				:
  ******************************************************************************/
@@ -63,46 +63,31 @@ uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLock
         switch (u8Command)
         {
             case DISPLAY_OFF_TOUCH_OFF:
-				if (u8CurrentStatus != TOUCH_OFF)
-				{
-	                HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-				}
-                else
-                { /* Nothing */ }
+	            HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
 				u8ReturnStatus = TOUCH_OFF;
                 break;
+				
             case DISPLAY_ON_TOUCH_OFF:
-				if(u8CurrentStatus != TOUCH_OFF)
-				{
-	                HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-				}
-                else
-                { /* Nothing */ }
+	            HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
 				u8ReturnStatus = TOUCH_OFF;
                 break;
-            case DISPLAY_OFF_TOUCH_ON:
-				if (u8CurrentStatus != TOUCH_ON)
-				{				
-            		HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-				}
-                else
-                { /* Nothing */ }
+				
+            case DISPLAY_OFF_TOUCH_ON:	
+            	HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
                 u8ReturnStatus = TOUCH_ON;
                 break;
+				
             case DISPLAY_ON_TOUCH_ON:
-				if (u8CurrentStatus != TOUCH_ON)
-				{
-                	HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-				}
-                else
-                { /* Nothing */ }
-                u8ReturnStatus = TOUCH_ON;
+                HAL_GPIO_High( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
+                u8ReturnStatus = TOUCH_ON;			
                 break;
+				
              default:
                 u8ReturnStatus = u8CurrentStatus;
                 break;               
         }
     }
+	(void) u8CurrentStatus;
     return u8ReturnStatus;
 }
 /******************************************************************************
@@ -128,80 +113,115 @@ uint8_t M_DM_DisplayControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLo
     {
         if (u8CurrentStatus == DISPLAY_ON)
         {
+			u8ReturnStatus = DISPLAY_OFF;
+			
 #if (U625_TDDI_TD7800)        
             u8SendData = 0x28U;
-            HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+            (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
             u8SendData = 0x10U;
-            HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+            (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 			u8SendData2[1] = 0x06U;
             /*Switch Page to CMD2_P0.*/
-            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U);
-            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U);						
+            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U) != DRIVER_TRUE)
+            {
+				u8ReturnStatus = u8CurrentStatus;
+            }
+			else
+        	{ /* Nothing */ }
+            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U) != DRIVER_TRUE)
+            {
+				u8ReturnStatus = u8CurrentStatus;
+            }
+			else
+        	{ /* Nothing */ }						
 #else
 #endif			
         }
         else
-        { /* Nothing */ }
-        u8ReturnStatus = DISPLAY_OFF;
+        { 
+			u8ReturnStatus = DISPLAY_OFF; 
+		}        
     }
     else
     {
         switch (u8Command)
         {
             case DISPLAY_OFF_TOUCH_OFF:
+				u8ReturnStatus = DISPLAY_OFF;
                 if (u8CurrentStatus != DISPLAY_OFF)
                 {
 #if (U625_TDDI_TD7800)        
                     u8SendData = 0x28U;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
                     u8SendData = 0x10U;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 					u8SendData2[1] = 0x06U;
                     /*Switch Page to CMD2_P0.*/
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U);
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U);						
+		            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U) != DRIVER_TRUE)
+		            {
+						u8ReturnStatus = u8CurrentStatus;
+		            }
+					else
+		        	{ /* Nothing */ }						
+		            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U) != DRIVER_TRUE)
+		            {
+						u8ReturnStatus = u8CurrentStatus;
+		            }
+					else
+		        	{ /* Nothing */ } 					
 #else
 #endif					
                 }
                 else
                 { /* Nothing */ }
-                u8ReturnStatus = DISPLAY_OFF;
+                
                 break;
             case DISPLAY_ON_TOUCH_OFF:
+				u8ReturnStatus = DISPLAY_ON;				
                 if (u8CurrentStatus != DISPLAY_ON)
                 {
 #if (U625_TDDI_TD7800)               
                     u8SendData = 0x29;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
                     u8SendData = 0x11;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 					u8SendData2[1] = 0x07U;
                     /*Switch Page to CMD2_P0.*/
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U);
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U);						
+		            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U) != DRIVER_TRUE)
+		            {
+						u8ReturnStatus = u8CurrentStatus;
+		            }
+					else
+		        	{ /* Nothing */ }
+		            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U) != DRIVER_TRUE)
+		            {
+						u8ReturnStatus = u8CurrentStatus;
+		            }
+					else
+		        	{ /* Nothing */ }						
 #else
 #endif					
                 }
                 else
                 { /* Nothing */ }
-                u8ReturnStatus = DISPLAY_ON;
+                
                 break;
             case DISPLAY_OFF_TOUCH_ON:
                 if (u8CurrentStatus != DISPLAY_OFF)
                 {                
 #if (U625_TDDI_TD7800)            
                     u8SendData = 0x28;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
                     u8SendData = 0x10;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 					u8SendData2[1] = 0x06U;
                     /*Switch Page to CMD2_P0.*/
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U);
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U);						
+		            (void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U);
+		            (void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U);						
 #else
 #endif					
                 }
@@ -210,25 +230,36 @@ uint8_t M_DM_DisplayControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLo
                 u8ReturnStatus = DISPLAY_OFF;
                 break;
             case DISPLAY_ON_TOUCH_ON:
+				u8ReturnStatus = DISPLAY_ON;
                 if (u8CurrentStatus != DISPLAY_ON)
                 {
 #if (U625_TDDI_TD7800)                
                     u8SendData = 0x29;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
                     u8SendData = 0x11;
-                    HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
+                    (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
                     u8ReturnStatus = DISPLAY_ON;
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 					u8SendData2[1] = 0x07U;
                     /*Switch Page to CMD2_P0.*/
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U);
-		            HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U);						
+		            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData1, sizeof(u8SendData1), 100U) != DRIVER_TRUE)
+		            {
+						u8ReturnStatus = u8CurrentStatus;
+		            }
+					else
+		        	{ /* Nothing */ }
+		            if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8SendData2, sizeof(u8SendData2), 100U) != DRIVER_TRUE)
+		            {
+						u8ReturnStatus = u8CurrentStatus;
+		            }
+					else
+		        	{ /* Nothing */ }						
 #else
 #endif			
                 }
                 else
                 { /* Nothing */ }
-                u8ReturnStatus = DISPLAY_ON;
+                
                 break;
                 
              default:
@@ -253,13 +284,9 @@ uint8_t M_DM_LcdControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLo
 
     if (bLockLoss == true)
     {
-        if (u8CurrentStatus == LCD_RESET_HIGH)
-        {
-			HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-			u8ReturnStatus = LCD_RESET_LOW;
-        }
-        else
-        { /* Nothing */ }
+		HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
+		u8ReturnStatus = LCD_RESET_LOW;
+
         bFlashReloadDisable = false;
         u8ReturnStatus = LCD_RESET_LOW;
     }
@@ -267,53 +294,37 @@ uint8_t M_DM_LcdControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLo
     {
         switch (u8Command)
         {
-            default:
-                u8ReturnStatus = u8CurrentStatus;
-                break;
             case DISPLAY_OFF_TOUCH_OFF:
-                if (u8CurrentStatus != LCD_RESET_LOW)
-                {
-					HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-                }
-                else
-                { /* Nothing */ }
-                bFlashReloadDisable = false;
+				HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
+
+				bFlashReloadDisable = false;
                 u8ReturnStatus = LCD_RESET_LOW;
+				
                 break;
             case DISPLAY_ON_TOUCH_OFF:
-                if (u8CurrentStatus != LCD_RESET_HIGH)
-                {
-					HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-                }
-                else
-                { /* Nothing */ }
+                HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
                 u8ReturnStatus = LCD_RESET_HIGH;
 
                 break;
             case DISPLAY_OFF_TOUCH_ON:
-                if (u8CurrentStatus != LCD_RESET_LOW)
-                {
-					HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-                }
-                else
-                { /* Nothing */ }
+                HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
+
                 bFlashReloadDisable = false;
                 u8ReturnStatus = LCD_RESET_LOW;
 
                 break;
             case DISPLAY_ON_TOUCH_ON:
-                if (u8CurrentStatus != LCD_RESET_HIGH)
-                {
-					HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-                }
-                else
-                { /* Nothing */ }
+                HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);                
                 u8ReturnStatus = LCD_RESET_HIGH;
 
-                break;
+                break;				
+            default:
+                u8ReturnStatus = u8CurrentStatus;
+                break;				
         }
     }
 
+	(void) u8CurrentStatus;
     return u8ReturnStatus;
 }
 
@@ -332,49 +343,83 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 	uint8_t u8ScanSel = NUMBER_ZERO;
 #endif
 
-    if (u8CurrentStatus != u8Command)
-    {
+	if (u8CurrentStatus != u8Command)
+	{
 #if (U625_TDDI_TD7800)    
         mu8SendData[0] = 0x36U;
         mu8SendData[1] = (u8Command & (BIT_HSD_MASK | BIT_VSD_MASK)) << 6U;
 
-        HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
+        (void)HAL_I2C_Master_Write(TD7800_MASTER_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
 #elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-    if(bFlashReloadDisable == false)
-    {
-        mu8SendData[0] = 0x1EU;
-        mu8SendData[1] = 0x21U;
-        /*Switch Page to CMD2_P1.*/
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
+	    if(bFlashReloadDisable == false)
+	    {
+			bFlashReloadDisable = true;
+			
+	        mu8SendData[0] = 0x1EU;
+	        mu8SendData[1] = 0x21U;
+	        /*Switch Page to CMD2_P1.*/
+	        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	        {
+				bFlashReloadDisable = false;
+			}
+			else
+	        { /* Nothing */ }
 
-        /*-RELOAD_OFF_KEY .*/
-        mu8SendData[0] = 0x0AU;
-        mu8SendData[1] = 0xA5U;        
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
-        mu8SendData[0] = 0x09U;
-        mu8SendData[1] = 0xA5U;        
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
+	        /* RELOAD_OFF_KEY .*/
+	        mu8SendData[0] = 0x0AU;
+	        mu8SendData[1] = 0xA5U;        
+	        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	        {
+				bFlashReloadDisable = false;
+			}
+			else
+	        { /* Nothing */ }
+			
+	        mu8SendData[0] = 0x09U;
+	        mu8SendData[1] = 0xA5U;        
+	        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	        {
+				bFlashReloadDisable = false;
+			}
+			else
+	        { /* Nothing */ }
 
-        mu8SendData[0] = 0x1EU;
-        mu8SendData[1] = 0x10U;
-        /*Switch Page to CMD1_P0.*/
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
+	        mu8SendData[0] = 0x1EU;
+	        mu8SendData[1] = 0x10U;
+	        /*Switch Page to CMD1_P0.*/
+	        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	        {
+				bFlashReloadDisable = false;
+			}
+			else
+	        { /* Nothing */ }
 
-        mu8SendData[0] = 0x1DU;
-        mu8SendData[1] = 0x03U;
-        /* Do not reload.*/
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
-        
-        bFlashReloadDisable = true;
-    } 
-        mu8SendData[0] = 0x1EU;
+	        mu8SendData[0] = 0x1DU;
+	        mu8SendData[1] = 0x03U;
+	        /* Do not reload.*/
+	        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	        {
+				bFlashReloadDisable = false;
+			}
+			else
+	        { /* Nothing */ }
+	    } 
+
+		u8ReturnStatus = u8Command;
+
+		mu8SendData[0] = 0x1EU;
         mu8SendData[1] = 0x1BU;
         /*Switch Page to CMD1_PB.*/
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
+        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	    {
+			u8ReturnStatus = u8CurrentStatus;
+		}
+		else
+	    { /* Nothing */ }	
 		
         mu8SendData[0] = 0x05U;
         u8ScanSel = (u8Command & (BIT_HSD_MASK | BIT_VSD_MASK));
-
+		
 		switch (u8ScanSel)
 		{
 			case SCAN_VT_HL :  
@@ -398,10 +443,14 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 				mu8SendData[1] = 0x30U; 
 				break;
 		}			
-        HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U);
+        if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 100U) != DRIVER_TRUE)
+	    {
+			u8ReturnStatus = u8CurrentStatus;
+		}
+		else
+	    { /* Nothing */ }
 #else
-#endif		
-        u8ReturnStatus = u8Command;
+#endif        
     }
     else
     {
@@ -424,24 +473,24 @@ uint32_t M_DM_VCOM_Get(void)
 	uint32_t u32ReadData;
 
     /* Switch Page to CMD1_P0.*/
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, sizeof(u8PageSwitch), 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, sizeof(u8PageSwitch), 100U);
 #if 0
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, u8ReadData, 1U, 100U);
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, u8ReadData, 1U, 100U);
 #endif
 	/*Write data address.*/
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 01h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 100U);
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 100U);
 	/*Write data address.*/
 	u8DataAddress=0x02U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 02h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 100U);
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 100U);
 	/*Write data address.*/
 	u8DataAddress=0x03U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 03h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 100U);
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 100U);
 
 	u32ReadData = ((((uint32_t)u8ReadData[2])<<16U) | (((uint32_t)u8ReadData[1])<<8U) | ((uint32_t)u8ReadData[0]));
 	return u32ReadData;
@@ -461,18 +510,41 @@ void M_DM_VCOM_Set(uint8_t *pSetData)
 	mu8SendData[0] = 0x1EU;
 	mu8SendData[1] = 0x10U;
     /*Switch Page to CMD1_P0.*/
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, (sizeof(mu8SendData)-1U), 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, (sizeof(mu8SendData)-1U), 100U);
 				
 	mu8SendData[2] = 0x03U;
 	mu8SendData[3] = pSetData[1];	
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], (sizeof(mu8SendData[2])+ 1U), 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], (sizeof(mu8SendData[2])+ 1U), 100U);
 			
 	mu8SendData[2] = 0x02U;
 	mu8SendData[3] = pSetData[0];
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], (sizeof(mu8SendData[2]) + 1U), 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &mu8SendData[2], (sizeof(mu8SendData[2]) + 1U), 100U);
 #endif
+}
+/******************************************************************************
+ ;       Function Name			:	uint8_t M_DM_NT51926_Status_Get(void)
+ ;       Function Description	:	This state for get  NT51926 display status
+ ;       Parameters				:	void
+ ;       Return Values			:	uint8_t u8ReadData
+ ;		 Source ID				:
+ ******************************************************************************/
+uint8_t M_DM_NT51926_Status_Get(void)
+{
+	uint8_t u8PageSwitch[2]={0x1EU,0x10U};
+	uint8_t u8ReadData = 0xFFU;
+	uint8_t u8DataAddress = 0x1FU;
 
+	/*Switch Page to CMD2_PB.*/
+    u8PageSwitch[1]=0x2BU;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 100U);
 
+	/*Write data address.*/
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 1Fh.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData, 1U, 100U);
+
+	u8ReadData &= 0x07U;
+	return u8ReadData;
 }
 
 /******************************************************************************
