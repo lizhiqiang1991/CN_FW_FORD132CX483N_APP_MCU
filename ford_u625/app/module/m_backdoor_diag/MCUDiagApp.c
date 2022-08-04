@@ -18,32 +18,87 @@ static uint8_t MDiagFlashAccess_Buffer[MCU_FLASH_ACCESS_TOTLA_BYTE_SIZE] = {0x00
 ;	Parameters				:	
 ;	Return Values			:	
 ******************************************************************************/
-void MCUDIAG_MemRW(uint8_t *u8DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uint8_t *u8RxData, uint8_t u8RxLen)
+void MCUDIAG_MemRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uint8_t *u8RxData, uint8_t u8RxLen)
 {
-	uint8_t u8Index=0U;
+	uint32_t u32Data = 0U;
+
+	ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
 	if(u8RxLen > 0U)
 	{
-		for(u8Index=0U; u8Index<u8RxLen; u8Index++)
+		if(u8RxLen <= 4U)
 		{
-			*(u8RxData+u8Index)=*(u8DataAddr+u8Index);
+			u32Data = CY_GET_REG32(u32DataAddr);		
+			if(u8RxLen == 1U)
+			{
+				*(u8RxData) = (uint8_t)(u32Data & 0xFFU);
+			}
+			else if(u8RxLen == 2U)
+			{
+				*(u8RxData) = (uint8_t)(u32Data & 0xFFU);
+				*(u8RxData + 1U) = (uint8_t)((u32Data >> 8U) & 0xFFU);
+			}
+			else if(u8RxLen == 3U)
+			{
+				*(u8RxData) = (uint8_t)(u32Data & 0xFFU);
+				*(u8RxData + 1U) = (uint8_t)((u32Data >> 8U) & 0xFFU);
+				*(u8RxData + 2U) = (uint8_t)((u32Data >> 16U) & 0xFFU);
+			}
+			else
+			{
+				*(u8RxData) = (uint8_t)(u32Data & 0xFFU);
+				*(u8RxData + 1U) = (uint8_t)((u32Data >> 8U) & 0xFFU);
+				*(u8RxData + 2U) = (uint8_t)((u32Data >> 16U) & 0xFFU);
+				*(u8RxData + 2U) = (uint8_t)((u32Data >> 24U) & 0xFFU);
+			}			
+
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 		}
+		else
+		{
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
+		}		
 	}
 	else
 	{/*Nothing*/}
 
 	if(u8TxLen > 0U)
 	{
-		for(u8Index=0U; u8Index<u8TxLen; u8Index++)
+		if(u8TxLen<=4U)
 		{
-			*(u8DataAddr+u8Index)=*(u8TxData+u8Index);
+			if(u8TxLen == 1U)
+			{
+				u32Data = (uint32_t)*(u8TxData);
+			}
+			else if(u8TxLen == 2U)
+			{
+				u32Data = ((uint32_t)*(u8TxData + 1U))<< 8U;
+				u32Data |= (uint32_t)*(u8TxData);
+			}
+			else if(u8TxLen == 3U)
+			{
+				u32Data = ((uint32_t)*(u8TxData + 2U))	<< 16U;
+				u32Data |= ((uint32_t)*(u8TxData + 1U))	<< 8U;
+				u32Data |= (uint32_t)*(u8TxData);
+			}
+			else
+			{
+				u32Data = ((uint32_t)*(u8TxData + 3U))	<< 24U;
+				u32Data |= ((uint32_t)*(u8TxData + 2U))	<< 16U;
+				u32Data |= ((uint32_t)*(u8TxData + 1U))	<< 8U;
+				u32Data |= (uint32_t)*(u8TxData);
+			}
+			
+			CY_SET_REG32(u32DataAddr, u32Data);
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
+		}
+		else
+		{
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
 		}
 	}
 	else
 	{/*Nothing*/}
 
-	ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
-
-	(void)u8Index;
 }
 
 /******************************************************************************
@@ -54,13 +109,13 @@ void MCUDIAG_MemRW(uint8_t *u8DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uint
 ******************************************************************************/
 void MCUDIAG_NVMRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uint8_t *u8RxData, uint8_t u8RxLen)
 {
-	uint32_t u32FlashAddr=0U;
-	
+	uint32_t u32FlashEndAddr=0U;
+
+	ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
 	if(u8RxLen > 0U)
 	{		
-		u32FlashAddr = MCU_FLASH_ACCESS_FLASH_ADDRESS + u32DataAddr;
-		if((u32FlashAddr   > (MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE))\
-        	|| ((MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE) < (u32FlashAddr +  (uint32_t)u8RxLen - 1U))\
+		u32FlashEndAddr = MCU_FLASH_ACCESS_FLASH_ADDRESS + u32DataAddr + (uint32_t)u8RxLen;
+		if((u32FlashEndAddr   > (MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE))\
         	|| (u8RxData == NULL))
     	{
 			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
@@ -70,6 +125,7 @@ void MCUDIAG_NVMRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uin
 			__disable_irq();
 			memcpy((void *)u8RxData, (const void *)(MCU_FLASH_ACCESS_FLASH_ADDRESS + u32DataAddr), u8RxLen);
 			__enable_irq();
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 		}
 	}
 	else
@@ -77,9 +133,8 @@ void MCUDIAG_NVMRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uin
 
 	if(u8TxLen > 0U)
 	{
-		u32FlashAddr = MCU_FLASH_ACCESS_FLASH_ADDRESS + u32DataAddr;
-		if((u32FlashAddr   > (MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE))\
-        	|| ((MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE) < (u32FlashAddr +  (uint32_t)u8TxLen - 1U))\
+		u32FlashEndAddr = MCU_FLASH_ACCESS_FLASH_ADDRESS + u32DataAddr +  (uint32_t)u8TxLen;
+		if((u32FlashEndAddr   > (MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE))\
         	|| (u8TxData == NULL))
     	{
 			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
