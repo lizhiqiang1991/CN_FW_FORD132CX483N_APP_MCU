@@ -190,13 +190,8 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Disable LCD */
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));	
 				            
-							/* Read 0x00 status. */
-							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-							u32Temp = Memory_Pool_ActualDisplayStatus_Get();							
-							
-							/* Set 0x00 DISP_ST bit */	
-				            Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS);
-							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);							
+							if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
+							{
 							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
 #if (U625_TDDI_TD7800)             
 							tDisplayManageTask.u16Timer1 = TIME_101ms;
@@ -204,8 +199,49 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							tDisplayManageTask.u16Timer1 = TIME_151ms;		
 #else
 #endif							
+							}
+							else
+							{
+								/* Read 0x00 status. */
+								u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+								u32Temp = Memory_Pool_ActualDisplayStatus_Get();					
+							
+								/* Set 0x00 TSC_ST bit */            				
+                				Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_TSC_ST_POS);
+								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_TSC_ST_POS);
+								
+								u8ReturnStatus	= DS_ACTION_DISPLAY_STATUS;							
+								tDisplayManageTask.u16Timer1 = TIME_151ms;
+							}
 							break;							
+						case DS_ACTION_DISPLAY_STATUS:
+							/* Read 0x00 status. */
+							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+							u32Temp = Memory_Pool_ActualDisplayStatus_Get();						
+													
+							/* Set 0x00 DISP_ST bit */							
+							if (M_DM_NT51926_Status_Get() == NT51925_STATUS_STANDY)
+							{
+								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS);
+								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);						
+							}
+							else
+							{ /* Nothing */ }
+							
+							tDisplayManageTask.u16Timer1 = TIME_2ms; /* TIME_1000ms */
+							u8ReturnStatus  = DS_ACTION_CTRL_PROTECT;
+												
+							break;
+
 						case DS_ACTION_DISPLAY_RESET:
+							/* Read 0x00 status. */
+							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+							u32Temp = Memory_Pool_ActualDisplayStatus_Get();							
+						
+							/* Set 0x00 DISP_ST bit */	
+							Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS);
+							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
+
 							/* Reset Display  */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
@@ -273,7 +309,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();						
 							
 							/* Set 0x00 DISP_ST bit */							
-							if (Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
+							if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (M_DM_NT51926_Status_Get() == NT51925_STATUS_NORMAL))
 							{
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS);
@@ -353,85 +389,28 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_TSC_ST_POS); 
 							}
 						
+							u8ReturnStatus  = DS_ACTION_CTRL_PROTECT;
+							tDisplayManageTask.u16Timer1 = TIME_101ms;
+						
+							break;
+						case DS_ACTION_CTRL_PROTECT:
 							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
 							tDisplayCtrl.bPowerStartupEvent =false;
 							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
 							u8ReturnStatus  = DS_ACTION_NONE;
 							tDisplayManageTask.u16Timer1 = TIME_DISABLE;
-							break;
 							
+							break;							
 						default:
 							/* Nothing */
 							break;
 					}
 					break;
-			case DISPLAY_OFF_TOUCH_ON :  /* TBD */
-#if 0
-					if(u8CtrlStatus == DS_ACTION_NONE)
-					{
-						u8CtrlStatus = DS_ACTION_DISPLAY_STATUS;
-					}
-					else
-					{ /* Nothing */ }
-
-					switch (u8CtrlStatus)
-					{
-						case DS_ACTION_DISPLAY_STATUS:
-							/* Read 0x00 status. */
-							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-							u32Temp = Memory_Pool_ActualDisplayStatus_Get();						
-							
-							/* Set 0x00 DISP_ST bit */							
-							if (Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
-							{
-								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
-								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS);
-							}
-							else
-							{
-								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS);
-								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
-							} 							
-							u8ReturnStatus  = DS_ACTION_TOUCH_STATUS;	         
-							tDisplayManageTask.u16Timer1 = TIME_250ms;
-						
-							break;
-						case DS_ACTION_TOUCH_CTRL:
-							/* Reset Touch */
-							Memory_Pool_TouchStatus_Set(M_DM_TouchControl(Memory_Pool_TouchStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get(), Memory_Pool_LcdStatus_Get()));
-							
-							/* Read 0x00 status. */
-							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-							u32Temp = Memory_Pool_ActualDisplayStatus_Get();							
-							
-							/* Set 0x00 TSC_ST bit */							
-							if (Memory_Pool_TouchStatus_Get() == TOUCH_ON)
-							{
-								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_TSC_ST_POS);
-								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_TSC_ST_POS); 
-								tDisplayManageTask.u16Timer2 = TIME_2ms;
-							}
-							else
-							{
-								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_TSC_ST_POS);
-								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_TSC_ST_POS);
-							}
-						
-							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
-							tDisplayCtrl.bPowerStartupEvent =false;
-							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
-							u8ReturnStatus  = DS_ACTION_NONE;
-							tDisplayManageTask.u16Timer1 = TIME_DISABLE;
-							break;
-							
-						default:
-							/* Nothing */
-							break;
-					}
-#endif
+			case DISPLAY_OFF_TOUCH_ON : 
 					tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
 					u8ReturnStatus  = DS_ACTION_NONE;
 					tDisplayManageTask.u16Timer1 = TIME_DISABLE;				
+					
 					break;
 			case DISPLAY_ON_TOUCH_ON :
 					if(u8CtrlStatus == DS_ACTION_NONE)
@@ -457,7 +436,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 
 							/* Set 0x00 DISP_ST bit */							
-							if (Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
+							if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (M_DM_NT51926_Status_Get() == NT51925_STATUS_NORMAL))
 							{
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS);
@@ -565,12 +544,24 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					}
 					else
 					{
-						u8CtrlStatus = DS_ACTION_NONE;
-						tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
-						u8ReturnStatus  = DS_ACTION_NONE;
-						tDisplayCtrl.bPowerStartupEvent =false;
-						tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
-						tDisplayManageTask.u16Timer1 = TIME_DISABLE;					
+						if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
+						{
+							if(u8CtrlStatus == DS_ACTION_NONE)
+							{
+								u8CtrlStatus = DS_ACTION_DISPLAY_RESET;
+							}
+							else
+							{ /* Nothing */ }							
+						}
+						else
+						{
+							u8CtrlStatus = DS_ACTION_NONE;
+							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
+							u8ReturnStatus  = DS_ACTION_NONE;
+							tDisplayCtrl.bPowerStartupEvent =false;
+							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+							tDisplayManageTask.u16Timer1 = TIME_DISABLE;
+						}
 					}
 
 					switch (u8CtrlStatus)
@@ -596,23 +587,60 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							/* Disable LCD */
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));	
 							
+							if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
+							{
+#if (U625_TDDI_TD7800)             
+								tDisplayManageTask.u16Timer1 = TIME_101ms;
+#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+								tDisplayManageTask.u16Timer1 = TIME_151ms;	
+#else
+#endif
+								u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;
+							}
+							else
+							{
+								/* Read 0x00 status. */
+								u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+								u32Temp = Memory_Pool_ActualDisplayStatus_Get();					
+							
+								/* Set 0x00 TSC_ST bit */            				
+                				Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_TSC_ST_POS);
+								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_TSC_ST_POS);
+								
+								u8ReturnStatus	= DS_ACTION_DISPLAY_STATUS;							
+								tDisplayManageTask.u16Timer1 = TIME_151ms;
+							}													
+					
+							break;
+
+						case DS_ACTION_DISPLAY_STATUS:
 							/* Read 0x00 status. */
 							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 							
 							/* Set 0x00 DISP_ST bit */	
+							if (M_DM_NT51926_Status_Get() == NT51925_STATUS_STANDY)
+							{
 				            Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS); 
 							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
+							}
+							else
+							{ /* Nothing */ }
+							
+							tDisplayManageTask.u16Timer1 = TIME_2ms;
+							u8ReturnStatus  = DS_ACTION_CTRL_PROTECT;
 
-							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
-#if (U625_TDDI_TD7800)             
-							tDisplayManageTask.u16Timer1 = TIME_101ms;
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-							tDisplayManageTask.u16Timer1 = TIME_151ms;		
-#else
-#endif					
 							break;							
+
 						case DS_ACTION_DISPLAY_RESET:
+							/* Read 0x00 status. */
+							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
+							u32Temp = Memory_Pool_ActualDisplayStatus_Get();							
+						
+							/* Set 0x00 DISP_ST bit */	
+							Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS);
+							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
+							
 							/* Reset Display  */
 							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
@@ -639,7 +667,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							else
 							{ /* Nothing */ }
 
-							tDisplayManageTask.u16Timer1 = TIME_2ms; /* TIME_1000ms */
+							tDisplayManageTask.u16Timer1 = TIME_2ms;
 							u8ReturnStatus  = DS_ACTION_CTRL_PROTECT;;
 							break;
 						case DS_ACTION_CTRL_PROTECT:
@@ -659,7 +687,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 			case DISPLAY_ON_TOUCH_OFF :
 					if(tDisplayCtrl.u8LastDisplayStatus != DISPLAY_ON_TOUCH_OFF)
 					{	
-						if((tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_OFF) || (tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_ON))
+						if(tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_OFF)
 						{
 							if(u8CtrlStatus == DS_ACTION_NONE)
 							{
@@ -678,7 +706,14 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{ /* Nothing */}
 						}
 						else
-						{ /* Nothing */}						
+						{
+							u8CtrlStatus = DS_ACTION_NONE;
+							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
+							tDisplayCtrl.bPowerStartupEvent =false;
+							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+							tDisplayManageTask.u16Timer1 = TIME_DISABLE;
+							u8ReturnStatus  = DS_ACTION_NONE;						
+						}					
 					}
 					else
 					{
@@ -695,14 +730,8 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 						case DS_ACTION_TOUCH_CTRL:
 							/* Reset Touch */
 							Memory_Pool_TouchStatus_Set(M_DM_TouchControl(Memory_Pool_TouchStatus_Get(), DISPLAY_ON_TOUCH_ON, Memory_Pool_LockLoss_Get(), Memory_Pool_LcdStatus_Get()));
-							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;          
-							tDisplayManageTask.u16Timer1 = TIME_11ms;
-							break;
-						case DS_ACTION_DISPLAY_RESET:
-							/* Reset DISPLAY */
-							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
 							u8ReturnStatus  = DS_ACTION_DISPLAY_CTRL;          
-							tDisplayManageTask.u16Timer1 = TIME_201ms;
+							tDisplayManageTask.u16Timer1 = TIME_1ms;
 							break;							
 						case DS_ACTION_DISPLAY_CTRL:
 							/* Enable LCD */
@@ -717,7 +746,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 
 							/* Set 0x00 DISP_ST bit */							
-							if (Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
+							if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON)&& (M_DM_NT51926_Status_Get() == NT51925_STATUS_NORMAL))
 							{
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS); 
@@ -790,137 +819,34 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_TSC_ST_POS); 
 							}
 						
-							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
-							tDisplayCtrl.bPowerStartupEvent =false;
-							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
-							tDisplayManageTask.u16Timer1 = TIME_DISABLE;
-							u8ReturnStatus  = DS_ACTION_NONE;
-							break;
-							
-						default:
-							/* Nothing */
-							break;
-					}
-
-					break;
-			case DISPLAY_OFF_TOUCH_ON :  /* TBD */
-#if 0			
-					if(tDisplayCtrl.u8LastDisplayStatus != DISPLAY_OFF_TOUCH_ON)
-					{
-						if((tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_OFF) || (tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_ON))
-						{
-							if(u8CtrlStatus == DS_ACTION_NONE)
-							{
-								u8CtrlStatus = DS_ACTION_BACKLIGHT;
-							}
-							else
-							{ /* Nothing */}
-						}
-						else if(tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_OFF)
-						{
-							if(u8CtrlStatus == DS_ACTION_NONE)
-							{
-								u8CtrlStatus = DS_ACTION_TOUCH_CTRL;
-							}
-							else
-							{ /* Nothing */}
-						}
-						else
-						{ /* Nothing */}
-					}		
-					else
-					{
-						u8CtrlStatus = DS_ACTION_NONE;
-					}						
-					switch (u8CtrlStatus)
-					{
-						case DS_ACTION_BACKLIGHT:
-							/* Disable backlight function */
-							Memory_Pool_BacklightEnable_Set(false);				          
-							M_DM_BacklightControl(tDisplayCtrl.bBacklightSet, Memory_Pool_LockLoss_Get());
-#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)
-							/* Read 0x00 status. */
-							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
-
-							/* Set 0x00 BL_ST bit */					
-				            Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_BL_ST_POS);
-							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_BL_ST_POS);				            
-#endif						
-							u8ReturnStatus  = DS_ACTION_DISPLAY_CTRL;
-							tDisplayManageTask.u16Timer1 = TIME_1ms;							
-
-							break;
-						case DS_ACTION_DISPLAY_CTRL:
-							/* Disable LCD */
-							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));	
-							
-							/* Read 0x00 status. */
-							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-							u32Temp = Memory_Pool_ActualDisplayStatus_Get();
-							
-							/* Set 0x00 DISP_ST bit */	
-				            Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_DISP_ST_POS); 
-							Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_DISP_ST_POS);
-
-							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
-#if (U625_TDDI_TD7800)             
+							u8ReturnStatus  = DS_ACTION_CTRL_PROTECT;
 							tDisplayManageTask.u16Timer1 = TIME_101ms;
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-							tDisplayManageTask.u16Timer1 = TIME_151ms;		
-#else
-#endif					
-							break;							
-						case DS_ACTION_DISPLAY_RESET:
-							/* Reset Display  */
-							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
-							u8ReturnStatus  = DS_ACTION_TOUCH_CTRL;
-							tDisplayManageTask.u16Timer1 = TIME_11ms;
 							
 							break;
-						case DS_ACTION_TOUCH_CTRL:
-							/* Reset Touch */
-							Memory_Pool_TouchStatus_Set(M_DM_TouchControl(Memory_Pool_TouchStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get(), Memory_Pool_LcdStatus_Get()));
-							tDisplayManageTask.u16Timer1 = TIME_2ms; 
-							u8ReturnStatus  = DS_ACTION_TOUCH_STATUS;;
-							break;
-						case DS_ACTION_TOUCH_STATUS:
-							/* Read 0x00 status. */
-							u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-							u32Temp = Memory_Pool_ActualDisplayStatus_Get();							
-							
-							/* Set 0x00 TSC_ST bit */
-							if (Memory_Pool_TouchStatus_Get() == TOUCH_ON)
-							{
-								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_TSC_ST_POS);
-								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_TSC_ST_POS); 
-								tDisplayManageTask.u16Timer2 = TIME_2ms;
-							}
-							else
-							{
-								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus & ~BIT_TSC_ST_POS);
-								Memory_Pool_ActualDisplayStatus_Set(u32Temp & ~BIT_TSC_ST_POS); 
-							}
+						case DS_ACTION_CTRL_PROTECT:
 							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
 							tDisplayCtrl.bPowerStartupEvent =false;
 							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
-							u8ReturnStatus  = DS_ACTION_NONE;
 							tDisplayManageTask.u16Timer1 = TIME_DISABLE;
+							u8ReturnStatus  = DS_ACTION_NONE;
 														
 							break;							
 						default:
 							/* Nothing */
 							break;
 					}
-#endif				
+
+					break;
+			case DISPLAY_OFF_TOUCH_ON : 
 					u8ReturnStatus  = DS_ACTION_NONE;
 					tDisplayManageTask.u16Timer1 = TIME_DISABLE;
 					tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;	
+
 					break;
 			case DISPLAY_ON_TOUCH_ON :
 					if(tDisplayCtrl.u8LastDisplayStatus != DISPLAY_ON_TOUCH_ON)
 					{	
-						if((tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_OFF) || (tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_ON) || (tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_OFF))
+						if((tDisplayCtrl.u8LastDisplayStatus == DISPLAY_OFF_TOUCH_OFF) || (tDisplayCtrl.u8LastDisplayStatus == DISPLAY_ON_TOUCH_OFF))
 						{
 							if(u8CtrlStatus == DS_ACTION_NONE)
 							{
@@ -930,7 +856,14 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							{ /* Nothing */}
 						}
 						else
-						{ /* Nothing */}						
+						{
+							u8CtrlStatus = DS_ACTION_NONE;
+							tDisplayCtrl.u8LastDisplayStatus = u8SetValue;
+							tDisplayCtrl.bPowerStartupEvent =false;
+							tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_OFF;
+							u8ReturnStatus  = DS_ACTION_NONE;
+							tDisplayManageTask.u16Timer1 = TIME_DISABLE;						
+						}
 					}
 					else
 					{
@@ -954,15 +887,9 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							}
 							else
 							{
-								u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;          
-								tDisplayManageTask.u16Timer1 = TIME_11ms;
+								u8ReturnStatus  = DS_ACTION_DISPLAY_CTRL;          
+								tDisplayManageTask.u16Timer1 = TIME_1ms;
 							}
-							break;
-						case DS_ACTION_DISPLAY_RESET:
-							/* Reset Touch */
-							Memory_Pool_LcdResetStatus_Set(M_DM_LcdControl(Memory_Pool_LcdResetStatus_Get(),u8SetValue, Memory_Pool_LockLoss_Get()));
-							u8ReturnStatus  = DS_ACTION_DISPLAY_CTRL;          
-							tDisplayManageTask.u16Timer1 = TIME_201ms;
 
 							break;
 						case DS_ACTION_DISPLAY_CTRL:
@@ -978,7 +905,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							u32Temp = Memory_Pool_ActualDisplayStatus_Get();							
 							
 							/* Set 0x00 DISP_ST bit */
-							if (Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
+							if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (M_DM_NT51926_Status_Get() == NT51925_STATUS_NORMAL))
 							{
 								Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus | BIT_DISP_ST_POS);
 								Memory_Pool_ActualDisplayStatus_Set(u32Temp | BIT_DISP_ST_POS); 
