@@ -4,7 +4,7 @@
 
 #if(BACKDOOR_ICDIAG_OPEN)
 
-#define MCU_FLASH_ACCESS_FLASH_ADDRESS 0x0001E000U
+#define MCU_FLASH_ACCESS_FLASH_ADDRESS 0x0001E000UL
 #define MCU_FLASH_ACCESS_ROW_BYTE_SIZE CY_FLASH_SIZEOF_ROW /** < 256 Bytes. */
 #define MCU_FLASH_ACCESS_ROW_SIZE 1U
 #define MCU_FLASH_ACCESS_TOTLA_BYTE_SIZE (MCU_FLASH_ACCESS_ROW_BYTE_SIZE * MCU_FLASH_ACCESS_ROW_SIZE)
@@ -63,7 +63,6 @@ void MCUDIAG_NVMRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uin
         	|| ((MCU_FLASH_ACCESS_FLASH_ADDRESS + MCU_FLASH_ACCESS_ROW_BYTE_SIZE) < (u32FlashAddr +  (uint32_t)u8RxLen - 1U))\
         	|| (u8RxData == NULL))
     	{
-			(void)memset(&u8RxData, 0xFFU, 64U);
 			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
         }
 		else
