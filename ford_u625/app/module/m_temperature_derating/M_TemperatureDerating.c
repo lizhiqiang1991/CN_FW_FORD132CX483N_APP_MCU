@@ -78,14 +78,6 @@ static int16_t gBLShutDownRelLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TE
 static int16_t gBLReduceLimitedTemp = TEMP_DERATING_DEFAULT_REDUCEBL_TEMP;
 #endif
 /**
- * @brief Avoiding that the system does not catch backlight temperature.
- * 
- * @details 1.When the function start running,the time will count down.\n
- * 2.If the time is equal to zero,The state is changed to derating.
- * 
- */
-static uint16_t gu16InitWaitTimer = TEMP_DERATING_INIT_WAIT_TIME_OUT;
-/**
  * @brief A look up table for catching the PWM duty according to backlight temperature. 
  * 
  * @details When the backlight temperature is over gBLDeratingLimitedTemp,the PWM duty is changed by the look up table.
@@ -94,72 +86,72 @@ static uint16_t gu16InitWaitTimer = TEMP_DERATING_INIT_WAIT_TIME_OUT;
 #if(DERATINGAPP_FLOAT_OPERATION)
 static float gDeratingTable[TEMP_DERATING_TABLE_SIZE] = 
 {
-    100.0f, 
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    100.0f,
-    85.0f,
-    71.0f,
-    59.0f,
-    48.0f,
-    38.0f,
-    29.0f,
-    22.0f,
-    16.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
-    10.0f,
+    100.0f, /**< 70 Degree. */
+    100.0f, /**< 71 Degree. */
+    100.0f, /**< 72 Degree. */
+    100.0f, /**< 73 Degree. */
+    100.0f, /**< 74 Degree. */
+    100.0f, /**< 75 Degree. */
+    100.0f, /**< 76 Degree. */
+    100.0f, /**< 77 Degree. */
+    100.0f, /**< 78 Degree. */
+    100.0f, /**< 79 Degree. */
+    100.0f, /**< 80 Degree. */
+    100.0f, /**< 81 Degree. */
+    100.0f, /**< 82 Degree. */
+    100.0f, /**< 83 Degree. */
+    100.0f, /**< 84 Degree. */
+    100.0f, /**< 85 Degree. */
+    85.0f, /**< 86 Degree. */
+    71.0f, /**< 87 Degree. */
+    59.0f, /**< 88 Degree. */
+    48.0f, /**< 89 Degree. */
+    38.0f, /**< 90 Degree. */
+    29.0f, /**< 91 Degree. */
+    22.0f, /**< 92 Degree. */
+    16.0f, /**< 93 Degree. */
+    10.0f, /**< 94 Degree. */
+    10.0f, /**< 95 Degree. */
+    10.0f, /**< 96 Degree. */
+    10.0f, /**< 97 Degree. */
+    10.0f, /**< 98 Degree. */
+    10.0f, /**< 99 Degree. */
+    10.0f, /**< 100 Degree. */
 };
 #else
 static int16_t gDeratingTable[TEMP_DERATING_TABLE_SIZE] = 
 {
-    100, 
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    100,
-    85,
-    71,
-    59,
-    48,
-    38,
-    29,
-    22,
-    16,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
+    100, /**< 70 Degree. */
+    100, /**< 71 Degree. */
+    100, /**< 72 Degree. */
+    100, /**< 73 Degree. */
+    100, /**< 74 Degree. */
+    100, /**< 75 Degree. */
+    100, /**< 76 Degree. */
+    100, /**< 77 Degree. */
+    100, /**< 78 Degree. */
+    100, /**< 79 Degree. */
+    100, /**< 80 Degree. */
+    100, /**< 81 Degree. */
+    100, /**< 82 Degree. */
+    100, /**< 83 Degree. */
+    100, /**< 84 Degree. */
+    100, /**< 85 Degree. */
+    85, /**< 86 Degree. */
+    71, /**< 87 Degree. */
+    59, /**< 88 Degree. */
+    48, /**< 89 Degree. */
+    38, /**< 90 Degree. */
+    29, /**< 91 Degree. */
+    22, /**< 92 Degree. */
+    16, /**< 93 Degree. */
+    10, /**< 94 Degree. */
+    10, /**< 95 Degree. */
+    10, /**< 96 Degree. */
+    10, /**< 97 Degree. */
+    10, /**< 98 Degree. */
+    10, /**< 99 Degree. */
+    10, /**< 100 Degree. */
 };
 #endif
 

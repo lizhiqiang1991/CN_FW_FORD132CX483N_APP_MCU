@@ -285,7 +285,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
-    else if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_SHUTDOWN_TEMP))
+    else if(StateMachineControl.AmbientTemperature >= TemperatureDerating_GetLimitedTemperature(LIMITED_SHUTDOWN_TEMP))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
@@ -304,7 +304,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     u16TempHostPWM;
 
     /* Sets or clears TERR  */
-    if(StateMachineControl.AmbientTemperature >= TemperatureDerating_GetLimitedTemperature(LIMITED_REDUCE_BL_TEMP))
+    if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_REDUCE_BL_TEMP))
     {
         MBacklightControl_UpdateTERR(E_MBL_TERR_SET);
     }
