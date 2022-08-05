@@ -98,31 +98,26 @@ static void MDetectTchAttn_Callback_BothEdgeISR(void)
     }
     else
     {
-        if(M_DETECT_TCH_ATTN_ISR_SETTING_FALLING == Cy_GPIO_GetInterruptEdge(U301_TSC_ATTN_PORT,U301_TSC_ATTN_NUM))
+        if(mDetectTchAttnControl.CallbackTchAttnDiGet() == ATTN_TRI_FALLING)
         {
-            /* Set the interrupt trigger type to falling edge for ATTN */
-            Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_NUM, M_DETECT_TCH_ATTN_ISR_SETTING_RISING);
             if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
             {
-                /* Wait Display Ready */
+
             }
             else
             {
                 mDetectTchAttnControl.CallbackTchClick();
-                
+
 #if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
                 mDetectTchAttnControl.i16AttnKeepsLowTime = M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD;
 #endif
-
             }
         }
         else
         {
-            /* Set the interrupt trigger type to rising edge for ATTN */
-            Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_NUM, M_DETECT_TCH_ATTN_ISR_SETTING_FALLING);
             if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
             {
-                /* Wait Display Ready */
+
             }
             else
             {
@@ -131,7 +126,6 @@ static void MDetectTchAttn_Callback_BothEdgeISR(void)
 #if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
                 mDetectTchAttnControl.i16AttnKeepsHighTime = M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD;
 #endif
-
             }
         }
     }
@@ -152,6 +146,8 @@ static bool MDetectTchAttn_AttnLostInterruptChecking(void)
     bool bResult = false;
 
     if((mDetectTchAttnControl.CallbackTchAttnDiGet == NULL)\
+        || (mDetectTchAttnControl.CallbackTchClick == NULL)\
+        || (mDetectTchAttnControl.CallbackTchClickRel == NULL)\
         ||(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY))
     {
         bResult = false;
@@ -329,28 +325,14 @@ CALLBACK_TCH_CLICK CallbackTchClick,\
 CALLBACK_TCH_CLICK_RELEASE CallbackTchClickRel,\
 MDetectTchAttn_ATTNTriggerType_E eAttnTriType)
 {
-#if (M_DETECT_TCH_ATTN_EX_INT)
-    if((CallbackTchControllerGet == NULL)\
-    || (CallbackTchClick == NULL)\
-    || (CallbackTchClickRel == NULL))
-#else
     if((CallbackTchControllerGet == NULL)\
         || (CallbackTchAttnDiGet == NULL)\
         || (CallbackTchClick == NULL)\
         || (CallbackTchClickRel == NULL))
-#endif
     {
         return false;
     }
     else{/* NA */}
-
-#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
-    if(CallbackTchAttnDiGet == NULL)
-    {
-        return false;
-    }
-    else{/* NA */}
-#endif
 
     mDetectTchAttnControl.CallbackTchControllerGet = CallbackTchControllerGet;
     mDetectTchAttnControl.CallbackTchAttnDiGet = CallbackTchAttnDiGet;

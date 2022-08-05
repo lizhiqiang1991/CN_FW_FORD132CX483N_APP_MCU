@@ -21,7 +21,7 @@ extern "C" {
 
 #if(M_DETECT_TCH_ATTN_FIX_LOST_EX)
 #define M_DETECT_TCH_ATTN_ROUTINE_TIME 2 /* Cyclic time of MDetectTchAttn_Routine2ms() and uint is ms. */
-#define M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD 4 /* ATTN pin keeps low Time and unit is ms. */
+#define M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD 20 /* ATTN pin keeps low Time and unit is ms. */
 #define M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD 4 /* ATTN pin keeps low Time and unit is ms. */
 #endif
 /**
