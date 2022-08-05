@@ -20,7 +20,7 @@
 /* -- Extern Global Variables -- */
 
 /* -- Extern Functions -- */
-uint32_t HAL_PWM_CH4_Init(void);
-void HAL_PWM_CH4_DeInit(void);
-void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust);
+extern uint32_t HAL_PWM_CH4_Init(void);
+extern void HAL_PWM_CH4_DeInit(void);
+extern void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust);
 #endif /* HAL_PWM_H_ */

@@ -12,7 +12,18 @@ extern "C" {
 
 /* -- Marco Define -- */
 #define M_DETECT_TCH_ATTN_EX_INT true
-#define M_DETECT_TCH_WAIT_TDDI_RESET_TIME 10U /* 10ms */
+
+#if(M_DETECT_TCH_ATTN_EX_INT)
+#define M_DETECT_TCH_ATTN_FIX_LOST_EX true
+#else
+#define M_DETECT_TCH_ATTN_FIX_LOST_EX false
+#endif
+
+#if(M_DETECT_TCH_ATTN_FIX_LOST_EX)
+#define M_DETECT_TCH_ATTN_ROUTINE_TIME 2 /* Cyclic time of MDetectTchAttn_Routine2ms() and uint is ms. */
+#define M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD 4 /* ATTN pin keeps low Time and unit is ms. */
+#define M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD 4 /* ATTN pin keeps low Time and unit is ms. */
+#endif
 /**
  * @brief 
  * 

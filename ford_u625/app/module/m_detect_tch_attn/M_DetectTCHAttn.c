@@ -19,9 +19,8 @@
 /* -- Marco Define -- */
 #if (M_DETECT_TCH_ATTN_EX_INT)
 #define M_DETECT_TCH_ATTN_ISR_SETTING_RISING CY_GPIO_INTR_RISING 
-#define M_DETECT_TCH_ATTN_ISR_SETTING_FALLING CY_GPIO_INTR_FALLING 
+#define M_DETECT_TCH_ATTN_ISR_SETTING_FALLING CY_GPIO_INTR_FALLING
 #endif
-
 
 /**
  * @brief Read ATH_ATTN to Update State Machine.
@@ -46,6 +45,10 @@ typedef struct
 #if (M_DETECT_TCH_ATTN_EX_INT)
     bool bRegisterPass;
 #endif
+#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
+    int16_t i16AttnKeepsLowTime;
+    int16_t i16AttnKeepsHighTime;
+#endif
     CALLBACK_TCH_CONTROLLER_ST_GET CallbackTchControllerGet;
     CALLBACK_TCH_ATTN_DI_GET CallbackTchAttnDiGet;
     CALLBACK_TCH_CLICK CallbackTchClick;
@@ -63,6 +66,10 @@ static MDetectTchAttn_Control mDetectTchAttnControl =
     .eStateMachine = TCH_ALERT_INIT,
 #if (M_DETECT_TCH_ATTN_EX_INT)
     .bRegisterPass = false,
+#endif
+#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
+    .i16AttnKeepsLowTime = M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD,
+    .i16AttnKeepsHighTime = M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD,
 #endif
     .CallbackTchControllerGet = NULL,
     .CallbackTchAttnDiGet = NULL,
@@ -97,13 +104,17 @@ static void MDetectTchAttn_Callback_BothEdgeISR(void)
             Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_NUM, M_DETECT_TCH_ATTN_ISR_SETTING_RISING);
             if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
             {
-
+                /* Wait Display Ready */
             }
             else
             {
                 mDetectTchAttnControl.CallbackTchClick();
+                
+#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
+                mDetectTchAttnControl.i16AttnKeepsLowTime = M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD;
+#endif
+
             }
-            HAL_UART_Printf("ATTN Falling Edge ISR. \n");
         }
         else
         {
@@ -111,12 +122,16 @@ static void MDetectTchAttn_Callback_BothEdgeISR(void)
             Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_NUM, M_DETECT_TCH_ATTN_ISR_SETTING_FALLING);
             if(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY)
             {
-                HAL_UART_Printf("ATTN Rising Edge ISR - touch not ready. \n");
+                /* Wait Display Ready */
             }
             else
             {
-                HAL_UART_Printf("ATTN Rising Edge ISR - touch ready. \n");
                 mDetectTchAttnControl.CallbackTchClickRel();
+
+#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
+                mDetectTchAttnControl.i16AttnKeepsHighTime = M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD;
+#endif
+
             }
         }
     }
@@ -126,6 +141,57 @@ static void MDetectTchAttn_Callback_BothEdgeISR(void)
     NVIC_ClearPendingIRQ(tExternalInterruptConfig.intrSrc);
 }
 #endif
+
+#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
+/**
+ * @brief 
+ * 
+ */
+static bool MDetectTchAttn_AttnLostInterruptChecking(void)
+{
+    bool bResult = false;
+
+    if((mDetectTchAttnControl.CallbackTchAttnDiGet == NULL)\
+        ||(mDetectTchAttnControl.CallbackTchControllerGet() == TCH_CONTROLLER_NOTREADY))
+    {
+        bResult = false;
+    }
+    else
+    {
+        if(mDetectTchAttnControl.CallbackTchAttnDiGet() == ATTN_TRI_FALLING)
+        {
+            mDetectTchAttnControl.i16AttnKeepsLowTime -= M_DETECT_TCH_ATTN_ROUTINE_TIME;
+            mDetectTchAttnControl.i16AttnKeepsHighTime = M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD;
+        }
+        else
+        {
+            mDetectTchAttnControl.i16AttnKeepsLowTime = M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD;
+            mDetectTchAttnControl.i16AttnKeepsHighTime -= M_DETECT_TCH_ATTN_ROUTINE_TIME;
+        }
+
+        if(mDetectTchAttnControl.i16AttnKeepsLowTime <= 0)
+        {
+            /* Gets Falling and Send Click Event to SDM. */
+            mDetectTchAttnControl.CallbackTchClick();
+            mDetectTchAttnControl.i16AttnKeepsLowTime = M_DETECT_TCH_ATTN_KEEP_LOW_TIME_THRESHOLD;
+        }
+        else{/* Waits lost event */}
+
+        if(mDetectTchAttnControl.i16AttnKeepsHighTime <= 0)
+        {
+            /* Gets Rising and Send Click Event to SDM. */
+            mDetectTchAttnControl.i16AttnKeepsHighTime = M_DETECT_TCH_ATTN_KEEP_HIGH_TIME_THRESHOLD;
+            mDetectTchAttnControl.CallbackTchClickRel();
+        }
+        else{/* Waits lost event */}
+
+        bResult = true;
+    }
+
+    return bResult;
+}
+#endif
+
 
 #if (!M_DETECT_TCH_ATTN_EX_INT)
 /**
@@ -276,6 +342,15 @@ MDetectTchAttn_ATTNTriggerType_E eAttnTriType)
     {
         return false;
     }
+    else{/* NA */}
+
+#if (M_DETECT_TCH_ATTN_FIX_LOST_EX)
+    if(CallbackTchAttnDiGet == NULL)
+    {
+        return false;
+    }
+    else{/* NA */}
+#endif
 
     mDetectTchAttnControl.CallbackTchControllerGet = CallbackTchControllerGet;
     mDetectTchAttnControl.CallbackTchAttnDiGet = CallbackTchAttnDiGet;
@@ -317,6 +392,11 @@ void MDetectTchAttn_Routine2ms(void)
             break;
     }
 #endif
+
+#if(M_DETECT_TCH_ATTN_FIX_LOST_EX)
+    (void)MDetectTchAttn_AttnLostInterruptChecking();
+#endif
+
 }
 
 /* -- END -- */

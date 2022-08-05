@@ -82,17 +82,22 @@ static void HAL_PWM_CH4_CallbackInterruptCC(void)
  */
 static bool HAL_PWM_CH4_RegisterIntCallback(HALPwm_Config tHalPwmconfig)
 {
+	bool bResult = false;
+
 	if((tHalPwmconfig.pIntPwmConfig == NULL)\
 		|| (tHalPwmconfig.CallbackInttruptCC == NULL))
 	{
-		return false;
+		bResult = false;
 	}
 	else
 	{
 		Cy_SysInt_Init(tHalPwmconfig.pIntPwmConfig, tHalPwmconfig.CallbackInttruptCC);
 		NVIC_ClearPendingIRQ(tHalPwmconfig.pIntPwmConfig->intrSrc);
 		NVIC_EnableIRQ(tHalPwmconfig.pIntPwmConfig->intrSrc);
+		bResult = true;
 	}
+
+	return bResult;
 }
 
 /* -- Global Functions -- */
