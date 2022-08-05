@@ -31,10 +31,10 @@
 
 extern void M_DM_I2cMasterInit(void);
 extern void M_DM_BacklightControl(bool bEnable, bool bLockLoss);
-extern uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss, uint8_t u8LcdCurrentStatus);
+extern uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command);
 extern uint8_t M_DM_DisplayControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss);
 extern uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command);
-extern uint8_t M_DM_LcdControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss);
+extern uint8_t M_DM_LcdControl(uint8_t u8CurrentStatus, uint8_t u8Command);
 extern uint32_t M_DM_VCOM_Get(void);
 extern void M_DM_VCOM_Set(uint8_t *pReturnData);
 extern void M_DM_DisplayStatus_Get(uint8_t *pReturnData);

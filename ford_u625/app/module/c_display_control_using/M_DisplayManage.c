@@ -49,17 +49,10 @@ void M_DM_BacklightControl( bool bEnable, bool bLockLoss)
  ;       Return Values			:	uint8_t u8ReturnStatus
  ;		Source ID				:
  ******************************************************************************/
-uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss, uint8_t u8LcdCurrentStatus)
+uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 {
     uint8_t u8ReturnStatus;
 
-    if (bLockLoss == true)
-    {
-        HAL_GPIO_Low( U301_TSC_RESET_PORT, U301_TSC_RESET_PIN);
-        u8ReturnStatus = TOUCH_OFF;
-    }
-    else
-    {
         switch (u8Command)
         {
             case DISPLAY_OFF_TOUCH_OFF:
@@ -85,7 +78,7 @@ uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLock
              default:
                 u8ReturnStatus = u8CurrentStatus;
                 break;               
-        }
+		
     }
 	(void) u8CurrentStatus;
     return u8ReturnStatus;
@@ -278,51 +271,41 @@ uint8_t M_DM_DisplayControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLo
  ;       Return Values			:	uint8_t u8ReturnStatus
  ;		Source ID				:
  ******************************************************************************/
-uint8_t M_DM_LcdControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss)
+uint8_t M_DM_LcdControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 {
     uint8_t u8ReturnStatus;
 
-    if (bLockLoss == true)
+    switch (u8Command)
     {
-		HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-		u8ReturnStatus = LCD_RESET_LOW;
+        case DISPLAY_OFF_TOUCH_OFF:
+			HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
 
-        bFlashReloadDisable = false;
-        u8ReturnStatus = LCD_RESET_LOW;
+			bFlashReloadDisable = false;
+            u8ReturnStatus = LCD_RESET_LOW;
+			
+            break;
+        case DISPLAY_ON_TOUCH_OFF:
+            HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
+            u8ReturnStatus = LCD_RESET_HIGH;
+
+            break;
+        case DISPLAY_OFF_TOUCH_ON:
+            HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
+
+            bFlashReloadDisable = false;
+            u8ReturnStatus = LCD_RESET_LOW;
+
+            break;
+        case DISPLAY_ON_TOUCH_ON:
+            HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);                
+            u8ReturnStatus = LCD_RESET_HIGH;
+
+            break;				
+        default:
+            u8ReturnStatus = u8CurrentStatus;
+            break;				
     }
-    else
-    {
-        switch (u8Command)
-        {
-            case DISPLAY_OFF_TOUCH_OFF:
-				HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
 
-				bFlashReloadDisable = false;
-                u8ReturnStatus = LCD_RESET_LOW;
-				
-                break;
-            case DISPLAY_ON_TOUCH_OFF:
-                HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-                u8ReturnStatus = LCD_RESET_HIGH;
-
-                break;
-            case DISPLAY_OFF_TOUCH_ON:
-                HAL_GPIO_Low( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
-
-                bFlashReloadDisable = false;
-                u8ReturnStatus = LCD_RESET_LOW;
-
-                break;
-            case DISPLAY_ON_TOUCH_ON:
-                HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);                
-                u8ReturnStatus = LCD_RESET_HIGH;
-
-                break;				
-            default:
-                u8ReturnStatus = u8CurrentStatus;
-                break;				
-        }
-    }
 
 	(void) u8CurrentStatus;
     return u8ReturnStatus;
@@ -468,7 +451,7 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 uint32_t M_DM_VCOM_Get(void)
 {
 	uint8_t u8PageSwitch[2]={0x1EU,0x10U};
-	uint8_t u8DataAddress=0x01U;
+	uint8_t u8DataAddress=0x02U;
 	uint8_t u8ReadData[3];
 	uint32_t u32ReadData;
 
@@ -479,18 +462,33 @@ uint32_t M_DM_VCOM_Get(void)
 #endif
 	/*Write data address.*/
 	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
-	/*Read data from 01h.*/
-	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 100U);
-	/*Write data address.*/
-	u8DataAddress=0x02U;
-	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 02h.*/
-	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 100U);
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 100U);
 	/*Write data address.*/
 	u8DataAddress=0x03U;
 	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 03h.*/
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 100U);
+	/*Write data address.*/
+	u8DataAddress=0x01U;
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 01h.*/
 	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 100U);
+
+	if((u8ReadData[1] & 0x02U) == 0x02U)
+	{
+		u8ReadData[2] |= 0x40U;
+	}
+	else
+	{ /* Nothing */ }
+	if((u8ReadData[1] & 0x10U) == 0x10U)
+	{
+		u8ReadData[2] |= 0x80U;
+	}
+	else
+	{ /* Nothing */ }
+	
+	u8ReadData[1] &= 0x01U;	
 
 	u32ReadData = ((((uint32_t)u8ReadData[2])<<16U) | (((uint32_t)u8ReadData[1])<<8U) | ((uint32_t)u8ReadData[0]));
 	return u32ReadData;
@@ -530,18 +528,17 @@ void M_DM_VCOM_Set(uint8_t *pSetData)
  ******************************************************************************/
 uint8_t M_DM_NT51926_Status_Get(void)
 {
-	uint8_t u8PageSwitch[2]={0x1EU,0x10U};
+	uint8_t u8PageSwitch[2]={0x1EU,0x2BU};
 	uint8_t u8ReadData = 0xFFU;
 	uint8_t u8DataAddress = 0x1FU;
 
 	/*Switch Page to CMD2_PB.*/
-    u8PageSwitch[1]=0x2BU;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 100U);
 
 	/*Write data address.*/
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	(void)HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 1Fh.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData, 1U, 100U);
+	(void)HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData, 1U, 100U);
 
 	u8ReadData &= 0x07U;
 	return u8ReadData;

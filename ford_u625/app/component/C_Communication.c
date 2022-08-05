@@ -252,7 +252,6 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			}
 			else
 			{
-				MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
 				Memory_Pool_BacklightEnable_Set(false);
 				Memory_Pool_DiagnosisEnable_Set(false);
 			}
