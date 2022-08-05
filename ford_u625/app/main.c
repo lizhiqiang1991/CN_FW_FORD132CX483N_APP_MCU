@@ -54,6 +54,7 @@ static void Main_TaskInit(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
+#ifdef DEBUG_UART_EN
 static void Main_UartInit(void)
 {
     debug_uart_tydef tDebugUart;
@@ -63,6 +64,7 @@ static void Main_UartInit(void)
 
     (void) HAL_UART_Init(tDebugUart);
 }
+#endif
 /******************************************************************************
  ;       Function Name			:	void Main_BspInit(void)
  ;       Function Description	:
@@ -90,7 +92,9 @@ static void Main_SysTickInit(void)
 static void Main_BspInit(void)
 {
     (void) cybsp_init();
+#ifdef DEBUG_UART_EN
     (void) Main_UartInit();
+#endif
     (void) Main_SysTickInit();
     HAL_UART_Printf("Initial Complete!\n");
 }

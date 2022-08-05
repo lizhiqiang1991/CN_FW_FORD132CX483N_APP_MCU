@@ -347,7 +347,7 @@ void ICDIAG_Main(void)
 #elif ICDIAG_USE_FORD23P6_DRV_API
 				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD13P2_DRV_API
-				MCUDIAG_MemRW(((uint8_t*)I2CICDiagCtrl.u32DataAddr), I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
+				MCUDIAG_MemRW(I2CICDiagCtrl.u32DataAddr, I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
 #endif
 			}
 			/*Use MCU driver API to submit fetch/write package*/

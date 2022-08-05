@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Design version="12" xmlns="http://cypress.com/xsd/cydesignfile_v3">
-    <ToolInfo version="2.3.0.4276"/>
+    <ToolInfo version="2.3.1.4663"/>
     <Devices>
         <Device mpn="CY8C4147AZS-S245">
             <BlockConfig>
@@ -52,7 +52,7 @@
                 <Block location="ioss[0].port[0].pin[7]">
                     <Alias value="U301_P1V2_PGOOD"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
                         <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
@@ -235,7 +235,7 @@
                 <Block location="ioss[0].port[2].pin[6]">
                     <Alias value="U301_LOCK"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
                         <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
@@ -247,7 +247,7 @@
                 <Block location="ioss[0].port[2].pin[7]">
                     <Alias value="U301_PASS"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
                         <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
@@ -295,10 +295,10 @@
                 <Block location="ioss[0].port[3].pin[4]">
                     <Alias value="U301_TSC_ATTN"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
                         <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
-                        <Param id="isrTrigger" value="CY_GPIO_INTR_FALLING"/>
+                        <Param id="isrTrigger" value="CY_GPIO_INTR_BOTH"/>
                         <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
                         <Param id="inFlash" value="true"/>
                         <Param id="portLevelConfig" value="false"/>
@@ -307,7 +307,7 @@
                 <Block location="ioss[0].port[3].pin[5]">
                     <Alias value="U301_TSC_RESET"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP_IN_OFF"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_STRONG_IN_OFF"/>
                         <Param id="initialState" value="0"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
@@ -379,7 +379,7 @@
                 <Block location="ioss[0].port[4].pin[4]">
                     <Alias value="U301_P3V3_PGOOD"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
                         <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
@@ -488,7 +488,7 @@
                     <Alias value="U301_BISTEN"/>
                     <Personality template="m0s8pin" version="1.0">
                         <Param id="DriveModes" value="CY_GPIO_DM_STRONG_IN_OFF"/>
-                        <Param id="initialState" value="1"/>
+                        <Param id="initialState" value="0"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
                         <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
@@ -499,7 +499,7 @@
                 <Block location="ioss[0].port[6].pin[1]">
                     <Alias value="U301_DISP_GLOBAL_RESET"/>
                     <Personality template="m0s8pin" version="1.0">
-                        <Param id="DriveModes" value="CY_GPIO_DM_PULLUP_IN_OFF"/>
+                        <Param id="DriveModes" value="CY_GPIO_DM_STRONG_IN_OFF"/>
                         <Param id="initialState" value="0"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
@@ -524,7 +524,7 @@
                     <Alias value="DEBUG_UART_TX"/>
                     <Personality template="m0s8pin" version="1.0">
                         <Param id="DriveModes" value="CY_GPIO_DM_STRONG_IN_OFF"/>
-                        <Param id="initialState" value="1"/>
+                        <Param id="initialState" value="0"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
                         <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
