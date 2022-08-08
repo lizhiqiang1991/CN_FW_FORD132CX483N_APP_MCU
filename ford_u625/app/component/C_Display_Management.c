@@ -1063,7 +1063,7 @@ static void C_Display_Manage_Control(void)
         case EVENT_TIME_INIT_POLLING :
 			if(Memory_Pool_PowerStatus_Get() != POWER_OFF)
 			{
-				if((Memory_Pool_DisplayEnable_Get() == DISPLAY_ON_TOUCH_ON) || (Memory_Pool_DisplayEnable_Get()==DISPLAY_ON_TOUCH_OFF))
+				if(Memory_Pool_DisplayEnable_Get() == DISPLAY_ON_TOUCH_ON)
 				{
 	                u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
 					u32Temp = Memory_Pool_ActualDisplayStatus_Get();
