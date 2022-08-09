@@ -1,5 +1,8 @@
 #include "M_GPIOSense.h"
 #include "M_DisplayManage.h"
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+#include "Memory_Pool.h"
+#endif
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -11,7 +14,33 @@
 bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_debounce_def *ptDebounce)
 {
     uint8_t u8IOLevel;
+	
     HAL_GPIO_Read(pPort, u8Pin, &u8IOLevel);
+#if(BACKDOOR_DIAGNOSIS_SIMULATE)
+	if((pPort == U301_LED_INT_PORT) && (u8Pin == U301_LED_INT_PIN))
+	{
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedINTPinLevel;
+	}
+	else if((pPort == U301_DISP_FAULT_PORT) && (u8Pin == U301_DISP_FAULT_PIN))
+	{
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultPinLevel;
+	}
+	else if((pPort == U301_LOCK_PORT) && (u8Pin == U301_LOCK_PIN))
+	{
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8LockPinLevel;
+	}
+	else if((pPort == U301_P1V2_PGOOD_PORT) && (u8Pin == U301_P1V2_PGOOD_PIN))
+	{
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8LockPinLevel;
+	}
+	else if((pPort == U301_P3V3_PGOOD_PORT) && (u8Pin == U301_P3V3_PGOOD_PIN))
+	{
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8LockPinLevel;
+	}
+	else
+	{/* Nothing */}
+#endif
+
     return Common_LevelDebounce(u8IOLevel, ptDebounce);
 }
 /******************************************************************************

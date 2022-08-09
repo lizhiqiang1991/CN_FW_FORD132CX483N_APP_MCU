@@ -240,7 +240,6 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 			tBPManagement.u16OverEnterNormalTime=0U;
 		break;
 	}
-	Memory_Pool_VBattState_Set(tBPManagement.u8VbattState);
 }
 
 /******************************************************************************

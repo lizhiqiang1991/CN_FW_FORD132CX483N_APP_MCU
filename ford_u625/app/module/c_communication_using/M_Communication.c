@@ -406,9 +406,22 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			else
 			{
 				u8CheckResult=FORMAT_LEN_FAIL;
-			}			
+			}
 		break;
-#endif			
+#endif
+#if(BACKDOOR_DIAGNOSIS_SIMULATE)
+		case CMD_DIAGNOSIS_SIMULATE:
+			if(u8Length == (LEN_SUBADDRESS+LEN_DIAGNOSIS_SIMULATE))
+			{
+				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
+			}
+			else
+			{
+				u8CheckResult=FORMAT_LEN_FAIL;
+			}
+			u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
+		break;
+#endif
 		default:
 			u8CheckResult=FORMAT_UNSUPPORT_SUBADDRESS;
 		break;

@@ -148,6 +148,9 @@ static void C_Diagnosis_Vol_FPCTx(void)
 {
     uint16_t u16Temp;
  	uint16_t u16VolTemp=Memory_Pool_FPCTxOutVol_Get();
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().u16FPCTXVol;
+#endif
 
 	/* Check diagnosis is enable or not*/
 	if(tFpcTx.blEnable == true)
@@ -209,6 +212,9 @@ static void C_Diagnosis_Vol_FPCRx(void)
 {
     uint16_t u16Temp;
  	uint16_t u16VolTemp=Memory_Pool_FPCRxOutVol_Get();
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().u16FPCRXVol;
+#endif
 
 	/* Check diagnosis is enable or not*/
 	if(tFpcRx.blEnable == true)
@@ -575,6 +581,7 @@ static void C_Diagnosis_Init(void)
 			C_Diagnosis_ParaInit();
 			tDiagnosisTask.u16Timer1 = TIME_5ms;
 		break;
+		
 		case EVENT_TIME_INITIAL_DELAY :
 			/* Check power ready and MCU is in the normal run mode */
 			if(Memory_Pool_PowerState_Get() == NORMAL_RUN_STATE)
@@ -587,7 +594,9 @@ static void C_Diagnosis_Init(void)
 				tDiagnosisTask.u16Timer1 = TIME_5ms;
 			}
 		break;
+			
 		default:
+			/*Nothing*/
 		break;
 	}
 	Task_TaskDone();
@@ -605,6 +614,7 @@ static void C_Diagnosis_Control(void)
 	switch(Task_Current_Event_Get())
 	{
 		case EVENT_FIRST :
+			/*Nothing*/
  		break;
 
 		case EVENT_MESSAGE_DISANOSIS_ENABLE :
@@ -631,7 +641,7 @@ static void C_Diagnosis_Control(void)
 #if(CX430_TDDI_NT51926)
 				if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
 				{
-				C_Diagnosis_IO_DispFaultMaster((tDiagnosisTask.u16Timer2-1U));
+					C_Diagnosis_IO_DispFaultMaster((tDiagnosisTask.u16Timer2-1U));
 				}			
 				else
 				{ /* Nothing */}			
@@ -640,7 +650,7 @@ static void C_Diagnosis_Control(void)
 			}
 			else
 			{/*Nothing*/}
-			//C_Diagnosis_Action();
+			C_Diagnosis_Action();
 			tDiagnosisTask.u16Timer2 = TIME_10ms;
 		break;
 #if(BACKDOOR_ICDIAG_OPEN)
