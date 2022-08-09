@@ -137,9 +137,12 @@ static void C_Display_Management_CallbackEnteringDiagnosisProtected(void)
  */
 static void C_Display_Management_CallbackLeavingDiagnosisProtected(void)
 {
+#if 0
 	tDisplayCtrl.bDiagnosisProtect = false;
 	tDisplayCtrl.bDiagnosisProtectLeve = true;	
 	(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+#endif
+  /* NOTHING */
 }
 
 /******************************************************************************
@@ -194,13 +197,8 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 				            
 							if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
 							{
-							u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;							
-#if (U625_TDDI_TD7800)             
-							tDisplayManageTask.u16Timer1 = TIME_101ms;
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-							tDisplayManageTask.u16Timer1 = TIME_151ms;		
-#else
-#endif							
+								u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;
+								tDisplayManageTask.u16Timer1 = TIME_151ms;						
 							}
 							else
 							{
@@ -474,7 +472,6 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 					switch (u8CtrlStatus)
 					{
 						case DS_ACTION_BACKLIGHT:
-							M_DM_TouchControl(Memory_Pool_TouchStatus_Get(), DISPLAY_ON_TOUCH_ON);
 							/* Disable backlight function */
 							Memory_Pool_BacklightEnable_Set(false);				          
 							M_DM_BacklightControl(tDisplayCtrl.bBacklightSet, Memory_Pool_LockLoss_Get());
@@ -497,12 +494,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8CtrlStatus, uint8_t u8SetVal
 							
 							if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
 							{
-#if (U625_TDDI_TD7800)             
-								tDisplayManageTask.u16Timer1 = TIME_101ms;
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-								tDisplayManageTask.u16Timer1 = TIME_151ms;	
-#else
-#endif
+								tDisplayManageTask.u16Timer1 = TIME_151ms;
 								u8ReturnStatus  = DS_ACTION_DISPLAY_RESET;
 							}
 							else
@@ -876,24 +868,14 @@ static void C_Display_Manage_Init(void)
 				Memory_Pool_TouchStatus_Set(TOUCH_ON);
 				Memory_Pool_LcdResetStatus_Set(LCD_RESET_HIGH);
 				tDisplayCtrl.bPowerStartupEvent = true;
-#if (U625_TDDI_TD7800) 
-                /* Registers Detect TCH ATTN Module. */          
-				MDetectTchAttn_Register(C_Display_Management_CallbackTCHState\
-                ,M_DM_TD7800_ATTN_Read\
-				,C_Display_Management_CallbackTCHClickHandler\
-                ,C_Display_Management_CallbackTCHClickRelHandler\
-                ,ATTN_TRI_FALLING);
 
-#elif (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
                 /* Registers Detect TCH ATTN Module. */
                 MDetectTchAttn_Register(C_Display_Management_CallbackTCHState\
                 ,M_DM_NT51926_ATTN_Read\
                 ,C_Display_Management_CallbackTCHClickHandler\
                 ,C_Display_Management_CallbackTCHClickRelHandler\
                 ,ATTN_TRI_FALLING);
-		
-#else
-#endif
+
                 /* Registers Two Callback Functions for Entering Battery Protected and Leaving Battery Protected. */
                 M_BP_Callback_Register(C_Display_Management_CallbackEnteringBatteryProtected\
                 ,C_Display_Management_CallbackLeavingBatteryProtected);
@@ -968,7 +950,7 @@ static void C_Display_Manage_Control(void)
 				else if(tDisplayCtrl.bDiagnosisProtect == true )
 				{	
 					/* Action => turn off the display, touch , back-light*/
-		            if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_TouchStatus_Get() == TOUCH_ON))
+		            if (Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
 		            {
 		                /* Backup the DisplayEnable status*/
 		            	Memory_Pool_DisplayEnableBp_Set(Memory_Pool_DisplayEnable_Get());
@@ -998,6 +980,7 @@ static void C_Display_Manage_Control(void)
 					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 					tDisplayCtrl.u8DispSeqStatus = u8Status;
 				}
+#if 0			
 				else if(tDisplayCtrl.bDiagnosisProtectLeve == true)
 				{
 					/* Action =>if not detect error, turn on the display, touch , back-light*/
@@ -1016,6 +999,7 @@ static void C_Display_Manage_Control(void)
 					tDisplayCtrl.u8DispSeqStatus = u8Status;					
 					tDisplayCtrl.bDiagnosisProtectLeve = false; /* Recover disable */
 				}
+#endif				
 				else
 				{
 					u8Status = DS_ACTION_NONE;

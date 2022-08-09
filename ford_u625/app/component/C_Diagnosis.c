@@ -29,7 +29,7 @@ tdiagnosis_ctrl_def tDiagCtrl;
  ******************************************************************************/
 static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 {
- 	uint64_t u64LEDDiagnosis;
+ 	uint64_t u64LEDDiagnosis=0UL;
 
 	/* Check diagnosis is enable or not*/
 	if(tLedInt.blEnable == true)
@@ -41,9 +41,35 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 			{
 				tDiagCtrl.u16LEDDriverCommTime=0U;
 				/* Read LED driver error message. */
-				M_GPIOSense_LED_Driver_Diagnosis(&u64LEDDiagnosis);
-				/* Record 0xA3 status */
-				Memory_Pool_LEDDiagnosis_Set(u64LEDDiagnosis);
+				u64LEDDiagnosis = M_GPIOSense_LED_Driver_Diagnosis();
+
+				if(u64LEDDiagnosis > 0UL)
+				{
+					tDiagCtrl.u8LEDDriverRegDebunce ++;
+					tDiagCtrl.u8LEDDriverRegDebunce_RECOV = NUMBER_ZERO;
+					if(tDiagCtrl.u8LEDDriverRegDebunce >= C_DIAG_LP8864_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8LEDDriverRegDebunce = C_DIAG_LP8864_REG_DEBUNCE;
+						/* Record 0xA3 status */
+						Memory_Pool_LEDDiagnosis_Set(u64LEDDiagnosis);						
+					}
+					else
+					{/*Nothing*/}
+				}
+				else
+				{
+					tDiagCtrl.u8LEDDriverRegDebunce_RECOV ++;
+					tDiagCtrl.u8LEDDriverRegDebunce = NUMBER_ZERO;
+					if(tDiagCtrl.u8LEDDriverRegDebunce_RECOV >= C_DIAG_LP8864_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8LEDDriverRegDebunce_RECOV = C_DIAG_LP8864_REG_DEBUNCE;
+						/* Record 0xA3 status */
+						Memory_Pool_LEDDiagnosis_Set(u64LEDDiagnosis);						
+					}
+					else
+					{/*Nothing*/}
+				}								
+
 				/* Clear corresponded registers to let LP8864 detect again. */
 				M_GPIOSense_LED_Driver_DiagClear();
 			}
@@ -55,6 +81,9 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 		else if((M_GPIOSense_LevelDeboucne(U301_LED_INT_PORT, U301_LED_INT_PIN, &tLedInt) == true) && (tLedInt.u8NewGPIOStatus == GPIO_HIGH))
 		{
 			tDiagCtrl.u16LEDDriverCommTime=C_DIAG_LP8864_I2CTIME;
+			tDiagCtrl.u8LEDDriverRegDebunce = NUMBER_ZERO;
+			tDiagCtrl.u8LEDDriverRegDebunce_RECOV = NUMBER_ZERO;
+			
 			/* Record 0xA3 status */
 			Memory_Pool_LEDDiagnosis_Set(0UL);
 		}
@@ -74,6 +103,8 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 {
 	uint64_t u64Temp=0UL;
+	uint64_t u64Diagnosis=0UL;
+	
 	/* Check diagnosis is enable or not*/
 	if(tDispFaultMaster.blEnable == true)
 	{
@@ -82,16 +113,81 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 		{
 			if(tDiagCtrl.u16NT51926CommTime >= C_DIAG_NT51926_I2CTIME)
 			{
-				tDiagCtrl.u16NT51926CommTime=0U;
-				u64Temp=M_GPIOSense_DisplayFault_Read()&BIT_A3_PANEL_DISPFAULT_ALL_POS;
-				Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+				tDiagCtrl.u16NT51926CommTime = NUMBER_ZERO;
+				u64Temp=M_GPIOSense_DisplayFault_Read()&(BIT_A3_PANEL_DISPFAULT_ALL_POS | BIT_A3_PANEL_TYPEC_ERR_POS);
+				if((u64Temp & (BIT_A3_PANEL_DISPFAULT_ALL_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
+				{	
+					tDiagCtrl.u8NT51926DpRegDebunce_RECOV = NUMBER_ZERO;
+					tDiagCtrl.u8NT51926DpRegDebunce ++;
+				}
+				else
+				{
+					tDiagCtrl.u8NT51926DpRegDebunce = NUMBER_ZERO;
+					tDiagCtrl.u8NT51926DpRegDebunce_RECOV ++;
+				}
+				
+				if((u64Temp & BIT_A3_PANEL_TOUCHFAULT_ALL_POS) > 0UL)
+				{	
+					tDiagCtrl.u8NT51926TpRegDebunce_RECOV = NUMBER_ZERO;
+					tDiagCtrl.u8NT51926TpRegDebunce ++;
+				}
+				else
+				{
+					tDiagCtrl.u8NT51926TpRegDebunce = NUMBER_ZERO;
+					tDiagCtrl.u8NT51926TpRegDebunce_RECOV ++;
+				}	
+
+				if(tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926DpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;
+					u64Diagnosis |= (u64Temp & (BIT_A3_PANEL_DISPFAULT_ALL_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS));
+				}
+				else if(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926DpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
+					u64Diagnosis &= ~(BIT_A3_PANEL_DISPFAULT_ALL_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS);
+				}				
+				else
+				{/*Nothing*/}
+				
+				if(tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926TpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;				
+					u64Diagnosis |= (u64Temp & BIT_A3_PANEL_TOUCHFAULT_ALL_POS);
+				}		
+				else if(tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926TpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
+					u64Diagnosis &= ~BIT_A3_PANEL_TOUCHFAULT_ALL_POS;					
+				}
+				else
+				{/*Nothing*/}
+								
+				if((tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
+					|| 	(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)\
+					||	(tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
+					||	(tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE))
+				{
+					Memory_Pool_NT51926Diagnosis_Set(u64Diagnosis);
+				}
+				
 			}
 			else
 			{
 				tDiagCtrl.u16NT51926CommTime+=u16RoutineTime;
 			}
 		}
-		/* No Error Recover*/
+		else if((M_GPIOSense_LevelDeboucne(U301_DISP_FAULT_PORT, U301_DISP_FAULT_PIN, &tDispFaultMaster) == true) && (tDispFaultMaster.u8NewGPIOStatus == GPIO_HIGH))
+		{
+			tDiagCtrl.u16NT51926CommTime= C_DIAG_NT51926_I2CTIME;
+			tDiagCtrl.u8NT51926DpRegDebunce = NUMBER_ZERO;
+			tDiagCtrl.u8NT51926DpRegDebunce_RECOV = NUMBER_ZERO;	
+			tDiagCtrl.u8NT51926TpRegDebunce = NUMBER_ZERO;	
+			tDiagCtrl.u8NT51926TpRegDebunce_RECOV = NUMBER_ZERO;
+
+			/* Record 0xA3 status */
+			Memory_Pool_NT51926Diagnosis_Set(0UL);
+		}
 		else
 		{/*Nothing*/}
 	}
@@ -341,8 +437,15 @@ static void C_Diagnosis_ParaInit(void)
 	Memory_Pool_DisplayStatusBp_Set(NUMBER_ZERO);
 	Memory_Pool_DiagnosisEnable_Set(false);
 	Memory_Pool_LockLoss_Set(false);
-	tDiagCtrl.DiagProtectAction=DIAG_ACTION_NONE;
-	tDiagCtrl.u16LEDDriverCommTime=C_DIAG_LP8864_I2CTIME;
+	tDiagCtrl.DiagProtectAction = DIAG_ACTION_NONE;
+	tDiagCtrl.u16LEDDriverCommTime = C_DIAG_LP8864_I2CTIME;
+	tDiagCtrl.u16NT51926CommTime = C_DIAG_NT51926_I2CTIME;
+	tDiagCtrl.u8NT51926DpRegDebunce = NUMBER_ZERO;
+	tDiagCtrl.u8NT51926DpRegDebunce_RECOV = NUMBER_ZERO;	
+	tDiagCtrl.u8NT51926TpRegDebunce = NUMBER_ZERO;	
+	tDiagCtrl.u8NT51926TpRegDebunce_RECOV = NUMBER_ZERO;	
+	tDiagCtrl.u8LEDDriverRegDebunce = NUMBER_ZERO;
+	tDiagCtrl.u8LEDDriverRegDebunce_RECOV = NUMBER_ZERO;
 
 	tLedInt.u8DebounceHigh = NUMBER_ZERO;
 	tLedInt.u8DebounceLow = NUMBER_ZERO;
@@ -357,7 +460,7 @@ static void C_Diagnosis_ParaInit(void)
 	tDispFaultMaster.u8CurrentGPIOStatus = GPIO_HIGH;
 	tDispFaultMaster.u8DebounceMax = DEBOUNCE_3_TIMES;
 	tDispFaultMaster.blEnable = true;
-	Memory_Pool_NT51926Diagnosis_Set(BIT_A3_PANEL_DISPFAULT_ALL_POS);
+	Memory_Pool_NT51926Diagnosis_Set(0UL);
 
 	tSerdesLock.u8DebounceHigh = NUMBER_ZERO;
 	tSerdesLock.u8DebounceLow = NUMBER_ZERO;
@@ -422,9 +525,16 @@ static void C_Diagnosis_Action(void)
 	/************************************************************************************************/
 	u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 	/* Record 0x00. */
-	if((u64DisplayDiagnosis&BIT_A3_PANEL_DISPFAULT_ALL_POS) != BIT_A3_PANEL_DISPFAULT_ALL_POS)
+	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_ALL_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
 	{
 		u32Temp|=BIT_LCDERR_POS;
+	}
+	else
+	{/*Nothing*/}
+
+	if((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) > 0UL)
+	{
+		u32Temp|=BIT_TSCERR_POS;
 	}
 	else
 	{/*Nothing*/}
@@ -478,7 +588,7 @@ static void C_Diagnosis_Action(void)
 	{/*Nothing*/}
 
 	/* Release TSCERR, TCERR. */
-	if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS )) == 0U)
+	if(((u16GeneralDiagnosis&BIT_A3_POWER_P3V3_ERROR_POS) == 0U) &&	((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) == 0UL))
 	{
 		u32Temp&=~(BIT_TSCERR_POS | BIT_TCERR_POS);
 	}
@@ -487,7 +597,7 @@ static void C_Diagnosis_Action(void)
 
 	/* Release LCDERR. */
 	if(((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS )) == 0U)
-		&& ((u64DisplayDiagnosis&BIT_A3_PANEL_DISPFAULT_ALL_POS) == BIT_A3_PANEL_DISPFAULT_ALL_POS))
+		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_ALL_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) == 0UL))
 	{
 		u32Temp&=~BIT_LCDERR_POS;
 	}
@@ -520,9 +630,10 @@ static void C_Diagnosis_Action(void)
 			else
 			{/*Nothing*/}
 		}
-		else if((u64DisplayDiagnosis&BIT_A3_PANEL_DISPFAULT_ALL_POS) != BIT_A3_PANEL_DISPFAULT_ALL_POS)
+		else if((u64DisplayDiagnosis&BIT_A3_PANEL_DISPFAULT_ALL_POS) > 0UL)
 		{
-			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_NORSTRQ_NORECOV;
+			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_RSTRQ;
+			u32CommDisplayStatus|=BIT_RST_RQ_POS;
 			if(CallbackDiagActionProtect != NULL)
 			{
 				CallbackDiagActionProtect();
@@ -532,7 +643,8 @@ static void C_Diagnosis_Action(void)
 		}
 		else if((u16GeneralDiagnosis&(BIT_A3_PANEL_FPC_TX_L_ERROR_POS | BIT_A3_PANEL_FPC_RX_R_ERROR_POS)) > 0U)
 		{
-			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_NORSTRQ_RECOV;
+			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_RSTRQ;
+			u32CommDisplayStatus |= BIT_RST_RQ_POS;
 			if(CallbackDiagActionProtect != NULL)
 			{
 				CallbackDiagActionProtect();
@@ -543,22 +655,20 @@ static void C_Diagnosis_Action(void)
 		else
 		{/*Nothing*/}
 	}
+#if 0	
 	else if(tDiagCtrl.DiagProtectAction == DIAG_ACTION_DISPBL_OFF_NORSTRQ_RECOV)
 	{
-		if((u16GeneralDiagnosis&(BIT_A3_PANEL_FPC_TX_L_ERROR_POS | BIT_A3_PANEL_FPC_RX_R_ERROR_POS)) == 0U)
+		tDiagCtrl.DiagProtectAction=DIAG_ACTION_NONE;			
+		/* Recover */
+		
+		if(CallbackDiagActionRecover != NULL)
 		{
-			tDiagCtrl.DiagProtectAction=DIAG_ACTION_NONE;			
-			/* Recover */
-			if(CallbackDiagActionRecover != NULL)
-			{
-				CallbackDiagActionRecover();
-			}
-			else
-			{/*Nothing*/}
+			CallbackDiagActionRecover();
 		}
 		else
 		{/*Nothing*/}
 	}
+#endif
 	else
 	{/*Nothing*/}
 
@@ -621,7 +731,9 @@ static void C_Diagnosis_Control(void)
 			if(Memory_Pool_DiagnosisEnable_Get() == true)
 			{
 				tDiagnosisTask.u16Timer2 = TIME_1000ms;
+#if(BACKDOOR_ICDIAG_OPEN)				
 				tDiagnosisTask.u16Timer1 = TIME_1000ms;
+#endif				
 			}
 			else
 			{
@@ -641,12 +753,12 @@ static void C_Diagnosis_Control(void)
 #if(CX430_TDDI_NT51926)
 				if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
 				{
-					C_Diagnosis_IO_DispFaultMaster((tDiagnosisTask.u16Timer2-1U));
+					C_Diagnosis_IO_DispFaultMaster((uint16_t)(TIME_10ms)- 1U);
 				}			
 				else
 				{ /* Nothing */}			
 #endif
-				C_Diagnosis_IO_LedInt((tDiagnosisTask.u16Timer2-1U));
+				C_Diagnosis_IO_LedInt((uint16_t)(TIME_10ms)- 1U);
 			}
 			else
 			{/*Nothing*/}

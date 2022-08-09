@@ -22,9 +22,7 @@ tdiagnosis_simulate_def gtDiagnosisSimulateInfo;
 tu625_def gtU625Info = { .bI2cDesBusInit = false, .bI2cMcuBusInit = false };
 tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U };
 
-#if(U625_TDDI_TD7800)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x2EU, .u8Subversion = 0x02U };
-#elif(U717_TDDI_NT51926)
+#if(U717_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x00U };    
 #elif(CX430_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x00U }; 
@@ -38,7 +36,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.01.03" };
+const uint8_t cmu8McuVersion[] = { "T.01.01.04" };
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1769,6 +1767,8 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 12U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 24U) & 0xFFU;
             *(pDataBuffer + 13U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 32U) & 0xFFU;
             *(pDataBuffer + 14U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 40U) & 0xFFU;
+            *(pDataBuffer + 15U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 48U) & 0xFFU;
+            *(pDataBuffer + 16U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 56U) & 0xFFU;			
             *pLength = LEN_DETIAL_DIAGNOSIS + LEN_SUBADDRESS;
             break;
         case CMD_TEMPERATURE_GET:

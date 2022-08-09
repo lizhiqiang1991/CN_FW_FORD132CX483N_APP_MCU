@@ -52,11 +52,7 @@ static uint8_t mu8TxBuff[BUFFER_SIZE];
 static uint8_t mu8BackupTxBuff[BUFFER_SIZE];
 volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
 
-#if (U625_TDDI_TD7800)
-	const uint8_t mu8Core[] = { "RU5T-14F180-JA" };
-	const uint8_t mu8Soft[] = { "RU5T-14D358-JA" };
-	const uint8_t mu8Main[] = { "RU5T-14D359-JA" };
-#elif (U717_TDDI_NT51926)
+#if (U717_TDDI_NT51926)
 	const uint8_t mu8Core[] = { "RU5T-14F180-SA" };
 	const uint8_t mu8Soft[] = { "RU5T-14D358-SA" };
 	const uint8_t mu8Main[] = { "RU5T-14D359-SA" };    

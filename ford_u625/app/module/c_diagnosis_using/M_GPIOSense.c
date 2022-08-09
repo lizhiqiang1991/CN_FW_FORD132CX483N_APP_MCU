@@ -50,12 +50,14 @@ bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_deboun
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void M_GPIOSense_LED_Driver_Diagnosis(uint64_t *pReturnData)
+uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
 {
     int8_t i8Counter;
     uint8_t u8SendData;
     uint8_t mu8Temp[6U];
-    uint64_t u64Temp;
+	uint64_t u64ReturnStatus=0UL;
+    uint64_t u64Temp=0UL;
+
     /* Get the supply status of LED driver*/
     u8SendData = 0x0EU;
     HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 100U);
@@ -80,14 +82,14 @@ void M_GPIOSense_LED_Driver_Diagnosis(uint64_t *pReturnData)
     mu8Temp[4U] = mu8Temp[4U] & 0xCF;
     mu8Temp[5U] = mu8Temp[5U] & 0x55;
 
-    *pReturnData = 0UL;
-
     for ( i8Counter = 5; i8Counter >= 0; i8Counter-- )
     {
         u64Temp = mu8Temp[i8Counter];
         u64Temp <<= (i8Counter * 8);
-        *pReturnData |= u64Temp;
+        u64ReturnStatus|=u64Temp;
     }
+	
+	return u64ReturnStatus;
 }
 /******************************************************************************
  ;       Function Name			:	
@@ -110,7 +112,7 @@ void M_GPIOSense_LED_Driver_DiagClear(void)
 	HAL_I2C_Master_Write(LP8864_ADDRESS, &u8Temp[0], 7U, 100U);
 }
 /******************************************************************************
- ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Name			:	uint64_t M_GPIOSense_DisplayFault_Read(void)
  ;       Function Description	:
  ;       Parameters				:	void
  ;       Return Values			:
@@ -122,109 +124,64 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	uint64_t u64ReturnStatus=0UL;
     uint64_t u64Temp=0UL;
 	/*Switch Page to CMD2_P2.*/
-	uint8_t u8PageSwitch[2]={0x1EU,0x22U};
-	uint8_t u8DDataAddress=0x01U;
-	uint8_t u8ReadData[5];
-	uint8_t u8ReadData2[10];
+	uint8_t u8PageSwitch[2]={0x1EU,0x2BU};
+	uint8_t u8DataAddress=0x00U;
+	uint8_t u8ReadData[8];
 
-	/*Switch Page to CMD2_P2.*/
+	/*Switch Page to CMD2_PB.*/
 	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 100U);
 	/*Write data address.*/
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 01h.*/
+    HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 00h.*/
 	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 100U);
 
 	/*Write data address.*/
-	u8DDataAddress=0x02U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 02h.*/
+    u8DataAddress=0x01U;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 01h.*/
 	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 100U);
 
 	/*Write data address.*/
-	u8DDataAddress=0x03U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
+	u8DataAddress=0x03U;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 03h.*/
 	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 100U);
 
 	/*Write data address.*/
-	u8DDataAddress=0x04U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
+	u8DataAddress=0x04U;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 04h.*/
 	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[3], 1U, 100U);
 
 	/*Write data address.*/
-	u8DDataAddress=0x05U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 05h.*/
+	u8DataAddress=0x07U;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 07h.*/
 	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[4], 1U, 100U);
 
+  	/*Write data address.*/
+    u8DataAddress=0x0AU;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 0Ah.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[5], 1U, 100U);
 
+	/*Write data address.*/
+    u8DataAddress=0x1FU;
+	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
+	/*Read data from 0Ah.*/
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[6], 1U, 100U);
 
-	/*Switch Page to CMD2_PB.*/
-    u8PageSwitch[1]=0x2BU;
+	/* Touch error status */	
+	/*Switch Page to CMD4_P1.*/
+    u8PageSwitch[1]=0x41U;
 	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 100U);
 	/*Write data address.*/
-    u8DDataAddress=0x00U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
+	u8DataAddress=0x1CU;
+    HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 100U);
 	/*Read data from 00h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[0], 1U, 100U);
-
-	/*Write data address.*/
-    u8DDataAddress=0x01U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 01h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[1], 1U, 100U);
-
-	/*Write data address.*/
-	u8DDataAddress=0x02U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 02h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[2], 1U, 100U);
-
-	/*Write data address.*/
-	u8DDataAddress=0x03U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 03h..*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[3], 1U, 100U);
-
-	/*Write data address.*/
-	u8DDataAddress=0x04U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 04h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[4], 1U, 100U);
-
-	/*Write data address.*/
-	u8DDataAddress=0x05U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 05h..*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[5], 1U, 100U);
-
-	/*Write data address.*/
-	u8DDataAddress=0x06U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 06h..*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[6], 1U, 100U);
-
-	/*Write data address.*/
-	u8DDataAddress=0x07U;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 07h.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[7], 1U, 100U);
-
-  	/*Write data address.*/
-    u8DDataAddress=0x0AU;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 0Ah.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[8], 1U, 100U);
-
-	/*Write data address.*/
-    u8DDataAddress=0x1FU;
-	HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DDataAddress, 1U, 100U);
-	/*Read data from 0Ah.*/
-	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData2[9], 1U, 100U);
-
+	HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[7], 1U, 100U);
     
-	for(i8Counter=4; i8Counter>=0; i8Counter--)
+	for(i8Counter=7; i8Counter>=0; i8Counter--)
 	{
 		u64Temp=u8ReadData[i8Counter];
 		u64Temp<<=(i8Counter*8);
@@ -233,4 +190,5 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 
 	return u64ReturnStatus;
 }
+
 
