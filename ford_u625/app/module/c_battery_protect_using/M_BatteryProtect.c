@@ -19,6 +19,9 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 	uint16_t u16BatteryVol=Memory_Pool_BatteryVol_Get();
 	uint16_t u16Temp = 0U;
 
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u16BatteryVol = Memory_Pool_DiagnosisSimulateInfo_Get().u16BatteryVol;
+#endif
 	switch(tBPManagement.u8VbattState)
 	{
 		case BP_STATE_INIT:

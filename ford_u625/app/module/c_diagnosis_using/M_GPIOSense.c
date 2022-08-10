@@ -88,6 +88,9 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
         u64Temp <<= (i8Counter * 8);
         u64ReturnStatus|=u64Temp;
     }
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u64ReturnStatus = Memory_Pool_DiagnosisSimulateInfo_Get().u64LedFaultStatus;
+#endif
 	
 	return u64ReturnStatus;
 }
@@ -98,6 +101,7 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
+#if 0
 void M_GPIOSense_LED_Driver_DiagClear(void)
 {
 	uint8_t u8Temp[7];
@@ -111,6 +115,7 @@ void M_GPIOSense_LED_Driver_DiagClear(void)
 	u8Temp[6]=0x7EU;
 	HAL_I2C_Master_Write(LP8864_ADDRESS, &u8Temp[0], 7U, 100U);
 }
+#endif
 /******************************************************************************
  ;       Function Name			:	uint64_t M_GPIOSense_DisplayFault_Read(void)
  ;       Function Description	:
@@ -187,7 +192,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 		u64Temp<<=(i8Counter*8);
 		u64ReturnStatus|=u64Temp;
 	}
-
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u64ReturnStatus=Memory_Pool_DiagnosisSimulateInfo_Get().u64DispFaultStatus;
+#endif
 	return u64ReturnStatus;
 }
 

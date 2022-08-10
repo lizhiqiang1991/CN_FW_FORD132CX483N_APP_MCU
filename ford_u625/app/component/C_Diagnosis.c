@@ -37,6 +37,7 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 		/* When LED_INT debounce 3 times, start to read LP8864 status and record error flags. */
 		if((M_GPIOSense_LevelDeboucne(U301_LED_INT_PORT, U301_LED_INT_PIN, &tLedInt) == true) && (tLedInt.u8NewGPIOStatus == GPIO_LOW))
 		{
+			tDiagCtrl.u16LEDDriverCommTime+=u16RoutineTime;
 			if(tDiagCtrl.u16LEDDriverCommTime >= C_DIAG_LP8864_I2CTIME)
 			{
 				tDiagCtrl.u16LEDDriverCommTime=0U;
@@ -69,14 +70,13 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 					else
 					{/*Nothing*/}
 				}								
-
+#if 0
 				/* Clear corresponded registers to let LP8864 detect again. */
 				M_GPIOSense_LED_Driver_DiagClear();
+#endif
 			}
 			else
-			{
-				tDiagCtrl.u16LEDDriverCommTime+=u16RoutineTime;
-			}
+			{/*Nothing*/}
 		}
 		else if((M_GPIOSense_LevelDeboucne(U301_LED_INT_PORT, U301_LED_INT_PIN, &tLedInt) == true) && (tLedInt.u8NewGPIOStatus == GPIO_HIGH))
 		{
@@ -111,11 +111,12 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 		/* When DISP_FAULT debounce 3 times, start to read NT51926 status and record error flags. */
 		if((M_GPIOSense_LevelDeboucne(U301_DISP_FAULT_PORT, U301_DISP_FAULT_PIN, &tDispFaultMaster) == true) && (tDispFaultMaster.u8NewGPIOStatus == GPIO_LOW))
 		{
+			tDiagCtrl.u16NT51926CommTime+=u16RoutineTime;
 			if(tDiagCtrl.u16NT51926CommTime >= C_DIAG_NT51926_I2CTIME)
 			{
 				tDiagCtrl.u16NT51926CommTime = NUMBER_ZERO;
-				u64Temp=M_GPIOSense_DisplayFault_Read()&(BIT_A3_PANEL_DISPFAULT_ALL_POS | BIT_A3_PANEL_TYPEC_ERR_POS);
-				if((u64Temp & (BIT_A3_PANEL_DISPFAULT_ALL_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
+				u64Temp=M_GPIOSense_DisplayFault_Read()&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_TYPEC_ERR_POS);
+				if((u64Temp & (BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
 				{	
 					tDiagCtrl.u8NT51926DpRegDebunce_RECOV = NUMBER_ZERO;
 					tDiagCtrl.u8NT51926DpRegDebunce ++;
@@ -140,12 +141,12 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				if(tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
 				{
 					tDiagCtrl.u8NT51926DpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;
-					u64Diagnosis |= (u64Temp & (BIT_A3_PANEL_DISPFAULT_ALL_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS));
+					u64Diagnosis |= (u64Temp & (BIT_A3_PANEL_DISPFAULT_TYPEB_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS));
 				}
 				else if(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
 				{
 					tDiagCtrl.u8NT51926DpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
-					u64Diagnosis &= ~(BIT_A3_PANEL_DISPFAULT_ALL_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS);
+					u64Diagnosis &= ~(BIT_A3_PANEL_DISPFAULT_TYPEB_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS);
 				}				
 				else
 				{/*Nothing*/}
@@ -173,9 +174,7 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				
 			}
 			else
-			{
-				tDiagCtrl.u16NT51926CommTime+=u16RoutineTime;
-			}
+			{/*Nothing*/}
 		}
 		else if((M_GPIOSense_LevelDeboucne(U301_DISP_FAULT_PORT, U301_DISP_FAULT_PIN, &tDispFaultMaster) == true) && (tDispFaultMaster.u8NewGPIOStatus == GPIO_HIGH))
 		{
@@ -525,7 +524,7 @@ static void C_Diagnosis_Action(void)
 	/************************************************************************************************/
 	u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 	/* Record 0x00. */
-	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_ALL_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
+	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
 	{
 		u32Temp|=BIT_LCDERR_POS;
 	}
@@ -597,7 +596,7 @@ static void C_Diagnosis_Action(void)
 
 	/* Release LCDERR. */
 	if(((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS )) == 0U)
-		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_ALL_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) == 0UL))
+		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) == 0UL))
 	{
 		u32Temp&=~BIT_LCDERR_POS;
 	}
@@ -630,7 +629,7 @@ static void C_Diagnosis_Action(void)
 			else
 			{/*Nothing*/}
 		}
-		else if((u64DisplayDiagnosis&BIT_A3_PANEL_DISPFAULT_ALL_POS) > 0UL)
+		else if((u64DisplayDiagnosis&BIT_A3_PANEL_DISPFAULT_TYPEB_POS) > 0UL)
 		{
 			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_RSTRQ;
 			u32CommDisplayStatus|=BIT_RST_RQ_POS;

@@ -31,9 +31,9 @@
 
 #define DEBOUNCE_3_TIMES			  		3U
 
-#define C_DIAG_LP8864_I2CTIME				50U /*Unit: 10ms*/
-#define C_DIAG_NT51926_I2CTIME				25U /*Unit: 10ms*/
-#define C_DIAG_LP8864_REG_DEBUNCE			4U /*Unit: 10ms*/
+#define C_DIAG_LP8864_I2CTIME				250U /*Unit: 1ms*/
+#define C_DIAG_NT51926_I2CTIME				250U /*Unit: 1ms*/
+#define C_DIAG_LP8864_REG_DEBUNCE			4U 
 #define C_DIAG_NT51926_REG_DEBUNCE			4U
 
 

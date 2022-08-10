@@ -6,6 +6,9 @@
 #include "M_FPNCtrl.h"
 #include "ICDiagApp.h"
 #include "M_TemperatureDerating.h"
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+#include "M_BatteryProtect.h"
+#endif
 
 tcommunication_def gtCommunicationInfo;
 tdata_collection_def gtDataCollectInfo;
@@ -16,7 +19,19 @@ tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U};
 tpower_management_def gtPowerManageInfo;
 
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
-tdiagnosis_simulate_def gtDiagnosisSimulateInfo;
+tdiagnosis_simulate_def gtDiagnosisSimulateInfo = 
+{
+	.u8DispFaultPinLevel = GPIO_HIGH,
+	.u64DispFaultStatus = 0U,
+	.u8LedINTPinLevel = GPIO_HIGH,
+	.u64LedFaultStatus = 0U,
+	.u8PG1V2PinLevel = GPIO_HIGH,
+	.u8PG3V3PinLevel = GPIO_HIGH,
+	.u8LockPinLevel = GPIO_HIGH,
+	.u16BatteryVol = (BP_VMIN_CFG + 1U),
+	.u16FPCTXVol = (DIAG_FPC_TX_DISCON_VOL + 1U),
+	.u16FPCRXVol = (DIAG_FPC_RX_DISCON_VOL + 1U),
+};
 #endif
 
 tu625_def gtU625Info = { .bI2cDesBusInit = false, .bI2cMcuBusInit = false };
@@ -36,7 +51,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.01.04" };
+const uint8_t cmu8McuVersion[] = { "T.01.01.05" };
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
