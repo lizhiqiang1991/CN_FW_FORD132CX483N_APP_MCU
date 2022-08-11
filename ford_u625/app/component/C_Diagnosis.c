@@ -14,6 +14,8 @@ static tgpio_debounce_def tFpcTx;
 static tgpio_debounce_def tFpcRx;
 static tgpio_debounce_def tP1V2Good;
 static tgpio_debounce_def tP3V3Good;
+static tgpio_debounce_def tIcComm;
+
 
 CALLBACK_DIAG_ACTION_PROTECT CallbackDiagActionProtect=NULL;
 CALLBACK_DIAG_ACTION_RECOVER CallbackDiagActionRecover=NULL;
@@ -126,18 +128,7 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					tDiagCtrl.u8NT51926DpRegDebunce = NUMBER_ZERO;
 					tDiagCtrl.u8NT51926DpRegDebunce_RECOV ++;
 				}
-				
-				if((u64Temp & BIT_A3_PANEL_TOUCHFAULT_ALL_POS) > 0UL)
-				{	
-					tDiagCtrl.u8NT51926TpRegDebunce_RECOV = NUMBER_ZERO;
-					tDiagCtrl.u8NT51926TpRegDebunce ++;
-				}
-				else
-				{
-					tDiagCtrl.u8NT51926TpRegDebunce = NUMBER_ZERO;
-					tDiagCtrl.u8NT51926TpRegDebunce_RECOV ++;
-				}	
-
+	
 				if(tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
 				{
 					tDiagCtrl.u8NT51926DpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;
@@ -150,20 +141,35 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				}				
 				else
 				{/*Nothing*/}
-				
-				if(tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
+
+				if((Memory_Pool_DisplayStatus_Get() & BIT_TSC_ST_POS) == BIT_TSC_ST_POS)
 				{
-					tDiagCtrl.u8NT51926TpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;				
-					u64Diagnosis |= (u64Temp & BIT_A3_PANEL_TOUCHFAULT_ALL_POS);
-				}		
-				else if(tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
-				{
-					tDiagCtrl.u8NT51926TpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
-					u64Diagnosis &= ~BIT_A3_PANEL_TOUCHFAULT_ALL_POS;					
+					if((u64Temp & BIT_A3_PANEL_TOUCHFAULT_ALL_POS) > 0UL)
+					{	
+						tDiagCtrl.u8NT51926TpRegDebunce_RECOV = NUMBER_ZERO;
+						tDiagCtrl.u8NT51926TpRegDebunce ++;
+					}
+					else
+					{
+						tDiagCtrl.u8NT51926TpRegDebunce = NUMBER_ZERO;
+						tDiagCtrl.u8NT51926TpRegDebunce_RECOV ++;
+					}				
+					if(tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8NT51926TpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;				
+						u64Diagnosis |= (u64Temp & BIT_A3_PANEL_TOUCHFAULT_ALL_POS);
+					}
+					else if(tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8NT51926TpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
+						u64Diagnosis &= ~BIT_A3_PANEL_TOUCHFAULT_ALL_POS;					
+					}
+					else
+					{/*Nothing*/}
 				}
 				else
 				{/*Nothing*/}
-								
+				
 				if((tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
 					|| 	(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)\
 					||	(tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
@@ -171,7 +177,8 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				{
 					Memory_Pool_NT51926Diagnosis_Set(u64Diagnosis);
 				}
-				
+				else
+				{/*Nothing*/}
 			}
 			else
 			{/*Nothing*/}
@@ -420,6 +427,55 @@ static void C_Diagnosis_IO_P3V3Good(void)
 	{/*Nothing*/}
 }
 /******************************************************************************
+ ;       Function Name			:	static void C_Diagnosis_IC_Communitation(void)
+ ;       Function Description	:	This state will do power management initialize
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		Source ID				:
+ ******************************************************************************/
+static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
+{
+	uint8_t u8Temp;
+	/* Check diagnosis is enable or not*/
+	if(tIcComm.blEnable == true)
+	{
+		tDiagCtrl.u16NT51926I2cCommTime+=u16RoutineTime;
+		if(tDiagCtrl.u16NT51926I2cCommTime >= C_DIAG_NT51926_I2CTIME)
+		{
+			tDiagCtrl.u16NT51926I2cCommTime = NUMBER_ZERO;
+			u8Temp = M_GPIOSense_NT51926_Status_Get();
+			if((u8Temp != NT51925_STATUS_NORMAL) || (Memory_Pool_IcCommDiagnosis_Get() > NUMBER_ZERO))
+			{	
+				tDiagCtrl.u8NT51926I2cDebunce ++;
+				if(Memory_Pool_IcCommDiagnosis_Get() > NUMBER_ZERO)
+				{
+					Memory_Pool_IcCommDiagnosis_Set(NUMBER_ZERO);
+				}
+				else
+				{ 
+					Memory_Pool_NT51926Diagnosis_Set(Memory_Pool_NT51926Diagnosis_Get()|(((uint64_t)u8Temp)<<48U));
+				}
+			}
+			else
+			{
+				tDiagCtrl.u8NT51926I2cDebunce = NUMBER_ZERO;
+			}		
+			
+			if(tDiagCtrl.u8NT51926I2cDebunce >= C_DIAG_NT51926_Comm_DEBUNCE)
+			{
+				tDiagCtrl.u8NT51926I2cDebunce = C_DIAG_NT51926_Comm_DEBUNCE;
+				Memory_Pool_GeneralDiagnosis_Set(Memory_Pool_GeneralDiagnosis_Get() | (BIT_A3_PANEL_NT51926_COMM_ERROR_POS));
+			}			
+			else
+			{/*Nothing*/}		
+
+		}
+	}
+	else
+	{/*Nothing*/}
+}
+
+/******************************************************************************
  ;       Function Name			:	void C_TD7800_Manage_Init(void)
  ;       Function Description	:	This state will do power management initialize
  ;       Parameters				:	void
@@ -445,6 +501,8 @@ static void C_Diagnosis_ParaInit(void)
 	tDiagCtrl.u8NT51926TpRegDebunce_RECOV = NUMBER_ZERO;	
 	tDiagCtrl.u8LEDDriverRegDebunce = NUMBER_ZERO;
 	tDiagCtrl.u8LEDDriverRegDebunce_RECOV = NUMBER_ZERO;
+	tDiagCtrl.u16NT51926I2cCommTime = C_DIAG_NT51926_I2CTIME;
+	tDiagCtrl.u8NT51926I2cDebunce = NUMBER_ZERO;
 
 	tLedInt.u8DebounceHigh = NUMBER_ZERO;
 	tLedInt.u8DebounceLow = NUMBER_ZERO;
@@ -496,10 +554,18 @@ static void C_Diagnosis_ParaInit(void)
 	tP3V3Good.u8DebounceMax = DEBOUNCE_3_TIMES;
 	tP3V3Good.blEnable = true;
 
+	tIcComm.u8DebounceHigh = NUMBER_ZERO;
+	tIcComm.u8DebounceLow = NUMBER_ZERO;
+	tIcComm.u8NewGPIOStatus = GPIO_HIGH;
+	tIcComm.u8CurrentGPIOStatus = GPIO_HIGH;
+	tIcComm.u8DebounceMax = DEBOUNCE_3_TIMES;
+	tIcComm.blEnable = true;
+
+	Memory_Pool_IcCommDiagnosis_Set(NUMBER_ZERO);
+	
 #if(BACKDOOR_ICDIAG_OPEN)
 	ICDIAG_Initialize();
-#endif
-	
+#endif	
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -611,7 +677,7 @@ static void C_Diagnosis_Action(void)
 	/* Action State Machine. */
 	if(tDiagCtrl.DiagProtectAction == DIAG_ACTION_NONE) 
 	{
-		if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS)) > 0U)
+		if(((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS)) > 0U) || ((u16GeneralDiagnosis&(BIT_A3_PANEL_NT51926_COMM_ERROR_POS)) > 0U))
 		{
 			tDiagCtrl.DiagProtectAction=DIAG_ACTION_SHUTDOWN;
 			Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
@@ -753,11 +819,17 @@ static void C_Diagnosis_Control(void)
 				if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
 				{
 					C_Diagnosis_IO_DispFaultMaster((uint16_t)(TIME_10ms)- 1U);
+					C_Diagnosis_IC_Communitation((uint16_t)(TIME_10ms)- 1U);
 				}			
 				else
 				{ /* Nothing */}			
 #endif
-				C_Diagnosis_IO_LedInt((uint16_t)(TIME_10ms)- 1U);
+				if((Memory_Pool_DisplayStatus_Get() & BIT_BL_ST_POS) == BIT_BL_ST_POS)
+				{
+					C_Diagnosis_IO_LedInt((uint16_t)(TIME_10ms)- 1U);
+				}
+				else
+				{ /* Nothing */}
 			}
 			else
 			{/*Nothing*/}

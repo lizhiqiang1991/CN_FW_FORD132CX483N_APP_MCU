@@ -35,6 +35,7 @@
 #define C_DIAG_NT51926_I2CTIME				250U /*Unit: 1ms*/
 #define C_DIAG_LP8864_REG_DEBUNCE			4U 
 #define C_DIAG_NT51926_REG_DEBUNCE			4U
+#define C_DIAG_NT51926_Comm_DEBUNCE			4U
 
 
 #define EVENT_MESSAGE_DISANOSIS_ENABLE		EVENT_MESSAGE
@@ -74,7 +75,11 @@ typedef struct
 	uint8_t  u8NT51926DpRegDebunce;
 	uint8_t  u8NT51926DpRegDebunce_RECOV;	
 	uint8_t  u8NT51926TpRegDebunce;	
-	uint8_t  u8NT51926TpRegDebunce_RECOV;	
+	uint8_t  u8NT51926TpRegDebunce_RECOV;
+
+	uint16_t u16NT51926I2cCommTime;
+	uint8_t  u8NT51926I2cDebunce;
+
 
 }tdiagnosis_ctrl_def;
 

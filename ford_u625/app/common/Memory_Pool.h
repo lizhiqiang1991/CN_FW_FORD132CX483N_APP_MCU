@@ -156,6 +156,7 @@ typedef struct
     uint16_t u16GeneralDiagnosis;
     uint64_t u64LEDDriverDiagnosis;
     uint64_t u64NT51926Diagnosis;
+	uint16_t u16IcCommunicationDiagnosis;
 } tdiagnosis_def;
 
 typedef struct
@@ -292,6 +293,9 @@ uint64_t Memory_Pool_LEDDiagnosis_Get(void);
 
 void Memory_Pool_NT51926Diagnosis_Set(uint64_t u64SetValue);
 uint64_t Memory_Pool_NT51926Diagnosis_Get(void);
+
+void Memory_Pool_IcCommDiagnosis_Set(uint16_t u16SetValue);
+uint16_t Memory_Pool_IcCommDiagnosis_Get(void);
 
 void Memory_Pool_DisplayStatusBp_Set(uint32_t u32SetValue);
 uint32_t Memory_Pool_DisplayStatusBp_Get(void);

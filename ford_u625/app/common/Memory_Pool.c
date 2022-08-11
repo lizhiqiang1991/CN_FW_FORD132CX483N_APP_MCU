@@ -6,6 +6,7 @@
 #include "M_FPNCtrl.h"
 #include "ICDiagApp.h"
 #include "M_TemperatureDerating.h"
+#include "M_DisplayManage.h"
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 #include "M_BatteryProtect.h"
 #endif
@@ -15,7 +16,7 @@ tdata_collection_def gtDataCollectInfo;
 tbacklight_def gtBacklightInfo;
 ttemperture_def gtTemperatureInfo;
 tbatt_protect_def gtBattProtectInfo;
-tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U};
+tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U, .u16IcCommunicationDiagnosis = NUMBER_ZERO};
 tpower_management_def gtPowerManageInfo;
 
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
@@ -51,7 +52,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.01.05" };
+const uint8_t cmu8McuVersion[] = { "T.01.02.06" };
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1039,6 +1040,42 @@ uint64_t Memory_Pool_NT51926Diagnosis_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
+void Memory_Pool_IcCommDiagnosis_Set(uint16_t u16SetValue)
+{
+	if(u16SetValue > NUMBER_ZERO ) 
+	{
+		if(u16SetValue >= 65535U)
+		{
+			u16SetValue = 65535U;
+		}
+		else
+		{/* Nothing */}
+		M_DM_I2cMasterInit();
+	}
+	else
+	{/* Nothing */}
+	
+    gtDiagnosisInfo.u16IcCommunicationDiagnosis = u16SetValue;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+uint16_t Memory_Pool_IcCommDiagnosis_Get(void)
+{
+    return gtDiagnosisInfo.u16IcCommunicationDiagnosis;
+}
+
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
 void Memory_Pool_DisplayStatusBp_Set(uint32_t u32SetValue)
 {
     gtDiagnosisInfo.u32DisplayStatusBp = u32SetValue;
@@ -1638,8 +1675,10 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
     {
         case CMD_DISPLAY_STATUS:
             *(pDataBuffer + 1U) = gtDiagnosisInfo.u32DisplayStatus & 0xFFU;
+#if (FORD_I2CCOMV1P9)
+			*(pDataBuffer + 2U) = (gtDiagnosisInfo.u32DisplayStatus >> 8U) & 0x07U;
+#elif (FORD_SPSSV1P0 || FORD_SPSSV1P1)
             *(pDataBuffer + 2U) = (gtDiagnosisInfo.u32DisplayStatus >> 8U) & 0xC7U;
-#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)
             *(pDataBuffer + 3U) = (gtDiagnosisInfo.u32DisplayStatus >> 16U) & 0x00;
 #endif
             /* Clear all latched flags when actual status released*/

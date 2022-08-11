@@ -20,4 +20,8 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void);
 void M_GPIOSense_LED_Driver_DiagClear(void);
 #endif
 uint64_t M_GPIOSense_DisplayFault_Read(void);
+uint8_t M_GPIOSense_NT51926_Status_Get(void);
+
 #endif
+
+
