@@ -11,31 +11,24 @@
 #include "main.h"
 #include "public.h"
 #include "ICDiagApp.h"
+#include "M_TemperatureDerating.h"
 
 /* -- Marco Define -- */
-#define CCOMMUNICATION_EEPROM_FACTORYDATA_USED_SIZE 25U
-#define CCOMMUNICATION_EEPROM_FACTORYDATA_RESERVED_SIZE 7U
-#define CCOMMUNICATION_EEPROM_FACTORYDATA_SIZE (CCOMMUNICATION_EEPROM_FACTORYDATA_USED_SIZE + CCOMMUNICATION_EEPROM_FACTORYDATA_RESERVED_SIZE)
-#define CCOMMUNICATION_EEPROM_FACTORYDATA_NUMBER 4U
-#define CCOMMUNICATION_EEPROM_DATA_SIZE (CCOMMUNICATION_EEPROM_FACTORYDATA_SIZE * CCOMMUNICATION_EEPROM_FACTORYDATA_NUMBER)
-   
-/* -- Type Define -- */
-typedef struct
-{
-	uint8_t u8UsedData[CCOMMUNICATION_EEPROM_FACTORYDATA_USED_SIZE];
-	uint8_t u8Reserved[CCOMMUNICATION_EEPROM_FACTORYDATA_RESERVED_SIZE];
-}CCommunication_FactoryData;
+#define CCOMMUNICATION_FLASH_FACTORYDATA_START_OFFSET ADDR_DELIVERY_ASSEMBLY
+#define CCOMMUNICATION_FLASH_FACTORYDATA_SIZE 32U
+#define CCOMMUNICATION_FLASH_FACTORYDATA_NUMBER 4U
+#define CCOMMUNICATION_FLASH_FACTORYALLDATA_SIZE (CCOMMUNICATION_FLASH_FACTORYDATA_SIZE * CCOMMUNICATION_FLASH_FACTORYDATA_NUMBER)
 
 /* -- Type Define -- */
 typedef struct
 {
-	uint8_t u8UsedData[CCOMMUNICATION_EEPROM_FACTORYDATA_USED_SIZE];
-	uint8_t u8Reserved[CCOMMUNICATION_EEPROM_FACTORYDATA_RESERVED_SIZE];
-}CCommunication_FactoryData2;
+	uint8_t u8UsedData[25U];
+	uint8_t u8Reserved[7U];
+}CCommunication_FactoryData;
 
 typedef union
 {
-	uint8_t u8Byte[CCOMMUNICATION_EEPROM_DATA_SIZE];
+	uint8_t u8Byte[CCOMMUNICATION_FLASH_FACTORYALLDATA_SIZE];
 	struct
 	{
 		CCommunication_FactoryData DeliveryData;
@@ -74,18 +67,20 @@ volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
  ;       Return Values			:	void
  ;		Source ID				:
  ******************************************************************************/
-static void C_Communication_EEPROM_Read(void)
+static void C_Communication_Flash_Read(void)
 {
-	uint8_t u8FactoryDataIndex = 0;
-	uint32_t u32FactoryDataOffset = 0;
+	uint8_t u8FlashDataIndex = 0;
+	uint32_t u32FlashDataOffset = 0;
 	CCommunication_AllFactoryData cCommunicaiotnAllFactoryData;
 
+	/* Reset Temp All Factory Data */
 	memset(cCommunicaiotnAllFactoryData.u8Byte , 0x00U , sizeof(CCommunication_AllFactoryData));
+
 	/* Read All Factory Data */
-	for(u8FactoryDataIndex = 0 ; u8FactoryDataIndex < CCOMMUNICATION_EEPROM_FACTORYDATA_NUMBER ; u8FactoryDataIndex++)
+	for(u8FlashDataIndex = 0 ; u8FlashDataIndex < CCOMMUNICATION_FLASH_FACTORYDATA_NUMBER ; u8FlashDataIndex++)
 	{
-		u32FactoryDataOffset = (uint32_t)(u8FactoryDataIndex) * (uint32_t)(CCOMMUNICATION_EEPROM_FACTORYDATA_SIZE);
-		MFixedFlashAccess_ReadPage(u32FactoryDataOffset, (cCommunicaiotnAllFactoryData.u8Byte + u32FactoryDataOffset), CCOMMUNICATION_EEPROM_FACTORYDATA_SIZE);
+		u32FlashDataOffset = (uint32_t)(u8FlashDataIndex) * (uint32_t)(CCOMMUNICATION_FLASH_FACTORYDATA_SIZE);
+		MFixedFlashAccess_ReadPage((u32FlashDataOffset + CCOMMUNICATION_FLASH_FACTORYDATA_START_OFFSET), (cCommunicaiotnAllFactoryData.u8Byte + u32FlashDataOffset), CCOMMUNICATION_FLASH_FACTORYDATA_SIZE);
 	}
 
 	/* Update Data to Memory Pool */
@@ -96,6 +91,7 @@ static void C_Communication_EEPROM_Read(void)
 	Memory_Pool_FPNMain_Set(mu8Main , sizeof(mu8Main));
 	Memory_Pool_FPNID_Set(cCommunicaiotnAllFactoryData.FactoryData.DisplayIDData.u8UsedData, sizeof(cCommunicaiotnAllFactoryData.FactoryData.DisplayIDData.u8UsedData));
 	Memory_Pool_FPNProductionPhase_Set(cCommunicaiotnAllFactoryData.FactoryData.ProductionPhaseData.u8UsedData[0]);
+
 }
 /******************************************************************************
  ;       Function Name			:	void C_TD7800_Manage_Init(void)
@@ -104,7 +100,7 @@ static void C_Communication_EEPROM_Read(void)
  ;       Return Values			:	void
  ;		Source ID				:
  ******************************************************************************/
-static void C_Communication_EEPROM_Write(uint8_t u8Case)
+static void C_Communication_Flash_Write(uint8_t u8Case)
 {
 	tFPN_ctrl_def tFPNCtrlDelivery = {NUMBER_ZERO};
 	tFPN_ctrl_def tFPNCtrlSerNum = {NUMBER_ZERO};
@@ -325,7 +321,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		case CMD_SERIAL_NUMBER_DATA:
 		case CMD_LOCK_PRODUCTION_PHASE_BYTE:
 		case PRODUCTION_PHASE_BYTE:
-			(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_EEPROM_CONTROL);
+			(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_FLASH_WRITE_CONTROL);
 		break;
 		
 		default:
@@ -578,7 +574,7 @@ static void C_Communiction_Init(void)
 				HAL_GPIO_Toggle( U301_INTB_IN_PORT,  U301_INTB_IN_PIN); 
 #endif
 				__disable_irq();
-				C_Communication_EEPROM_Read();  /* Do this function use 91us */
+				C_Communication_Flash_Read();  /* Do this function use 91us */
 				__enable_irq();
 				tCommunicationTask.u16Timer1 = TIME_DISABLE;
 #if(DEBUG_POWER_UP)				
@@ -612,14 +608,14 @@ static void C_Communiction_Process(void)
 {
 	switch (Task_Current_Event_Get())
 	{
-		case EVENT_FIRST :
+		case EVENT_FIRST:
 			/* Enable EVENT_TIMER_INTB_ROUNTINE */
 			tCommunicationTask.u16Timer2 = TIME_2ms;
 			tCommunicationTask.u16Timer1 = TIME_DISABLE;
 		break;
 		
-		case EVENT_MESSAGE_EEPROM_CONTROL :
-			C_Communication_EEPROM_Write(Memory_Pool_EppromIndex_Get());
+		case EVENT_MESSAGE_FLASH_WRITE_CONTROL:
+			C_Communication_Flash_Write(Memory_Pool_EppromIndex_Get());
 		break;
 
 		case EVENT_MESSAGE_START_INTB_STRATEGY:

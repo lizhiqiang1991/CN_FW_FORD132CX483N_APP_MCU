@@ -34,7 +34,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.01.02" };
+const uint8_t cmu8McuVersion[] = { "T.01.02.07" };
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1973,15 +1973,15 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 #endif
 
 #if(BACKDOOR_WRITE_DERATINGDATA)
-        case CMD_DERATING_THRESHOLD_GET:
+        case CMD_DERATING_LIMITED_TEMPERATURES_GET:
             /* Read Derating Limited Temperatures */
             TemperatureDerating_LimitedTemperature_Get((pDataBuffer + 1U), TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH);
             *pLength = TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH + LEN_SUBADDRESS;
             break;
         case CMD_DERATING_TABLE_GET:
             /* Read Derating Table */
-            TemperatureDerating_DeratingTable_Get((pDataBuffer + 1U), TEMP_DERATING_TABLE_TEMPERATURE_LENGTH);
-            *pLength = TEMP_DERATING_TABLE_TEMPERATURE_LENGTH + LEN_SUBADDRESS;
+            TemperatureDerating_DeratingTable_Get((pDataBuffer + 1U), TEMP_DERATING_TABLE_SIZE);
+            *pLength = TEMP_DERATING_TABLE_SIZE + LEN_SUBADDRESS;
             break;
 #endif
 			
@@ -2086,8 +2086,9 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 #endif
 
 #if(BACKDOOR_WRITE_DERATINGDATA)
-        case CMD_DERATING_DATA_SET:
+        case CMD_DERATING_DATAS_SET:
             TemperatureDerating_DeratingCalibrationData_Set(pCmdBuffer + 1U);
+            break;
 #endif		
         default:
             break;

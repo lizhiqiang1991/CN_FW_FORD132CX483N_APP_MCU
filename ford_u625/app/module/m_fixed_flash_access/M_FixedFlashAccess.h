@@ -16,7 +16,7 @@ extern "C" {
 /* -- Extern Global Variables -- */
 
 /* -- Extern Functions -- */
-extern bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ExternalSetBuffer, uint8_t ExternalSetBufferSize);
-extern bool MFixedFlashAccess_ReadPage(uint32_t u32AddrOffset, uint8_t *ExternalGetBuffer, uint8_t ExternalGetBufferSize);
+extern bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ptrExternalSetBuffer, uint8_t u8ExternalSetBufferSize);
+extern bool MFixedFlashAccess_ReadPage(uint32_t u32AddrOffset, uint8_t *ptrExternalGetBuffer, uint8_t u8ExternalGetBufferSize);
 
 #endif

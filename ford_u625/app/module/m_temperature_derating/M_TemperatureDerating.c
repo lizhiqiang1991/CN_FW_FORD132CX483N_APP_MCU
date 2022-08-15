@@ -3,18 +3,22 @@
  * 
  * @brief The program could execute a specific derating method according to backlight temperature.
  * 
- * @details 1.To build a derating table which saves each backlight percentage according to backlight temperature.\n
- * 2.To build a smooth dimming control table which changes 10% per 200 milli second.\n
- * 3.To build a state machine mechanism according to backlight temperature.
+ * @details 1.[0.1]To build a derating table which saves each backlight percentage according to backlight temperature.\n
+ * 2.[0.1]To turn off a smooth dimming control at this module.\n
+ * 3.[0.1]To build a state machine mechanism according to backlight temperature.\n
+ * 4.[0.2]To add controling int_terr callback and saving derating calibration data callback funcs.\n
+ * 5.[0.2]To add getting ambient temperature callback func.\n
+ * 6.[0.2]To add accessing flash for calibration data.\n
+ * 
  * 
  * @note After building a derating method and dimming control,
  * you must register these by DeratingApp_RegisterElement() and DeratingApp_RegisterDimmingControl(). 
  * 
  * @author Orlando Huang (Orlando.Huang@auo.com)
  * 
- * @version 0.1
+ * @version 0.2
  * 
- * @date 2022-05-04
+ * @date 2022-08-12
  * 
  */
 
@@ -36,10 +40,52 @@ typedef struct
     int16_t DeratingTemperature; /**< To save near temperature according to system's backlight temperature. */
     int16_t DeratingPWM; /**< To save the PWM value according to DeratingTemperature value. */
 #endif
-}BacklightDeratingApp_DeratingTempToPWM_Typedef;
+}MTemperatureDeratingTempToPWM_Typedef;
 
 /* -- Global Variables -- */
-
+/**
+ * @brief Callback for controlling INT_TERR.
+ * 
+ * @details 1.If function pointer is null, doesn't control int terr.\n
+ * 2.If DeratingPWM is less than 100%, pull up int terr.\n
+ * 
+ */
+CALLBACK_CTRL_TERR gCallbackCtrlTerrFunc = NULL;
+/**
+ * @brief Callback for fetching ambient temperature.
+ * 
+ * @details If function pointer is null, jump to normal state.
+ * 
+ */
+CALLBACK_GET_TEMPERATURE gCallbackGetTemperature = NULL;
+/**
+ * @brief Callback for accsessing calibration data of flash.
+ * 
+ * @details If function pointer is null, calibration datas are configed default values.
+ * 
+ */
+CALLBACK_ACCESS_FLASH_CALIBRATIONDATA gCallbackAccessFlashCalibrationData = NULL;
+/**
+ * @brief Variable for controlling enable or disable temperature derating.
+ * 
+ * @details If variable is DERATING_DISABLE, temperature derating is disable.
+ * 
+ */
+TEMP_DERATING_ENABLE_DISABLE_STATUS gTempDeratingEnableDisableStatus = DERATING_ENABLE;
+/**
+ * @brief Saved calibration datas from flash.
+ * 
+ * @details When it is init, datas are loaded default values.
+ * 
+ */
+MTemperatureDeratingAccessFlashCalibrationData AccessFlashCalibrationData;
+/**
+ * @brief Saved calibration data's address from flash.
+ * 
+ * @details When it is init, datas are loaded default values.
+ * 
+ */
+MTemperatureDeratingAccessFlashCalibrationData *ptrAccessFlashCalibrationData = &AccessFlashCalibrationData;
 #if(TEMP_DERATINGAPP_TEST)
 /**
  * @brief A simulate backlight temperature is used for testing function.
@@ -48,8 +94,20 @@ typedef struct
  * 
  */
 #if(DERATINGAPP_FLOAT_OPERATION)
+/**
+ * @brief To replace BL temperatrue for testing.
+ * 
+ * @details None.
+ * 
+ */
 float gSimuBLTemperature = (TEMP_DERATING_DEFAULT_DERA_TEMP - 1.0);
 #else
+/**
+ * @brief To replace BL temperatrue for testing.
+ * 
+ * @details None.
+ * 
+ */
 int16_t gSimuBLTemperature = (TEMP_DERATING_DEFAULT_DERA_TEMP - (1*TEMP_DERATING_TEMP_RESOLUTION));
 #endif
 #endif
@@ -60,31 +118,60 @@ int16_t gSimuBLTemperature = (TEMP_DERATING_DEFAULT_DERA_TEMP - (1*TEMP_DERATING
  * 
  */
 DeratingApp_Status PreDeratingStatus = INIT_MODE;
+#if(DERATINGAPP_FLOAT_OPERATION)
+/**
+ * @brief The state is from normal to derating if the backlight temperature is over it.
+ * 
+ * @details The default value is equal to 70 celisius.
+ * 
+ */
+static float gBLDeratingLimitedTemp = TEMP_DERATING_DEFAULT_DERA_TEMP;
+/**
+ * @brief The backlight control module state is from derating to shut down if the backlight temperature is over it.
+ * 
+ * @details The default value is equal to 96 celisius.
+ * 
+ */
+static float gBLShutDownLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP;
+/**
+ * @brief The backlight control module state is from shut down to derating if the backlight temperature is over it.
+ * 
+ * @details The default value is equal to 96 celisius.
+ * 
+ */
+static float gBLShutDownRelLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP;
+#else
 /**
  * @brief The state is from normal to derating if the backlight temperature is over it.
  * 
  * @details The value is equal to 70 celisius,it could start getting the PWM by looking for derating table.
  * 
  */
-#if(DERATINGAPP_FLOAT_OPERATION)
-static float gBLDeratingLimitedTemp = TEMP_DERATING_DEFAULT_DERA_TEMP;
-static float gBLShutDownLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP;
-static float gBLShutDownRelLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP;
-static float gBLReduceLimitedTemp = TEMP_DERATING_DEFAULT_REDUCEBL_TEMP;
-#else
 static int16_t gBLDeratingLimitedTemp = TEMP_DERATING_DEFAULT_DERA_TEMP;
-static int16_t gBLShutDownLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP;
-static int16_t gBLShutDownRelLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP;
-static int16_t gBLReduceLimitedTemp = TEMP_DERATING_DEFAULT_REDUCEBL_TEMP;
-#endif
 /**
- * @brief A look up table for catching the PWM duty according to backlight temperature. 
+ * @brief The backlight control module state is from derating to shut down if the backlight temperature is over it.
  * 
- * @details When the backlight temperature is over gBLDeratingLimitedTemp,the PWM duty is changed by the look up table.
+ * @details The default value is equal to 96 celisius.
  * 
  */
+static int16_t gBLShutDownLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP;
+/**
+ * @brief The backlight control module state is from shut down to derating if the backlight temperature is over it.
+ * 
+ * @details The default value is equal to 96 celisius.
+ * 
+ */
+static int16_t gBLShutDownRelLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP;
+#endif
+
 #if(DERATINGAPP_FLOAT_OPERATION)
-static float gDeratingTable[TEMP_DERATING_TABLE_SIZE] = 
+/**
+ * @brief A look up default table for catching the PWM duty according to backlight temperature. 
+ * 
+ * @details When table is not loaded from flash, the PWM duty is recoverd by the look up table.
+ * 
+ */
+static const float gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] = 
 {
     100.0f, /**< 70 Degree. */
     100.0f, /**< 71 Degree. */
@@ -118,8 +205,21 @@ static float gDeratingTable[TEMP_DERATING_TABLE_SIZE] =
     10.0f, /**< 99 Degree. */
     10.0f, /**< 100 Degree. */
 };
+/**
+ * @brief A look up table for catching the PWM duty according to backlight temperature. 
+ * 
+ * @details When the backlight temperature is over gBLDeratingLimitedTemp,the PWM duty is changed by the look up table.
+ * 
+ */
+static float gDeratingTable[TEMP_DERATING_TABLE_SIZE];
 #else
-static int16_t gDeratingTable[TEMP_DERATING_TABLE_SIZE] = 
+/**
+ * @brief A look up default table for catching the PWM duty according to backlight temperature. 
+ * 
+ * @details When table is not loaded from flash, the PWM duty is recoverd by the look up table.
+ * 
+ */
+static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] = 
 {
     100, /**< 70 Degree. */
     100, /**< 71 Degree. */
@@ -153,15 +253,23 @@ static int16_t gDeratingTable[TEMP_DERATING_TABLE_SIZE] =
     10, /**< 99 Degree. */
     10, /**< 100 Degree. */
 };
+/**
+ * @brief A look up table for catching the PWM duty according to backlight temperature. 
+ * 
+ * @details When the backlight temperature is over gBLDeratingLimitedTemp,the PWM duty is changed by the look up table.
+ * 
+ */
+static int16_t gDeratingTable[TEMP_DERATING_TABLE_SIZE];
 #endif
+/**
+ * @brief Records if the calibration datas of flash are updated.
+ * 
+ * @details When reveiving calibration data set I2C commnad, it is changed to true.
+ * 
+ */
+static bool bDeratingCalibrationDataUpdatedFlash = false;
 
 /* -- Local Functions -- */
-
-/* -- Global Functions -- */
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Init(void);
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Boot(void);
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Derating(void);
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Normal(void);
 /**
  * @brief When the system start,the function will be called.
  * 
@@ -180,16 +288,18 @@ DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Normal(void);
  * @enddot 
  * 
  */
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Init(void)
+static DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Init(void)
 {
     DeratingApp_Status DeratingStatus = PreDeratingStatus;
     DeratingApp_ReturnMethod_Typedef ReturnMethod;
 
     DeratingStatus = NORMAL;
 
+    gTempDeratingEnableDisableStatus = DERATING_ENABLE;
+
     PreDeratingStatus = DeratingStatus; 
     ReturnMethod.MethodStatus = DeratingStatus;
-    ReturnMethod.DeratingOutData = (int16_t)TEMP_DERATING_DEFAULT_OUTDATA;
+    ReturnMethod.DeratingOutData = TEMP_DERATING_DEFAULT_OUTDATA;
 
     return ReturnMethod;
 }
@@ -209,14 +319,14 @@ DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Init(void)
  * @enddot 
  * 
  */
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Boot(void)
+static DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Boot(void)
 {
     DeratingApp_ReturnMethod_Typedef ReturnMethod;
     DeratingApp_Status DeratingStatus = DERATING;
 
     PreDeratingStatus = DeratingStatus;
     ReturnMethod.MethodStatus = DeratingStatus;
-    ReturnMethod.DeratingOutData = (int16_t)TEMP_DERATING_DEFAULT_OUTDATA;
+    ReturnMethod.DeratingOutData = TEMP_DERATING_DEFAULT_OUTDATA;
 
     return ReturnMethod;
 }
@@ -234,68 +344,100 @@ DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Boot(void)
  * digraph BLDerating_State_Machine_Mechanism {
  *  "Derating" -> "Derating" [label = "BLTemperature >= 70 celies."];
  *  "Derating" -> "Normal" [label = "BLTemperature < 70 celies."];
+ *  "Derating" -> "Normal" [label = "Disable temperature derating."];
  * }
  * @enddot 
  * 
  */
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Derating(void)
+static DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Derating(void)
 {
     DeratingApp_ReturnMethod_Typedef ReturnMethod;
     DeratingApp_Status DeratingStatus = PreDeratingStatus;
-    BacklightDeratingApp_DeratingTempToPWM_Typedef DeratingTempToPWMUp;
-    BacklightDeratingApp_DeratingTempToPWM_Typedef DeratingTempToPWMDown;
+    MTemperatureDeratingTempToPWM_Typedef DeratingTempToPWMUp;
+    MTemperatureDeratingTempToPWM_Typedef DeratingTempToPWMDown;
     int16_t i16DeratingTableIndex = 0U;
 
 #if(DERATINGAPP_FLOAT_OPERATION)
-    float BLTemperature = (float)(Memory_Pool_PCBATemp_Get());
+    float BLTemperature = (float)(gCallbackGetTemperature());
 #else
-    int16_t BLTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
+    int16_t BLTemperature = gCallbackGetTemperature()*TEMP_DERATING_TEMP_RESOLUTION;
 #endif
 
 #if(TEMP_DERATINGAPP_TEST)
     BLTemperature = gSimuBLTemperature;
 #endif
 
-    if(BLTemperature >= gBLDeratingLimitedTemp)
+    if((gCallbackGetTemperature == NULL)\
+        || (DERATING_DISABLE == gTempDeratingEnableDisableStatus))
     {
-        DeratingStatus = DERATING;
+        DeratingStatus = NORMAL;
+        gCallbackCtrlTerrFunc(TEMP_DERATING_TERR_CLEAR);
+        ReturnMethod.DeratingOutData = TEMP_DERATING_DEFAULT_OUTDATA;
     }
     else
     {
-        DeratingStatus = NORMAL;
-    }
+        if(BLTemperature >= gBLDeratingLimitedTemp)
+        {
+            DeratingStatus = DERATING;
+        }
+        else
+        {
+            DeratingStatus = NORMAL;
+        }
+        
+        /* PWM is calculate from derating table.The relationship of two items is linear. */
+#if(DERATINGAPP_FLOAT_OPERATION)
+        i16DeratingTableIndex = (BLTemperature - gBLDeratingLimitedTemp);
+#else
+        i16DeratingTableIndex = (BLTemperature - gBLDeratingLimitedTemp) / TEMP_DERATING_TEMP_RESOLUTION;
+#endif
+        /* Avoid to go out of array range. */
+        i16DeratingTableIndex = (i16DeratingTableIndex > (TEMP_DERATING_TABLE_SIZE - 1))?(TEMP_DERATING_TABLE_SIZE - 1):i16DeratingTableIndex;
+
+        DeratingTempToPWMDown.DeratingPWM = gDeratingTable[i16DeratingTableIndex];
+#if(DERATINGAPP_FLOAT_OPERATION)
+        DeratingTempToPWMDown.DeratingTemperature = gBLDeratingLimitedTemp + (float)(i16DeratingTableIndex);
+#else
+        DeratingTempToPWMDown.DeratingTemperature = gBLDeratingLimitedTemp + (i16DeratingTableIndex * TEMP_DERATING_TEMP_RESOLUTION);
+#endif
+        DeratingTempToPWMUp.DeratingPWM = gDeratingTable[i16DeratingTableIndex + 1U];
+#if(DERATINGAPP_FLOAT_OPERATION)
+        DeratingTempToPWMUp.DeratingTemperature = gBLDeratingLimitedTemp + (float)(i16DeratingTableIndex + 1U);
+#else
+        DeratingTempToPWMUp.DeratingTemperature = gBLDeratingLimitedTemp + ((i16DeratingTableIndex + 1) * TEMP_DERATING_TEMP_RESOLUTION);
+#endif
+        ReturnMethod.DeratingOutData = DeratingTempToPWMDown.DeratingPWM + \
+            (((BLTemperature - DeratingTempToPWMDown.DeratingTemperature)\
+            *(DeratingTempToPWMUp.DeratingPWM - DeratingTempToPWMDown.DeratingPWM))\
+            /(DeratingTempToPWMUp.DeratingTemperature - DeratingTempToPWMDown.DeratingTemperature));
+
+        /* Control Derating Alert Flag. */
+        if(ReturnMethod.DeratingOutData < TEMP_DERATING_DEFAULT_OUTDATA)
+        {
+            if(gCallbackCtrlTerrFunc == NULL)
+            {
+                /* Do nothing */
+            }
+            else
+            {
+                gCallbackCtrlTerrFunc(TEMP_DERATING_TERR_SET);
+            }    
+        }
+        else
+        {
+            if(gCallbackCtrlTerrFunc == NULL)
+            {
+                /* Do nothing */
+            }
+            else
+            {
+                gCallbackCtrlTerrFunc(TEMP_DERATING_TERR_CLEAR);
+            }
+        }
+    } 
 
     PreDeratingStatus = DeratingStatus;
     ReturnMethod.MethodStatus = DeratingStatus;
-
-    /* PWM is calculate from derating table. 
-    ; The relationship of two items is linear.
-    */
-#if(DERATINGAPP_FLOAT_OPERATION)
-    i16DeratingTableIndex = (BLTemperature - gBLDeratingLimitedTemp);
-#else
-    i16DeratingTableIndex = (BLTemperature - gBLDeratingLimitedTemp) / TEMP_DERATING_TEMP_RESOLUTION;
-#endif
-    /* Avoid to go out of array range. */
-    i16DeratingTableIndex = (i16DeratingTableIndex > (TEMP_DERATING_TABLE_SIZE - 1))?(TEMP_DERATING_TABLE_SIZE - 1):i16DeratingTableIndex;
-
-    DeratingTempToPWMDown.DeratingPWM = gDeratingTable[i16DeratingTableIndex];
-#if(DERATINGAPP_FLOAT_OPERATION)
-    DeratingTempToPWMDown.DeratingTemperature = gBLDeratingLimitedTemp + (float)(i16DeratingTableIndex);
-#else
-    DeratingTempToPWMDown.DeratingTemperature = gBLDeratingLimitedTemp + (i16DeratingTableIndex * TEMP_DERATING_TEMP_RESOLUTION);
-#endif
-    DeratingTempToPWMUp.DeratingPWM = gDeratingTable[i16DeratingTableIndex + 1U];
-#if(DERATINGAPP_FLOAT_OPERATION)
-    DeratingTempToPWMUp.DeratingTemperature = gBLDeratingLimitedTemp + (float)(i16DeratingTableIndex + 1U);
-#else
-    DeratingTempToPWMUp.DeratingTemperature = gBLDeratingLimitedTemp + ((i16DeratingTableIndex + 1) * TEMP_DERATING_TEMP_RESOLUTION);
-#endif
-    ReturnMethod.DeratingOutData = DeratingTempToPWMDown.DeratingPWM + \
-        (((BLTemperature - DeratingTempToPWMDown.DeratingTemperature)\
-        *(DeratingTempToPWMUp.DeratingPWM - DeratingTempToPWMDown.DeratingPWM))\
-        /(DeratingTempToPWMUp.DeratingTemperature - DeratingTempToPWMDown.DeratingTemperature));
-
     return ReturnMethod;
 }
 /**
@@ -312,50 +454,170 @@ DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Derating(void)
  * digraph BLDerating_State_Machine_Mechanism {
  *  "Normal" -> "Derating" [label = "BLTemperature >= 70 celies."];
  *  "Normal" -> "Normal" [label = "BLTemperature < 70 celies."];
+ *  "Normal" -> "Normal" [label = "Disable temperature derating."];
  * }
  * @enddot 
  * 
  */
-DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Normal(void)
+static DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Normal(void)
 {
     DeratingApp_ReturnMethod_Typedef ReturnMethod;
     DeratingApp_Status DeratingStatus = PreDeratingStatus;
 
 #if(DERATINGAPP_FLOAT_OPERATION)
-    float BLTemperature = (float)(Memory_Pool_PCBATemp_Get());
+    float BLTemperature = (float)(gCallbackGetTemperature());
 #else
-    int16_t BLTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
+    int16_t BLTemperature = gCallbackGetTemperature()*TEMP_DERATING_TEMP_RESOLUTION;
 #endif
 
 #if(TEMP_DERATINGAPP_TEST)
     BLTemperature = gSimuBLTemperature;
 #endif
 
-    if(BLTemperature >= gBLDeratingLimitedTemp)
-    {
-        DeratingStatus = DERATING;
-    }
-    else
+    if((gCallbackGetTemperature == NULL)\
+        || (DERATING_DISABLE == gTempDeratingEnableDisableStatus))
     {
         DeratingStatus = NORMAL;
     }
-
+    else
+    {
+        if(BLTemperature >= gBLDeratingLimitedTemp)
+        {
+            DeratingStatus = DERATING;
+        }
+        else
+        {
+            DeratingStatus = NORMAL;
+        }
+    } 
+    
     PreDeratingStatus = DeratingStatus;
     ReturnMethod.MethodStatus = DeratingStatus;
-    ReturnMethod.DeratingOutData = (int16_t)TEMP_DERATING_DEFAULT_OUTDATA;
+    ReturnMethod.DeratingOutData = TEMP_DERATING_DEFAULT_OUTDATA;
 
     return ReturnMethod;
 }
 /**
- * @brief To apply to DeratingApp.c for registering the backlight derating method.
+ * @brief Calibration datas are default values.
  * 
- * @details To register dimming control settings in order to control backlight smoothly.
+ * @details When reading calibration datas is not successfully, calibration datas are default values.
+ * 
+ * @note It's a local function.
+ * 
+ */
+static void TemperatureDerating_CalibrationDataInit(void)
+{  
+    gBLDeratingLimitedTemp = TEMP_DERATING_DEFAULT_DERA_TEMP;
+    gBLShutDownLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP;
+    gBLShutDownRelLimitedTemp = TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP;
+    memcpy(gDeratingTable, gDeratingDefaultTable, sizeof(gDeratingTable));
+}
+/**
+ * @brief Calibration dats are reloading from flash.
+ * 
+ * @details When system is over boot successfully, calibration datas are reading flash to load values.
+ * 
+ * @note It's a local function.
+ * 
+ */
+static void TemperatureDerating_CalibrationDataReloadFlash(void)
+{
+    float fConvertedTemp = 0.0f;
+    uint8_t *ptrDataAddress = NULL;
+    uint8_t u8DeratingTableIndex = 0U;
+    uint16_t u16TransfromData = 0U;
+
+    ptrDataAddress = AccessFlashCalibrationData.uDeratingLimitedTemperatures.DeratingLimitedTemperatures.u8DeratingTemperature; 
+
+    u16TransfromData = ((uint16_t)(*ptrDataAddress) << 8) | ((uint16_t)*(ptrDataAddress + 1U));
+
+    fConvertedTemp = (float)(u16TransfromData);
+    fConvertedTemp /= FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
+    fConvertedTemp += FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET;
+
+#if(DERATINGAPP_FLOAT_OPERATION)
+    gBLDeratingLimitedTemp = fConvertedTemp;
+#else
+    gBLDeratingLimitedTemp = (int16_t)(fConvertedTemp);
+#endif
+
+    ptrDataAddress = AccessFlashCalibrationData.uDeratingLimitedTemperatures.DeratingLimitedTemperatures.u8ShutDownTemperature; 
+
+    u16TransfromData = ((uint16_t)(*ptrDataAddress) << 8) | ((uint16_t)*(ptrDataAddress + 1U));
+
+    fConvertedTemp = (float)(u16TransfromData);
+    fConvertedTemp /= FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
+    fConvertedTemp += FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET;
+#if(DERATINGAPP_FLOAT_OPERATION)
+    gBLShutDownLimitedTemp = fConvertedTemp;
+#else
+    gBLShutDownLimitedTemp = (int16_t)(fConvertedTemp);
+#endif
+
+    ptrDataAddress = AccessFlashCalibrationData.uDeratingLimitedTemperatures.DeratingLimitedTemperatures.u8ShutDownRelTemperature; 
+
+    u16TransfromData = ((uint16_t)(*ptrDataAddress) << 8) | ((uint16_t)*(ptrDataAddress + 1U));
+
+    fConvertedTemp = (float)(u16TransfromData);
+    fConvertedTemp /= FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
+    fConvertedTemp += FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET;
+#if(DERATINGAPP_FLOAT_OPERATION)
+    gBLShutDownRelLimitedTemp = fConvertedTemp;
+#else
+    gBLShutDownRelLimitedTemp = (int16_t)(fConvertedTemp);
+#endif
+
+    ptrDataAddress = AccessFlashCalibrationData.u8DeratingTable;
+    for(u8DeratingTableIndex = 0U ; u8DeratingTableIndex < TEMP_DERATING_TABLE_SIZE ; u8DeratingTableIndex++)
+    {
+#if(DERATINGAPP_FLOAT_OPERATION)
+        gDeratingTable[u8DeratingTableIndex] = (float)(*(ptrDataAddress + u8DeratingTableIndex));
+#else
+        gDeratingTable[u8DeratingTableIndex] = (int16_t)(*(ptrDataAddress + u8DeratingTableIndex));
+#endif
+    }
+}
+
+/* -- Global Functions -- */
+/**
+ * @brief DeratingApp.c apply to execute temperature derating.
+ * 
+ * @details If CallbackGetTemperature is NULL, truns off temperature derating.\n
  * 
  * @note It is a global function.
  * 
  */
-void TemperatureDerating_Init(void)
+void TemperatureDerating_Init(CALLBACK_CTRL_TERR CallbackCtrlTerr,\
+CALLBACK_GET_TEMPERATURE CallbackGetTemperature,\
+CALLBACK_ACCESS_FLASH_CALIBRATIONDATA CallbackAccessFlashCalibrationData)
 {
+    /* Register callback func to control Terr. */
+    gCallbackCtrlTerrFunc = CallbackCtrlTerr;
+    /* Register callback func to get Temp. */
+    gCallbackGetTemperature = CallbackGetTemperature;
+    /* Register callback func to access flash calibration data. */
+    gCallbackAccessFlashCalibrationData = CallbackAccessFlashCalibrationData;
+    /* Loads calibration data */
+    if(gCallbackAccessFlashCalibrationData == NULL)
+    {
+        /* Calibration datas are default value. */
+        TemperatureDerating_CalibrationDataInit();
+    }
+    else
+    {
+        /* Gets calibration data are from flash. */
+        if(!gCallbackAccessFlashCalibrationData(ptrAccessFlashCalibrationData, DERATING_FLASH_OPERATE_READ))
+        {
+            /* Get faild to set calibration datas are default value. */
+            TemperatureDerating_CalibrationDataInit(); 
+        }
+        else
+        {
+            /* Loads calibration data */
+            TemperatureDerating_CalibrationDataReloadFlash();
+        }
+    }
+
     /* Register BL Derating Dimming */
     DeratingApp_RegisterElement(AMBIENT_TEMPERATURE,\
         TemperatureDerating_State_Init,\
@@ -364,12 +626,36 @@ void TemperatureDerating_Init(void)
         TemperatureDerating_State_Normal,\
         TEMP_DERATING_METHOD_PERIOD_TIME,\
         TEMP_DERATING_METHOD_CHECK_TIME
-    ); 
+    );
 }
 
 #if(DERATINGAPP_FLOAT_OPERATION)
+/**
+ * @brief To return limited temperature threshold.
+ * 
+ * @details By TEMP_DERATING_LIMITED_SELECTION to select a specific limited temperature.
+ * 
+ * @note It is a global function.
+ * 
+ * @param TEMP_DERATING_LIMITED_SELECTION Controls to return a specific limited temperature.
+ * 
+ * @return float A specific limited temperature.
+ * 
+ */
 float TemperatureDerating_GetLimitedTemperature(TEMP_DERATING_LIMITED_SELECTION TempDeratingLimitedSelection)
 #else
+/**
+ * @brief To return limited temperature threshold.
+ * 
+ * @details By TEMP_DERATING_LIMITED_SELECTION to select a specific limited temperature.
+ * 
+ * @note It is a global function.
+ * 
+ * @param TEMP_DERATING_LIMITED_SELECTION Controls to return a specific limited temperature.
+ * 
+ * @return int16_t A specific limited temperature.
+ * 
+ */
 int16_t TemperatureDerating_GetLimitedTemperature(TEMP_DERATING_LIMITED_SELECTION TempDeratingLimitedSelection)
 #endif
 {
@@ -389,169 +675,242 @@ int16_t TemperatureDerating_GetLimitedTemperature(TEMP_DERATING_LIMITED_SELECTIO
 
         case LIMITED_SHUTDOWN_REL_TEMP:
             return gBLShutDownRelLimitedTemp;
-
-        case LIMITED_REDUCE_BL_TEMP:
-            return gBLReduceLimitedTemp;
             break;
     }
 }
 
-#if(BACKDOOR_WRITE_DERATINGDATA)
 /**
- * @brief Setting DeratingLimitedTemp,ShutDownLimitedTemp and ShutDownRelLimitedTemp.
+ * @brief Getting DeratingLimitedTemp,ShutDownLimitedTemp and ShutDownRelLimitedTemp.
  * 
- * @param CalibrationElement 
+ * @details If u8CalibrationElementLength is more than TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH, getting data is not successfully.
  * 
- * @return true Success.
+ * @note It is a global function.
+ * 
+ * @param volatile uint8_t* Returned data's address.
+ * 
+ * @param Returned data's length.
+ * 
+ * @return true Getting data is successfully.
  *  
- * @return false Unsuccess.
+ * @return false Getting data is not successfully.
  *  
  */
-bool TemperatureDerating_LimitedTemperature_Get(volatile uint8_t *CalibrationElement, uint8_t CalibrationElementLength)
+bool TemperatureDerating_LimitedTemperature_Get(volatile uint8_t* ptrCalibrationElement, uint8_t u8CalibrationElementLength)
 {
     float fConvertedTemp = 0.0f;
     uint16_t u16ReturnedTemp = 0U;
 
-    if(CalibrationElementLength != TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH)
+    if(u8CalibrationElementLength != TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH)
     {
         return false;
     }
     else{/* NA */}
 
     /* Sets Derating Setting Temperature */
-    fConvertedTemp = (((float)(gBLDeratingLimitedTemp) - (float)TEMP_DERATING_OFFSET) / (float)TEMP_DERATING_RESOLUTION);
+    fConvertedTemp = (((float)(gBLDeratingLimitedTemp) - FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET)) * (float)FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
     u16ReturnedTemp = (uint16_t)(fConvertedTemp);
     /* Fills Data */
-    *CalibrationElement = (uint8_t)(u16ReturnedTemp >> 8);
-    *(CalibrationElement + 1U) = (uint8_t)(u16ReturnedTemp);
+    *ptrCalibrationElement = (uint8_t)(u16ReturnedTemp >> 8);
+    *(ptrCalibrationElement + 1U) = (uint8_t)(u16ReturnedTemp);
 
     /* Sets Shutdown Setting Temperature */
-    fConvertedTemp = (((float)(gBLShutDownLimitedTemp) - (float)TEMP_DERATING_OFFSET) / (float)TEMP_DERATING_RESOLUTION);
+    fConvertedTemp = (((float)(gBLShutDownLimitedTemp) - FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET)) * (float)FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
     u16ReturnedTemp = (uint16_t)(fConvertedTemp);
     /* Fills Data */
-    *(CalibrationElement + 2U) = (uint8_t)(u16ReturnedTemp >> 8);
-    *(CalibrationElement + 3U) = (uint8_t)(u16ReturnedTemp);
+    *(ptrCalibrationElement + 2U) = (uint8_t)(u16ReturnedTemp >> 8);
+    *(ptrCalibrationElement + 3U) = (uint8_t)(u16ReturnedTemp);
 
     /* Sets Shutdown Rel Setting Temperature */
-    fConvertedTemp = (((float)(gBLShutDownRelLimitedTemp) - (float)TEMP_DERATING_OFFSET) / (float)TEMP_DERATING_RESOLUTION);
+    fConvertedTemp = (((float)(gBLShutDownRelLimitedTemp) - FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET)) * (float)FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
     u16ReturnedTemp = (uint16_t)(fConvertedTemp);
     /* Fills Data */
-    *(CalibrationElement + 4U) = (uint8_t)(u16ReturnedTemp >> 8);
-    *(CalibrationElement + 5U) = (uint8_t)(u16ReturnedTemp);
-
-    /* Sets Shown TERR Temperature */
-    fConvertedTemp = (((float)(gBLReduceLimitedTemp) - (float)TEMP_DERATING_OFFSET) / (float)TEMP_DERATING_RESOLUTION);
-    u16ReturnedTemp = (uint16_t)(fConvertedTemp);
-    /* Fills Data */
-    *(CalibrationElement + 6U) = (uint8_t)(u16ReturnedTemp >> 8);
-    *(CalibrationElement + 7U) = (uint8_t)(u16ReturnedTemp);
+    *(ptrCalibrationElement + 4U) = (uint8_t)(u16ReturnedTemp >> 8);
+    *(ptrCalibrationElement + 5U) = (uint8_t)(u16ReturnedTemp);
 
     return true;
 }
 /**
- * @brief 
+ * @brief Getting contents of temperature derating duty table.
  * 
- * @return volatile* 
+ * @details If u8CalibrationElementLength is more than TEMP_DERATING_TABLE_SIZE, getting data is not successfully.
+ * 
+ * @note It is a global function.
+ * 
+ * @param volatile uint8_t* Returned data's address.
+ * 
+ * @param Returned data's length.
+ * 
+ * @return true Getting data is successfully.
+ *  
+ * @return false Getting data is not successfully.
+ * 
  */
-bool TemperatureDerating_DeratingTable_Get(volatile uint8_t *CalibrationElement, uint8_t CalibrationElementLength)
+bool TemperatureDerating_DeratingTable_Get(volatile uint8_t* ptrCalibrationElement, uint8_t u8CalibrationElementLength)
 {
     uint8_t u8DeratingTableIndex = 0;
 
-    if(CalibrationElementLength != TEMP_DERATING_TABLE_TEMPERATURE_LENGTH)
+    if(u8CalibrationElementLength != TEMP_DERATING_TABLE_SIZE)
     {
         return false;
     }
     else{/* NA */}
 
-    for(u8DeratingTableIndex = 0 ; u8DeratingTableIndex < CalibrationElementLength; u8DeratingTableIndex++)
+    for(u8DeratingTableIndex = 0 ; u8DeratingTableIndex < u8CalibrationElementLength; u8DeratingTableIndex++)
     {
-        *(CalibrationElement + u8DeratingTableIndex) = (uint8_t)(*(gDeratingTable + u8DeratingTableIndex));
+        *(ptrCalibrationElement + u8DeratingTableIndex) = (uint8_t)(*(gDeratingTable + u8DeratingTableIndex));
     }
 
     return true;
 }
 /**
- * @brief 
+ * @brief Setting temperature derating calibration datas.
  * 
- * @param DeratingCalibrationDataIndex 
+ * @details *ptrCalibrationElement indicates which data is changed.
  * 
- * @param SettingData 
+ * @note It is a global function.
  * 
- * @return true 
+ * @param volatile uint8_t* Setting address of command.
  * 
- * @return false
+ * @return true Setting data is successfully.
+ * 
+ * @return false Setting data is not successfully.
  *  
  */
-bool TemperatureDerating_DeratingCalibrationData_Set(volatile uint8_t *CalibrationElement)
+bool TemperatureDerating_DeratingCalibrationData_Set(volatile uint8_t* ptrCalibrationElement)
 {
     float fConvertedTemp = 0.0f;
+    bool bResult = false;
+    uint16_t u16TransfromData = 0U;
 
-    switch((TEMP_DERATING_CALIBRATION_DATAINDEX)(CalibrationElement[0]))
+    switch((TEMP_DERATING_CALIBRATION_DATAINDEX)(*ptrCalibrationElement))
     {
         case DERATING_CALIBRATION_DATAINDEX_DERATING_TEMP:
             /* Gets Derating Setting Temperature */
-            fConvertedTemp = ((float)(CalibrationElement[1]) * 256) + (float)(CalibrationElement[2]);
-            fConvertedTemp /= 10.0f;
-            fConvertedTemp -= 40.0f;
+            u16TransfromData = ((uint16_t)*(ptrCalibrationElement + 1) << 8) | ((uint16_t)*(ptrCalibrationElement + 2));
+            fConvertedTemp = (float)u16TransfromData;
+            fConvertedTemp /= FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
+            fConvertedTemp += FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET;
 #if(DERATINGAPP_FLOAT_OPERATION)
             gBLDeratingLimitedTemp = fConvertedTemp;
 #else
             gBLDeratingLimitedTemp = (int16_t)(fConvertedTemp);
 #endif
+            bResult = true;
             break;
         case DERATING_CALIBRATION_DATAINDEX_SHUTDOWN_TEMP:
             /* Gets Shut Down Setting Temperature */
-            fConvertedTemp = ((float)(CalibrationElement[1]) * 256) + (float)(CalibrationElement[2]);
-            fConvertedTemp /= 10.0f;
-            fConvertedTemp -= 40.0f;
+            u16TransfromData = ((uint16_t)*(ptrCalibrationElement + 1) << 8) | ((uint16_t)*(ptrCalibrationElement + 2));
+            fConvertedTemp = (float)u16TransfromData;
+            fConvertedTemp /= FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
+            fConvertedTemp += FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET;
 #if(DERATINGAPP_FLOAT_OPERATION)
             gBLShutDownLimitedTemp = fConvertedTemp;
 #else
             gBLShutDownLimitedTemp = (int16_t)(fConvertedTemp);
 #endif
+            bResult = true;
             break;
         case DERATING_CALIBRATION_DATAINDEX_SHUTDOWN_REL_TEMP:
             /* Gets Shut Down Rel Setting Temperature */
-            fConvertedTemp = ((float)(CalibrationElement[1]) * 256) + (float)(CalibrationElement[2]);
-            fConvertedTemp /= 10.0f;
-            fConvertedTemp -= 40.0f;;
+            u16TransfromData = ((uint16_t)*(ptrCalibrationElement + 1) << 8) | ((uint16_t)*(ptrCalibrationElement + 2));
+            fConvertedTemp = (float)u16TransfromData;
+            fConvertedTemp /= FLASH_DERATING_CALIBRATION_LIMITED_TEMP_RESOLUTION;
+            fConvertedTemp += FLASH_DERATING_CALIBRATION_LIMITED_TEMPOFFSET;
 #if(DERATINGAPP_FLOAT_OPERATION)
             gBLShutDownRelLimitedTemp = fConvertedTemp;
 #else
             gBLShutDownRelLimitedTemp = (int16_t)(fConvertedTemp);
 #endif
-            break;
-
-        case DERATING_CALIBRATION_DATAINDEX_SHOWN_TERR_TEMP:
-            /* Gets Shown TERR Setting Temperature */
-            fConvertedTemp = ((float)(CalibrationElement[1]) * 256) + (float)(CalibrationElement[2]);
-            fConvertedTemp /= 10.0f;
-            fConvertedTemp -= 40.0f;;
-#if(DERATINGAPP_FLOAT_OPERATION)
-            gBLReduceLimitedTemp = fConvertedTemp;
-#else
-            gBLReduceLimitedTemp = (int16_t)(fConvertedTemp);
-#endif
+            bResult = true;
             break;
 
         default:
-            if(CalibrationElement[0] >= (DERATING_CALIBRATION_DATAINDEX_TABLE_START + TEMP_DERATING_TABLE_TEMPERATURE_LENGTH))
+            if(*ptrCalibrationElement >= (DERATING_CALIBRATION_DATAINDEX_TABLE_START + TEMP_DERATING_TABLE_SIZE))
             {
-                return false;
+                bResult = false;
             }
             else
             {
-                fConvertedTemp = ((float)(CalibrationElement[1]) * 256) + (float)(CalibrationElement[2]);
+                u16TransfromData = ((uint16_t)*(ptrCalibrationElement + 1) << 8) | ((uint16_t)*(ptrCalibrationElement + 2));
+                fConvertedTemp = (float)u16TransfromData;
 #if(DERATINGAPP_FLOAT_OPERATION)
-                gDeratingTable[(DeratingCalibrationDataIndex - DERATING_CALIBRATION_DATAINDEX_TABLE_START)] = fConvertedTemp;
+                gDeratingTable[(*ptrCalibrationElement - DERATING_CALIBRATION_DATAINDEX_TABLE_START)] = fConvertedTemp;
 #else
-                gDeratingTable[(CalibrationElement[0] - DERATING_CALIBRATION_DATAINDEX_TABLE_START)] = (int16_t)(fConvertedTemp);
+                gDeratingTable[(*ptrCalibrationElement - DERATING_CALIBRATION_DATAINDEX_TABLE_START)] = (int16_t)(fConvertedTemp);
 #endif
             }
+            bResult = true;
             break;
     }
 
-    return true;
+    if(!bResult)
+    {
+        /* NA */
+    }
+    else
+    {
+        bDeratingCalibrationDataUpdatedFlash = (!bDeratingCalibrationDataUpdatedFlash)?\
+        true:\
+        bDeratingCalibrationDataUpdatedFlash;
+    }
+
+    return bResult;
 }
-#endif
+/**
+ * @brief To save calibration datas to flash of MCU.
+ * 
+ * @details To save calibration datas to flash of MCU if access flash api has supplied.
+ * 
+ * @note It is a global function.
+ * 
+ */
+void TemperatureDerating_SaveCalibrationData(void)
+{
+    if((!bDeratingCalibrationDataUpdatedFlash)\
+        || (gCallbackAccessFlashCalibrationData == NULL))
+    {
+        /* Doesn't Save */
+    }
+    else
+    {
+        /* Save */
+        (void)TemperatureDerating_LimitedTemperature_Get(AccessFlashCalibrationData.uDeratingLimitedTemperatures.u8DeratingLimitedTemperatureByte,\
+        TEMP_DERATING_LIMITED_TEMPERATURE_LENGTH);
+        
+        (void)TemperatureDerating_DeratingTable_Get(AccessFlashCalibrationData.u8DeratingTable,\
+        TEMP_DERATING_TABLE_SIZE);
+
+        (void)gCallbackAccessFlashCalibrationData(ptrAccessFlashCalibrationData, DERATING_FLASH_OPERATE_WRITE);
+        /* Clear Flag */
+        bDeratingCalibrationDataUpdatedFlash = false;
+    }
+}
+/**
+ * @brief To supply turn on or off for external.
+ * 
+ * @details None.
+ * 
+ * @note None.
+ * 
+ * @param TempDeratingEnableDisableStatus Variable for controlling turn on or off.
+ *  
+ */
+void TemperatureDerating_TurnOnOff_Set(TEMP_DERATING_ENABLE_DISABLE_STATUS TempDeratingEnableDisableStatus)
+{
+    gTempDeratingEnableDisableStatus = TempDeratingEnableDisableStatus;
+}
+/**
+ * @brief To retun status of turn on or off.
+ * 
+ * @details None.
+ * 
+ * @note None.
+ * 
+ * @return TEMP_DERATING_ENABLE_DISABLE_STATUS Variable for controlling turn on or off.
+ * 
+ */
+extern TEMP_DERATING_ENABLE_DISABLE_STATUS TemperatureDerating_TurnOnOff_Get(void)
+{
+    return gTempDeratingEnableDisableStatus;
+}
 /* -- END -- */

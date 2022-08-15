@@ -182,7 +182,7 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 		case CMD_FPCRXOUTVOLINFO:
 		case CMD_MCU_VERSION_GET:
 #if (BACKDOOR_WRITE_DERATINGDATA)
-		case CMD_DERATING_THRESHOLD_GET:
+		case CMD_DERATING_LIMITED_TEMPERATURES_GET:
 		case CMD_DERATING_TABLE_GET:
 			if(u8Length == LEN_SUBADDRESS)
 			{
@@ -193,7 +193,7 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 				u8CheckResult=FORMAT_LEN_FAIL;
 			}
 		break;
-		case CMD_DERATING_DATA_SET:
+		case CMD_DERATING_DATAS_SET:
 			if(u8Length == LEN_SUBADDRESS + LEN_DERATING_SETTING_DATA)
 			{
 				u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;

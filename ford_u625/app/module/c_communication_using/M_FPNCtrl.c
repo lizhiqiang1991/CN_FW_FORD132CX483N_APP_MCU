@@ -63,7 +63,7 @@ static uint8_t M_FPNCtrl_DeliveryFPNWriteToEE_Process(void)
             if(u8CompResulat == FPN_ENABLE)
             {
                 pu8Delivery_assembly = tFPNCtrlDelivery.pFPNDataBuff;
-                MFixedFlashAccess_WritePage((uint32_t)ADDR_DELIVERY_ASSEMBLY, pu8Delivery_assembly, tFPNCtrlDelivery.FPNDataLength);
+                MFixedFlashAccess_WritePage(ADDR_DELIVERY_ASSEMBLY, pu8Delivery_assembly, tFPNCtrlDelivery.FPNDataLength);
                 u8ProcessStatus = FPN_WRITE_SUCCESS;
             }
             else
@@ -152,7 +152,7 @@ uint8_t M_FPNCtrl_SerNumFPNWriteToEE_Process(void)
             if(u8CompResulat == FPN_ENABLE)
             {
                 pu8SerNum_assembly = tFPNCtrlSerNum.pFPNDataBuff;
-                MFixedFlashAccess_WritePage((uint32_t)ADDR_SERIAL_NUMBER, pu8SerNum_assembly, tFPNCtrlSerNum.FPNDataLength);              
+                MFixedFlashAccess_WritePage(ADDR_SERIAL_NUMBER, pu8SerNum_assembly, tFPNCtrlSerNum.FPNDataLength);              
                 u8ProcessStatus = FPN_WRITE_SUCCESS;
             }
             else
@@ -229,7 +229,7 @@ uint8_t M_FPNCtrl_ProductionByte_FPNWriteToEE_Process(void)
         if(tFPNProductionByte.FPN_Flag_t.FPNDataFlag == FPN_ENABLE)
         {
             pu8FCE = tFPNProductionByte.pFPNDataBuff;
-            MFixedFlashAccess_WritePage((uint32_t)ADDR_PRODUCTION_PHASE_BYTE, pu8FCE, tFPNProductionByte.FPNDataLength);
+            MFixedFlashAccess_WritePage(ADDR_PRODUCTION_PHASE_BYTE, pu8FCE, tFPNProductionByte.FPNDataLength);
             u8ProcessStatus = FPN_WRITE_SUCCESS;
         }
 		else

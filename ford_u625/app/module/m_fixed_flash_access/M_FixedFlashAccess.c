@@ -16,13 +16,13 @@ static uint8_t MFixedFlashAccess_Buffer[FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE] = {0
 /* -- Local Functions -- */
 
 /* -- Global Functions -- */
-bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ExternalSetBuffer, uint8_t ExternalSetBufferSize)
+bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ptrExternalSetBuffer, uint8_t u8ExternalSetBufferSize)
 {
     bool bReturn;   
     if(((u32AddrOffset % FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE) != 0)\
         || (u32AddrOffset > (FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE - FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))\
-        || (ExternalSetBuffer == NULL)\
-        || (ExternalSetBufferSize > FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
+        || (ptrExternalSetBuffer == NULL)\
+        || (u8ExternalSetBufferSize > FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
     {
         bReturn = false;
     }
@@ -31,7 +31,7 @@ bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ExternalSetBuf
         /* Read Total Flash */
         memcpy(MFixedFlashAccess_Buffer, (const void *)FIXED_FLASH_ACCESS_FLASH_ADDRESS, FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE);
         /* Recover Page Data */
-        memcpy((MFixedFlashAccess_Buffer + u32AddrOffset), ExternalSetBuffer, ExternalSetBufferSize);
+        memcpy((MFixedFlashAccess_Buffer + u32AddrOffset), ptrExternalSetBuffer, u8ExternalSetBufferSize);
         /* Write Flash */
         if(CY_FLASH_DRV_SUCCESS != Cy_Flash_WriteRow(FIXED_FLASH_ACCESS_FLASH_ADDRESS , (uint32_t *)MFixedFlashAccess_Buffer))
         {
@@ -45,20 +45,20 @@ bool MFixedFlashAccess_WritePage(uint32_t u32AddrOffset, uint8_t *ExternalSetBuf
     return bReturn;
 }
 
-bool MFixedFlashAccess_ReadPage(uint32_t u32AddrOffset, uint8_t *ExternalGetBuffer, uint8_t ExternalGetBufferSize)
+bool MFixedFlashAccess_ReadPage(uint32_t u32AddrOffset, uint8_t *ptrExternalGetBuffer, uint8_t u8ExternalGetBufferSize)
 {
     bool bReturn;
 
     if(((u32AddrOffset % FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE) != 0)\
         || (u32AddrOffset > (FIXED_FLASH_ACCESS_TOTLA_BYTE_SIZE - FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))\
-        || (ExternalGetBuffer == NULL)\
-        || (ExternalGetBufferSize > FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
+        || (ptrExternalGetBuffer == NULL)\
+        || (u8ExternalGetBufferSize > FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE))
     {
         bReturn = false;
     }
     else
     {
-        memcpy((void *)ExternalGetBuffer, (const void *)(FIXED_FLASH_ACCESS_FLASH_ADDRESS + u32AddrOffset), ExternalGetBufferSize);
+        memcpy((void *)ptrExternalGetBuffer, (const void *)(FIXED_FLASH_ACCESS_FLASH_ADDRESS + u32AddrOffset), u8ExternalGetBufferSize);
         bReturn = true;
     }
     return bReturn;

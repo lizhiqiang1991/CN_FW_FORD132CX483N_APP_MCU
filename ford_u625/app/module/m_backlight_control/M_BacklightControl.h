@@ -7,8 +7,16 @@ extern "C" {
 
 /* -- Includes -- */
 #include "main.h"
+#include "M_TemperatureDerating.h"
 
 /* -- Marco Define -- */
+/**
+ * @brief Checking derating data of flash.
+ * 
+ */
+#define E_MBL_FLASHDERATINGDATA_CHECKBYTE 0xEEU
+#define E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION 0U
+#define E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE 1U
 /**
  * @brief The define const values for controling backlight state machine.
  * 
@@ -38,8 +46,8 @@ typedef enum
  */
 typedef enum
 {
-    E_MBL_ENABLE_DERATING = 0xAAU,
-    E_MBL_DISABLE_DERATING = 0xABU,
+    E_MBL_ENABLE_DERATING = DERATING_ENABLE,
+    E_MBL_DISABLE_DERATING = DERATING_DISABLE,
 }MBacklightControlDeratingEnable_E;
 /* -- Data Type Define -- */
 typedef void (*CALLBACK_EX_ALERT_HANDLER_COMPLETE)(void);

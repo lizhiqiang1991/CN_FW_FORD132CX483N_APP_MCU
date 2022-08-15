@@ -13,8 +13,8 @@
 #include "M_PWMDimming.h"
 #include "Memory_Pool.h"
 #include "hal_pwm.h"
-#include "M_TemperatureDerating.h"
 #include "M_Derating.h"
+#include "M_FixedFlashAccess.h"
 
 /* -- Marco Define -- */
 #define LOWBYTE(x) (uint8_t)(x & 0x00FF) /* Gets low byte of uint16_t data. */
@@ -50,19 +50,9 @@ typedef struct
     uint16_t u16CurrentPwmValue; /**< Saves current pwm. */
     MBacklightControlExternalEnable_E eMBLCtrlExternalEn;
     MBacklightControlDimmingControl_E eMBLCtrlDimmingEn;
-    MBacklightControlDeratingEnable_E eMBLCtrlDeratingEn;
     MBacklightControl_AlertEvent CallbackExAlertEnComplete; /**< When backlight turn on due to external alert. */
     MBacklightControl_AlertEvent CallbackExAlertDisComplete; /**< When backlight turn off due to external alert. */
 }MBacklightControlStateMachineControl_Typedef;
-/**
- * @brief 
- * 
- */
-typedef enum
-{
-    E_MBL_TERR_CLEAR = 0,
-    E_MBL_TERR_SET,
-}MBacklightControlUpdateTERR_E;
 
 /* -- Global Variables -- */
 /**
@@ -78,7 +68,6 @@ static MBacklightControlStateMachineControl_Typedef StateMachineControl = \
     0U,
     E_MBL_EXTERNAL_DISABLE_DIMMING,
     E_MBL_DIMMING_EN,
-    E_MBL_ENABLE_DERATING,
     {.bReceivedAlert = false,.CallbackExAlertHandlerComplete = NULL},
     {.bReceivedAlert = false,.CallbackExAlertHandlerComplete = NULL},
 };
@@ -88,28 +77,21 @@ static MBacklightControlStateMachineControl_Typedef StateMachineControl = \
  * 
  * @param eMBLUpdateTERR Operation of erase or set TERR.
  */
-static void MBacklightControl_UpdateTERR(MBacklightControlUpdateTERR_E eMBLUpdateTERR)
+static void MBacklightControl_UpdateTERR(TEMP_DERATING_CONTROL_TERR_E eTempDeratingControlTERR)
 {
-    if(StateMachineControl.eMBLCtrlDeratingEn == E_MBL_ENABLE_DERATING)
+    switch(eTempDeratingControlTERR)
     {
-        switch(eMBLUpdateTERR)
-        {
-            default:
-                break;
+        default:
+            break;
 
-            case E_MBL_TERR_CLEAR:
-                Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TERR_POS));
-                break;
+        case TEMP_DERATING_TERR_CLEAR:
+            Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TERR_POS));
+            break;
 
-            case E_MBL_TERR_SET:
-                Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() | (BIT_TERR_POS));
-                Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() | (BIT_TERR_POS));
-                break;
-        }
-    }
-    else
-    {
-        Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TERR_POS));
+        case TEMP_DERATING_TERR_SET:
+            Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() | (BIT_TERR_POS));
+            Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() | (BIT_TERR_POS));
+            break;
     }
 }
 /**
@@ -122,9 +104,142 @@ static void MBacklightControl_UpdateTERR(MBacklightControlUpdateTERR_E eMBLUpdat
  * @param u16DimmingPWMSignal The pwm after dimming.
  * 
  */
-void MBacklightControl_SendPWMSignal(uint16_t u16DimmingPWMSignal)
+static void MBacklightControl_SendPWMSignal(uint16_t u16DimmingPWMSignal)
 {
     HAL_PWM_Duty_Output_Adjust(PWM_OUT_DIM_NUM,(uint32_t)(u16DimmingPWMSignal));
+}
+
+static uint8_t MBacklightControl_CalculateFlashCalibrationData(uint8_t *Data, uint8_t DataLen)
+{
+    uint8_t u8DataIndex = 0U;
+    uint8_t u8Crc = E_MBL_FLASHDERATINGDATA_CHECKBYTE;
+
+    for(u8DataIndex = 0U ; u8DataIndex < DataLen ; u8DataIndex++)
+    {
+        u8Crc += *(Data + u8DataIndex);
+    }
+
+    return u8Crc;
+}
+/**
+ * @brief 
+ * 
+ */
+static bool MBacklightControl_CallbackAccessFlashCalibrationData(MTemperatureDeratingAccessFlashCalibrationData* ptrFlashCalibrationData,\
+TEMP_DERATING_FLASH_OPERATE eDeratingFlashOperate)
+{
+    bool bResult = false;
+    uint8_t u8AccessFlashData[FIXED_FLASH_ACCESS_PAGE_BYTE_SIZE];
+    const uint8_t u8DeratingLimitedTemperatureByteSize = sizeof(ptrFlashCalibrationData->uDeratingLimitedTemperatures.u8DeratingLimitedTemperatureByte);
+    
+    switch(eDeratingFlashOperate)
+    {
+        default:
+            /* Do nothing. */
+            bResult = false;
+            break;
+
+        case DERATING_FLASH_OPERATE_WRITE:
+            memset(u8AccessFlashData, 0xFFU, sizeof(u8AccessFlashData));
+            
+            memcpy((u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+            ptrFlashCalibrationData->uDeratingLimitedTemperatures.u8DeratingLimitedTemperatureByte,\
+            u8DeratingLimitedTemperatureByteSize);
+
+            /* Calculate CRC */
+            u8AccessFlashData[E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION] = \
+            MBacklightControl_CalculateFlashCalibrationData((u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+            u8DeratingLimitedTemperatureByteSize);
+            
+            bResult = MFixedFlashAccess_WritePage(ADDR_DERATINGDATA_LIMITED_TEMP,\
+            u8AccessFlashData,\
+            (u8DeratingLimitedTemperatureByteSize + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE));
+
+            if(!bResult)
+            {
+                break;
+            }
+            else
+            {
+                /* Write derating table to flash */
+                memset(u8AccessFlashData, 0xFFU, sizeof(u8AccessFlashData));
+
+                memcpy((u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+                ptrFlashCalibrationData->u8DeratingTable,\
+                TEMP_DERATING_TABLE_SIZE);
+
+                /* Calculate CRC */
+                u8AccessFlashData[E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION] = \
+                MBacklightControl_CalculateFlashCalibrationData((u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+                TEMP_DERATING_TABLE_SIZE);
+
+                bResult = MFixedFlashAccess_WritePage(ADDR_DERATINGDATA_DUTY_TABLE,\
+                u8AccessFlashData,\
+                (TEMP_DERATING_TABLE_SIZE + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE));
+        
+                break;
+            }
+            
+
+        case DERATING_FLASH_OPERATE_READ:
+            /* Read derating limted Data */
+            memset(u8AccessFlashData, 0xFFU, sizeof(u8AccessFlashData));
+            bResult = MFixedFlashAccess_ReadPage(ADDR_DERATINGDATA_LIMITED_TEMP,\
+            u8AccessFlashData,\
+            (u8DeratingLimitedTemperatureByteSize + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE));
+            
+            if(!bResult)
+            {
+                break;
+            }
+            else if(u8AccessFlashData[E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION] !=\
+            MBacklightControl_CalculateFlashCalibrationData((u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+            u8DeratingLimitedTemperatureByteSize))
+            {
+                bResult = false;
+                
+                break;
+            }
+            else
+            {
+                bResult = true;
+                /* Updates limited temperature  data */
+                memcpy(ptrFlashCalibrationData->uDeratingLimitedTemperatures.u8DeratingLimitedTemperatureByte,\
+                (u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+                u8DeratingLimitedTemperatureByteSize);
+            }
+            
+            /* Reads derating table Data */
+            memset(u8AccessFlashData, 0xFFU, sizeof(u8AccessFlashData));
+            bResult = MFixedFlashAccess_ReadPage(ADDR_DERATINGDATA_DUTY_TABLE,\
+            u8AccessFlashData,\
+            (TEMP_DERATING_TABLE_SIZE + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE));
+
+            if(!bResult)
+            {
+                break;
+            }
+            else if(u8AccessFlashData[E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION] !=\
+            MBacklightControl_CalculateFlashCalibrationData((u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+            TEMP_DERATING_TABLE_SIZE))
+            {
+                bResult = false;
+                
+                break;
+            }
+            else
+            {
+                bResult = true;
+                /* Updates derating table Data */
+                memcpy(ptrFlashCalibrationData->u8DeratingTable,\
+                (u8AccessFlashData + E_MBL_FLASHDERATINGDATA_CHECKBYTE_LOCATION + E_MBL_FLASHDERATINGDATA_CHECKBYTE_SIZE),\
+                TEMP_DERATING_TABLE_SIZE);
+                
+                break;
+            }
+    }
+
+    return bResult;
 }
 /**
  * @brief Registers pwm callback func.
@@ -143,10 +258,22 @@ static MBacklightControlStateMachine_E MBacklightControl_StateInit(void)
 
     /* Registers callback function for sending PWM signal. */
     MPWMDimming_RegisterPWMDriverCtrl(MBacklightControl_SendPWMSignal);
+
+#if(BACKDOOR_WRITE_DERATINGDATA)
     /* Init temperature derating module. */
-    TemperatureDerating_Init();
+    TemperatureDerating_Init(MBacklightControl_UpdateTERR,\
+    Memory_Pool_PCBATemp_Get,\
+    MBacklightControl_CallbackAccessFlashCalibrationData);
+#else
+    /* Init temperature derating module. */
+    TemperatureDerating_Init(MBacklightControl_UpdateTERR,\
+    Memory_Pool_PCBATemp_Get,\
+    NULL);
+#endif
+
+    
     /* Clears TERR */
-    MBacklightControl_UpdateTERR(E_MBL_TERR_CLEAR);
+    MBacklightControl_UpdateTERR(TEMP_DERATING_TERR_CLEAR);
 
     TempBacklightStateMachine = E_MBL_STATEMACHINE_WAITENABLE;
     return TempBacklightStateMachine;
@@ -214,11 +341,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateNormal(void)
 
     StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
 
-    if(StateMachineControl.eMBLCtrlDeratingEn != E_MBL_ENABLE_DERATING)
-    {
-        TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
-    }
-    else if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
+    if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
         ||(StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_NODIMMNG))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
@@ -276,11 +399,7 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
 
     StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
 
-    if(StateMachineControl.eMBLCtrlDeratingEn != E_MBL_ENABLE_DERATING)
-    {
-        TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
-    }
-    else if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
+    if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
         ||(StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_NODIMMNG))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
@@ -302,16 +421,6 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     u16TempHostPWM = (u16TempHostPWM >= u16TempDeratingPWM)?\
     u16TempDeratingPWM:\
     u16TempHostPWM;
-
-    /* Sets or clears TERR  */
-    if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_REDUCE_BL_TEMP))
-    {
-        MBacklightControl_UpdateTERR(E_MBL_TERR_SET);
-    }
-    else
-    {
-        MBacklightControl_UpdateTERR(E_MBL_TERR_CLEAR);
-    }
 
     if(StateMachineControl.u16CurrentPwmValue != u16TempHostPWM)
     {
@@ -353,14 +462,14 @@ static MBacklightControlStateMachine_E MBacklightControl_StateShutdown(void)
 
     StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
 
-    if(StateMachineControl.eMBLCtrlDeratingEn != E_MBL_ENABLE_DERATING)
-    {
-        TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
-    }
-    else if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
+    if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
         ||(StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_NODIMMNG))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
+    }
+    else if(DERATING_DISABLE == TemperatureDerating_TurnOnOff_Get())
+    {
+        TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
     }
     else if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_SHUTDOWN_REL_TEMP))
     {
@@ -401,13 +510,31 @@ static MBacklightControlStateMachine_E MBacklightControl_StateShutdown(void)
 
 /* -- Global Functions -- */
 /**
- * @brief 
+ * @brief To set up enable or disable to temperature derating module.
  * 
- * @param eMBLCtrlDeratingEn 
+ * @details None.
+ * 
+ * @note None.
+ * 
+ * @param eMBLCtrlDeratingEn To Enable or disable to temperature derating module.
+ * 
  */
 void MBacklightControl_TurnOnOffDerating(MBacklightControlDeratingEnable_E eMBLCtrlDeratingEn)
 {
-    StateMachineControl.eMBLCtrlDeratingEn = eMBLCtrlDeratingEn;
+    switch(eMBLCtrlDeratingEn)
+    {
+        default:
+            /* Do nothing */
+            break;
+
+        case E_MBL_ENABLE_DERATING:
+            TemperatureDerating_TurnOnOff_Set(DERATING_ENABLE);
+            break;
+
+        case E_MBL_DISABLE_DERATING:
+        	TemperatureDerating_TurnOnOff_Set(DERATING_DISABLE);
+            break;
+    }
 }
 /**
  * @brief External alert to enable or disable BL.
@@ -443,6 +570,7 @@ void MBacklightControl_ExternalTurnOnOffBL(MBacklightControlExternalEnable_E eMB
             StateMachineControl.CallbackExAlertDisComplete.bReceivedAlert = true;
             StateMachineControl.eMBLCtrlExternalEn = E_MBL_EXTERNAL_DISABLE_NODIMMNG;
             StateMachineControl.eMBLCtrlDimmingEn = E_MBL_DIMMING_DIS;
+            TemperatureDerating_SaveCalibrationData();
             break;
     }
 }
