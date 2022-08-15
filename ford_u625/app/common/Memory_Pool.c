@@ -2143,17 +2143,9 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 #endif
 
 #if(BACKDOOR_WRITE_DERATINGDATA)
-<<<<<<< HEAD
         case CMD_DERATING_DATAS_SET:
             TemperatureDerating_DeratingCalibrationData_Set(pCmdBuffer + 1U);
             break;
-#endif		
-        default:
-            break;
-=======
-		case CMD_DERATING_DATA_SET:
-			TemperatureDerating_DeratingCalibrationData_Set(pCmdBuffer + 1U);
-		break;
 #endif
 
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
@@ -2170,9 +2162,8 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 			gtDiagnosisSimulateInfo.u16FPCRXVol = 0U;
 		break;
 #endif
-		default:
-		/* Nothing */
-		break;
->>>>>>> 9462e3d07e05d1a8e1110f0262c53b31c36f8fee
+        default:
+            /* Nothing */
+            break;
     }
 }
