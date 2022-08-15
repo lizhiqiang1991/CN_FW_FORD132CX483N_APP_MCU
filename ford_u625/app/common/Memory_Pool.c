@@ -6,21 +6,39 @@
 #include "M_FPNCtrl.h"
 #include "ICDiagApp.h"
 #include "M_TemperatureDerating.h"
+#include "M_DisplayManage.h"
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+#include "M_BatteryProtect.h"
+#endif
 
 tcommunication_def gtCommunicationInfo;
 tdata_collection_def gtDataCollectInfo;
 tbacklight_def gtBacklightInfo;
 ttemperture_def gtTemperatureInfo;
 tbatt_protect_def gtBattProtectInfo;
-tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U};
+tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U, .u16IcCommunicationDiagnosis = NUMBER_ZERO};
 tpower_management_def gtPowerManageInfo;
+
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+tdiagnosis_simulate_def gtDiagnosisSimulateInfo = 
+{
+	.u8DispFaultPinLevel = GPIO_HIGH,
+	.u64DispFaultStatus = 0U,
+	.u8LedINTPinLevel = GPIO_HIGH,
+	.u64LedFaultStatus = 0U,
+	.u8PG1V2PinLevel = GPIO_HIGH,
+	.u8PG3V3PinLevel = GPIO_HIGH,
+	.u8LockPinLevel = GPIO_HIGH,
+	.u16BatteryVol = (BP_VMIN_CFG + 1U),
+	.u16FPCTXVol = (DIAG_FPC_TX_DISCON_VOL + 1U),
+	.u16FPCRXVol = (DIAG_FPC_RX_DISCON_VOL + 1U),
+};
+#endif
 
 tu625_def gtU625Info = { .bI2cDesBusInit = false, .bI2cMcuBusInit = false };
 tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U };
 
-#if(U625_TDDI_TD7800)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x2EU, .u8Subversion = 0x02U };
-#elif(U717_TDDI_NT51926)
+#if(U717_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x00U };    
 #elif(CX430_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x00U }; 
@@ -35,7 +53,6 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 const uint8_t cmu8McuVersion[] = { "T.01.02.07" };
-
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -925,30 +942,6 @@ int16_t Memory_Pool_FPCRxOutADC_Get(void)
 }
 
 /******************************************************************************
- ;       Function Name			:	void (void)
- ;       Function Description	:
- ;       Parameters				:	void
- ;       Return Values			:
- ;       Source ID				:
- ******************************************************************************/
-void Memory_Pool_VBattState_Set(uint8_t u8SetValue)
-{
-    gtBattProtectInfo.u8VBattState = u8SetValue;
-}
-
-/******************************************************************************
- ;       Function Name			:	void (void)
- ;       Function Description	:
- ;       Parameters				:	void
- ;       Return Values			:
- ;       Source ID				:
- ******************************************************************************/
-uint8_t Memory_Pool_VBattState_Get(void)
-{
-    return gtBattProtectInfo.u8VBattState;
-}
-
-/******************************************************************************
  ;       Function Name			:	void Memory_Pool_VBattProtectState_Set(uint8_t u8SetValue)
  ;       Function Description	:	Set Battery voltage protection status
  ;       Parameters				:	uint8_t u8SetValue
@@ -1039,6 +1032,42 @@ uint64_t Memory_Pool_NT51926Diagnosis_Get(void)
 {
     return gtDiagnosisInfo.u64NT51926Diagnosis;
 }
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+void Memory_Pool_IcCommDiagnosis_Set(uint16_t u16SetValue)
+{
+	if(u16SetValue > NUMBER_ZERO ) 
+	{
+		if(u16SetValue >= 65535U)
+		{
+			u16SetValue = 65535U;
+		}
+		else
+		{/* Nothing */}
+		M_DM_I2cMasterInit();
+	}
+	else
+	{/* Nothing */}
+	
+    gtDiagnosisInfo.u16IcCommunicationDiagnosis = u16SetValue;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+uint16_t Memory_Pool_IcCommDiagnosis_Get(void)
+{
+    return gtDiagnosisInfo.u16IcCommunicationDiagnosis;
+}
+
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -1611,6 +1640,20 @@ uint8_t Memory_Pool_PowerState_Get(void)
     return gtPowerManageInfo.u8PowerState;
 }
 
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+/******************************************************************************
+ ;       Function Name			:	tdiagnosis_simulate_def Memory_Pool_DiagnosisSimulateInfo_Get(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+tdiagnosis_simulate_def Memory_Pool_DiagnosisSimulateInfo_Get(void)
+{
+    return gtDiagnosisSimulateInfo;
+}
+#endif
+
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -1631,8 +1674,10 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
     {
         case CMD_DISPLAY_STATUS:
             *(pDataBuffer + 1U) = gtDiagnosisInfo.u32DisplayStatus & 0xFFU;
+#if (FORD_I2CCOMV1P9)
+			*(pDataBuffer + 2U) = (gtDiagnosisInfo.u32DisplayStatus >> 8U) & 0x07U;
+#elif (FORD_SPSSV1P0 || FORD_SPSSV1P1)
             *(pDataBuffer + 2U) = (gtDiagnosisInfo.u32DisplayStatus >> 8U) & 0xC7U;
-#if (FORD_SPSSV1P0 || FORD_SPSSV1P1)
             *(pDataBuffer + 3U) = (gtDiagnosisInfo.u32DisplayStatus >> 16U) & 0x00;
 #endif
             /* Clear all latched flags when actual status released*/
@@ -1775,6 +1820,8 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 12U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 24U) & 0xFFU;
             *(pDataBuffer + 13U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 32U) & 0xFFU;
             *(pDataBuffer + 14U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 40U) & 0xFFU;
+            *(pDataBuffer + 15U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 48U) & 0xFFU;
+            *(pDataBuffer + 16U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 56U) & 0xFFU;			
             *pLength = LEN_DETIAL_DIAGNOSIS + LEN_SUBADDRESS;
             break;
         case CMD_TEMPERATURE_GET:
@@ -1869,7 +1916,6 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 4U) = gtDataCollectInfo.u16BatteryAnaVol>>8U;
 			*(pDataBuffer + 5U) = gtDataCollectInfo.i16BatteryADC;
 			*(pDataBuffer + 6U) = gtDataCollectInfo.i16BatteryADC>>8U;
-			*(pDataBuffer + 7U) = gtBattProtectInfo.u8VBattState;
             *pLength = LEN_BATTERYVOLTAGE_INFO + LEN_SUBADDRESS;
 			break;
 		case CMD_SYNCVOLINFO:
@@ -1998,81 +2044,92 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
  ******************************************************************************/
 void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 {
-    uint8_t u8Counter;
-    uint8_t u8Cmd = *pCmdBuffer;
-    uint16_t u16DataTemp = NUMBER_ZERO;
+	uint8_t u8Counter;
+	uint8_t u8Cmd = *pCmdBuffer;
+	uint16_t u16DataTemp = NUMBER_ZERO;
 #if(BACKDOOR_ICDIAG_OPEN)
-		uint32_t u32DataAddr=0UL;
-		uint8_t  u8DiagBuf =0U;
+	uint32_t u32DataAddr = 0UL;
+	uint8_t u8DiagBuf = 0U;
 #endif 
 
-    switch (u8Cmd)
+    switch(u8Cmd)
     {
-        case CMD_BACKLIGHT_PWM:
-            u16DataTemp = *(pCmdBuffer + 2U) & 0x03U;
-            u16DataTemp = (u16DataTemp << 8U) + *(pCmdBuffer + 1U);
-            gtBacklightInfo.u16TargetDuty = u16DataTemp;
-            break;
-        case CMD_DISPLAY_SCANNING:
-            gtDisplayManageInfo.u8DisplayScanning = *(pCmdBuffer + 1U) & 0x03U;
-            break;
-        case CMD_DISPLAY_ENABLE:
-            gtDisplayManageInfo.u8DisplayEnable = *(pCmdBuffer + 1U) & 0x03U;
-            break;
-        case CMD_DISPLAY_SHUTDOWN:
-            gtDisplayManageInfo.u8DisplayShutdown = *(pCmdBuffer + 1U) & 0x01U;
-            break;
-        case CMD_FACTORY_MODE:
-            gtDisplayManageInfo.u8FactoryMode = *(pCmdBuffer + 1U) & 0x03U;
-            break;
-        case CMD_DERATING_ENABLE:
-            if ((*(pCmdBuffer + 1U) & BIT_DERATING_EN_POS) == BIT_DERATING_EN_POS)
-            {
-                gtBacklightInfo.bDeratingEnable = true;
-            }
-            else
-            {
-                gtBacklightInfo.bDeratingEnable = false;
-            }
-            break;
+		case CMD_BACKLIGHT_PWM:
+			u16DataTemp = *(pCmdBuffer + 2U) & 0x03U;
+			u16DataTemp = (u16DataTemp << 8U) + *(pCmdBuffer + 1U);
+			gtBacklightInfo.u16TargetDuty = u16DataTemp;
+		break;
+
+		case CMD_DISPLAY_SCANNING:
+			gtDisplayManageInfo.u8DisplayScanning = *(pCmdBuffer + 1U) & 0x03U;
+		break;
+
+		case CMD_DISPLAY_ENABLE:
+			gtDisplayManageInfo.u8DisplayEnable = *(pCmdBuffer + 1U) & 0x03U;
+		break;
+
+		case CMD_DISPLAY_SHUTDOWN:
+			gtDisplayManageInfo.u8DisplayShutdown = *(pCmdBuffer + 1U) & 0x01U;
+		break;
+
+		case CMD_FACTORY_MODE:
+			gtDisplayManageInfo.u8FactoryMode = *(pCmdBuffer + 1U) & 0x03U;
+		break;
+		
+		case CMD_DERATING_ENABLE:
+			if ((*(pCmdBuffer + 1U) & BIT_DERATING_EN_POS) == BIT_DERATING_EN_POS)
+			{
+				gtBacklightInfo.bDeratingEnable = true;
+			}
+			else
+			{
+				gtBacklightInfo.bDeratingEnable = false;
+			}
+		break;
+			
         case CMD_LOCK_DELIVERY_ASSEMBLY:
-            gtCommunicationInfo.tFPNDeliverystatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
-            gtCommunicationInfo.bWriteFPNDeliveryStatusReg = FPN_ENABLE;
-            break;        
+			gtCommunicationInfo.tFPNDeliverystatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
+			gtCommunicationInfo.bWriteFPNDeliveryStatusReg = FPN_ENABLE;
+		break;  
+			
         case CMD_LOCK_SERIAL_NUMBER:
-            gtCommunicationInfo.tFPNSerialstatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
-            gtCommunicationInfo.bWriteSerNumPNStatusReg = FPN_ENABLE;
-            break;
+			gtCommunicationInfo.tFPNSerialstatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
+			gtCommunicationInfo.bWriteSerNumPNStatusReg = FPN_ENABLE;
+		break;
+			
         case CMD_LOCK_PRODUCTION_PHASE_BYTE:
-            gtCommunicationInfo.tFPNSProductPhaseStatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
-            gtCommunicationInfo.bWriteProductPhasePNStatusReg = FPN_ENABLE;
-            break;
+			gtCommunicationInfo.tFPNSProductPhaseStatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
+			gtCommunicationInfo.bWriteProductPhasePNStatusReg = FPN_ENABLE;
+		break;
+			
         case CMD_DELIVERY_ASSEMBLY_DATA:
-            gtCommunicationInfo.u8EppromIndex = u8Cmd;
-            for ( u8Counter = 0; u8Counter < 26U; u8Counter++ )
-            {
-                gtCommunicationInfo.mu8WriteFFPNDelivery[u8Counter] = *(pCmdBuffer + u8Counter + 1U);
-            }
-            gtCommunicationInfo.bWriteFPNDeliveryStatusReg = FPN_ENABLE;
-            gtCommunicationInfo.bWriteFPNDelivery = FPN_ENABLE;
-            
-            break;
+			gtCommunicationInfo.u8EppromIndex = u8Cmd;
+			for ( u8Counter = 0; u8Counter < 26U; u8Counter++ )
+			{
+				gtCommunicationInfo.mu8WriteFFPNDelivery[u8Counter] = *(pCmdBuffer + u8Counter + 1U);
+			}
+			gtCommunicationInfo.bWriteFPNDeliveryStatusReg = FPN_ENABLE;
+			gtCommunicationInfo.bWriteFPNDelivery = FPN_ENABLE;
+		break;
+			
         case CMD_SERIAL_NUMBER_DATA:
-            gtCommunicationInfo.u8EppromIndex = u8Cmd;
-            for ( u8Counter = 0; u8Counter < 26U; u8Counter++ )
-            {
-                gtCommunicationInfo.mu8WriteFPNSerial[u8Counter] = *(pCmdBuffer + u8Counter + 1U);
-            }
-            gtCommunicationInfo.bWriteSerNumPNStatusReg = FPN_ENABLE;
-            gtCommunicationInfo.bWriteSerNumFPN = FPN_ENABLE;
-            break;
+			gtCommunicationInfo.u8EppromIndex = u8Cmd;
+			for ( u8Counter = 0; u8Counter < 26U; u8Counter++ )
+			{
+				gtCommunicationInfo.mu8WriteFPNSerial[u8Counter] = *(pCmdBuffer + u8Counter + 1U);
+			}
+			gtCommunicationInfo.bWriteSerNumPNStatusReg = FPN_ENABLE;
+			gtCommunicationInfo.bWriteSerNumFPN = FPN_ENABLE;
+		break;
+			
         case CMD_PRODUCTION_PHASE_BYTE_DATA:
-            gtCommunicationInfo.u8EppromIndex = u8Cmd;
-            gtCommunicationInfo.u8WriteProductionPhase = *(pCmdBuffer + 1U);
-            
-            gtCommunicationInfo.bWriteProductPhasePNStatusReg = FPN_ENABLE;
-            gtCommunicationInfo.bWriteProductPhaseFPN = FPN_ENABLE;
-            break;
+			gtCommunicationInfo.u8EppromIndex = u8Cmd;
+			gtCommunicationInfo.u8WriteProductionPhase = *(pCmdBuffer + 1U);
+
+			gtCommunicationInfo.bWriteProductPhasePNStatusReg = FPN_ENABLE;
+			gtCommunicationInfo.bWriteProductPhaseFPN = FPN_ENABLE;
+		break;
+			
 #if(BACKDOOR_ICDIAG_OPEN)
 		case ICDIAG_CMD_ICFETCH:
 			u32DataAddr=(uint32_t)((uint32_t)pCmdBuffer[4]|((uint32_t)pCmdBuffer[5]<<8U)|((uint32_t)pCmdBuffer[6]<<16U)|((uint32_t)pCmdBuffer[7]<<24U));
@@ -2080,17 +2137,42 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 		break;
 
 		case ICDIAG_CMD_ICCTRL:           
-            u32DataAddr=(uint32_t)((uint32_t)pCmdBuffer[4]|((uint32_t)pCmdBuffer[5]<<8U)|((uint32_t)pCmdBuffer[6]<<16U)|((uint32_t)pCmdBuffer[7]<<24U));
+			u32DataAddr=(uint32_t)((uint32_t)pCmdBuffer[4]|((uint32_t)pCmdBuffer[5]<<8U)|((uint32_t)pCmdBuffer[6]<<16U)|((uint32_t)pCmdBuffer[7]<<24U));
 			ICDIAG_CmdTrigger(pCmdBuffer[0], pCmdBuffer[1], pCmdBuffer[2], pCmdBuffer[3], u32DataAddr, pCmdBuffer[8], &pCmdBuffer[9]);
 		break;
 #endif
 
 #if(BACKDOOR_WRITE_DERATINGDATA)
+<<<<<<< HEAD
         case CMD_DERATING_DATAS_SET:
             TemperatureDerating_DeratingCalibrationData_Set(pCmdBuffer + 1U);
             break;
 #endif		
         default:
             break;
+=======
+		case CMD_DERATING_DATA_SET:
+			TemperatureDerating_DeratingCalibrationData_Set(pCmdBuffer + 1U);
+		break;
+#endif
+
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+        case CMD_DIAGNOSIS_SIMULATE:
+			gtDiagnosisSimulateInfo.u8DispFaultPinLevel = 0U;
+			gtDiagnosisSimulateInfo.u64DispFaultStatus = 0U;
+			gtDiagnosisSimulateInfo.u8LedINTPinLevel = 0U;
+			gtDiagnosisSimulateInfo.u64LedFaultStatus = 0U;
+			gtDiagnosisSimulateInfo.u8PG1V2PinLevel = 0U;
+			gtDiagnosisSimulateInfo.u8PG3V3PinLevel = 0U;
+			gtDiagnosisSimulateInfo.u8LockPinLevel = 0U;
+			gtDiagnosisSimulateInfo.u16BatteryVol = 0U;
+			gtDiagnosisSimulateInfo.u16FPCTXVol = 0U;
+			gtDiagnosisSimulateInfo.u16FPCRXVol = 0U;
+		break;
+#endif
+		default:
+		/* Nothing */
+		break;
+>>>>>>> 9462e3d07e05d1a8e1110f0262c53b31c36f8fee
     }
 }

@@ -193,9 +193,9 @@ void MCUDIAG_I2cMaster_ICDiag(uint8_t u8DeviceAddr, uint8_t u8Channel, uint8_t *
 		/*Read after write*/
 		if(u16RxLen > 0U)
 		{
-			if(HAL_I2C_Master_Write(u8DeviceAddr, u8TxData, u16TxLen, 100U) == DRIVER_TRUE)
+			if(HAL_I2C_Master_Write(u8DeviceAddr, u8TxData, u16TxLen, 10U) == DRIVER_TRUE)
 			{
-				if(HAL_I2C_Master_Read(u8DeviceAddr, u8RxData, u16RxLen, 100U) == DRIVER_TRUE)
+				if(HAL_I2C_Master_Read(u8DeviceAddr, u8RxData, u16RxLen, 10U) == DRIVER_TRUE)
 				{/*Nothing*/}
 				else
 				{
@@ -212,7 +212,7 @@ void MCUDIAG_I2cMaster_ICDiag(uint8_t u8DeviceAddr, uint8_t u8Channel, uint8_t *
 		/*Write only*/
 		else
 		{
-			if(HAL_I2C_Master_Write(u8DeviceAddr, u8TxData, u16TxLen, 100U) == DRIVER_TRUE)
+			if(HAL_I2C_Master_Write(u8DeviceAddr, u8TxData, u16TxLen, 10U) == DRIVER_TRUE)
 			{/*Nothing*/}
 			else
 			{

@@ -41,10 +41,6 @@ extern void M_DM_DisplayStatus_Get(uint8_t *pReturnData);
 extern void M_DM_FW_DisplayStatus_Get(uint8_t *pReturnData);
 extern void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel);
 extern uint8_t M_DM_NT51926_Status_Get(void);
-#if(U625_TDDI_TD7800)
-extern uint8_t M_DM_TD7800_ATTN_Read (void);
-#elif(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 extern uint8_t M_DM_NT51926_ATTN_Read (void);
-#else
 #endif
-#endif
+

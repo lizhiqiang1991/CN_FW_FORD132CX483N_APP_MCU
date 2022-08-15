@@ -156,6 +156,7 @@ typedef struct
     uint16_t u16GeneralDiagnosis;
     uint64_t u64LEDDriverDiagnosis;
     uint64_t u64NT51926Diagnosis;
+	uint16_t u16IcCommunicationDiagnosis;
 } tdiagnosis_def;
 
 typedef struct
@@ -163,6 +164,26 @@ typedef struct
     bool bI2cDesBusInit;
     bool bI2cMcuBusInit;
 } tu625_def;
+
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+typedef struct
+{
+	uint8_t u8DispFaultPinLevel;
+	uint64_t u64DispFaultStatus;
+	
+	uint8_t u8LedINTPinLevel;
+	uint64_t u64LedFaultStatus;
+	
+	uint8_t u8PG1V2PinLevel;
+	uint8_t u8PG3V3PinLevel;
+	uint8_t u8LockPinLevel;
+
+	uint16_t u16BatteryVol;
+	uint16_t u16FPCTXVol;
+	uint16_t u16FPCRXVol;
+} tdiagnosis_simulate_def;
+#endif
+
 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -261,9 +282,6 @@ int16_t Memory_Pool_FPCTxOutADC_Get(void);
 void Memory_Pool_FPCRxOutADC_Set(int16_t i16SetValue);
 int16_t Memory_Pool_FPCRxOutADC_Get(void);
 
-void Memory_Pool_VBattState_Set(uint8_t u8SetValue);
-uint8_t Memory_Pool_VBattState_Get(void);
-
 void Memory_Pool_LEDDiagnosis_Set(uint64_t u64SetValue);
 uint64_t Memory_Pool_LEDDiagnosis_Get(void);
 
@@ -275,6 +293,9 @@ uint64_t Memory_Pool_LEDDiagnosis_Get(void);
 
 void Memory_Pool_NT51926Diagnosis_Set(uint64_t u64SetValue);
 uint64_t Memory_Pool_NT51926Diagnosis_Get(void);
+
+void Memory_Pool_IcCommDiagnosis_Set(uint16_t u16SetValue);
+uint16_t Memory_Pool_IcCommDiagnosis_Get(void);
 
 void Memory_Pool_DisplayStatusBp_Set(uint32_t u32SetValue);
 uint32_t Memory_Pool_DisplayStatusBp_Get(void);
@@ -395,6 +416,10 @@ void Memory_Pool_FPNSProductPhaseStatusInfo_Set(tProduct_pn_status_info_def * pD
 
 void Memory_Pool_FPNProductionPhase_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_FPNProductionPhase_Get(void);
+
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+tdiagnosis_simulate_def Memory_Pool_DiagnosisSimulateInfo_Get(void);
+#endif
 
 #endif
 

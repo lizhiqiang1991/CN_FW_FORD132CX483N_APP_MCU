@@ -133,6 +133,9 @@ static void C_Power_Manager_Control(void)
 
                     /*Disable display functions */
                     Memory_Pool_DisplayEnable_Set(DISPLAY_OFF_TOUCH_OFF);
+
+					/*Disable Backlight functions */
+					Memory_Pool_BacklightEnable_Set(false);
                     (void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
                     break;
                 case NORMAL_RUN_STATE:
@@ -164,7 +167,6 @@ static void C_Power_Manager_Control(void)
 				tPowerManageTask.u16Timer1=TIME_DISABLE;
 				Memory_Pool_SyncStatus_Set(SYNC_DISABLE);
 				Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
-				Memory_Pool_BacklightEnable_Set(false);
 				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 			else
