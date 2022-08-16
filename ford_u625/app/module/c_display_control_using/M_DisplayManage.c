@@ -269,7 +269,7 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
     uint8_t mu8SendData[2];	
     uint8_t u8ReturnStatus;
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-	uint8_t u8ScanSel = NUMBER_ZERO;
+	uint8_t u8ScanSel = 0U;
 #endif
 
 	if (u8CurrentStatus != u8Command)

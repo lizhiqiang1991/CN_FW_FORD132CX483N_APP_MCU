@@ -79,9 +79,9 @@
 #endif
 
 /* -- Macro Define  -- */
-#define	ICDIAG_CMD_ICFETCH				0xAAU /* Host to FIDM Command : Fetch command */
-#define	ICDIAG_CMD_READ					0xABU /* Host to FIDM Command : Read command */
-#define	ICDIAG_CMD_ICCTRL				0xACU /* Host to FIDM Command : Write command */
+#define	ICDIAG_CMD_ICFETCH				0xEBU /* Host to FIDM Command : Fetch command */
+#define	ICDIAG_CMD_READ					0xECU /* Host to FIDM Command : Read command */
+#define	ICDIAG_CMD_ICCTRL				0xEDU /* Host to FIDM Command : Write command */
 
 #define	ICDIAG_RESULT_NONE				0x00U /* Driver command result : None(Default) */
 #define	ICDIAG_RESULT_SUCCESS			0x01U /* Driver command result : Success */

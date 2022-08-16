@@ -237,20 +237,17 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			u8Temp = Memory_Pool_DisplayEnable_Reg_Get();
             if(u8Temp != DISPLAY_OFF_TOUCH_ON)
             {
-			if ((u8Temp & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
-			{                
-				Memory_Pool_BacklightEnable_Set(true);
-				Memory_Pool_DiagnosisEnable_Set(true);
-			}
-			else
-			{
-				Memory_Pool_BacklightEnable_Set(false);
-				Memory_Pool_DiagnosisEnable_Set(false);
-			}
-			Memory_Pool_DisplayEnable_Set(u8Temp);
+				if ((u8Temp & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
+				{
+					Memory_Pool_BacklightEnable_Set(true);					
+				}
+				else
+				{
+					Memory_Pool_BacklightEnable_Set(false);					
+				}
+				Memory_Pool_DisplayEnable_Set(u8Temp);
 
-			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
-			(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL4, EVENT_MESSAGE_DISANOSIS_ENABLE);
+				(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
             }
             else
 			{/*Nothing*/}

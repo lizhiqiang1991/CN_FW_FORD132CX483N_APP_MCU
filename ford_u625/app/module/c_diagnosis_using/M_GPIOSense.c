@@ -50,42 +50,24 @@ bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_deboun
  ******************************************************************************/
 uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
 {
-    int8_t i8Counter;
-    uint8_t u8SendData;
+    uint8_t u8SendData = 0x0EU;
     uint8_t mu8Temp[6U];
 	uint64_t u64ReturnStatus=0UL;
-    uint64_t u64Temp=0UL;
 
     /* Get the supply status of LED driver*/
-    u8SendData = 0x0EU;
     (void)HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 10U);
-    (void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[0U], 2U, 10U);
-
-    mu8Temp[0U] = mu8Temp[0U] & 0xAA;
-    mu8Temp[1U] = mu8Temp[1U] & 0xAA;
+    (void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[0U], 6U, 10U);
+	u64ReturnStatus = (uint64_t)(mu8Temp[0U] & 0xAAU);
+	u64ReturnStatus |= (((uint64_t)(mu8Temp[1U] & 0xAAU)) << 8U);
 
     /* Get the supply status of LED driver*/
-    u8SendData = 0x10U;
-    (void)HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 10U);
-    (void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[2U], 2U, 10U);
-
-    mu8Temp[2U] = mu8Temp[0U] & 0xAA;
-    mu8Temp[3U] = mu8Temp[1U] & 0xAA;
+	u64ReturnStatus |= (((uint64_t)(mu8Temp[2U] & 0xAAU)) << 16U);
+	u64ReturnStatus |= (((uint64_t)(mu8Temp[3U] & 0xAAU)) << 24U);
 
     /* Get the supply status of LED driver*/
-    u8SendData = 0x12U;
-    (void)HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 10U);
-    (void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[4U], 2U, 10U);
+	u64ReturnStatus |= (((uint64_t)(mu8Temp[4U] & 0xCFU)) << 32U);
+	u64ReturnStatus |= (((uint64_t)(mu8Temp[5U] & 0x55U)) << 40U);
 
-    mu8Temp[4U] = mu8Temp[4U] & 0xCF;
-    mu8Temp[5U] = mu8Temp[5U] & 0x55;
-
-    for ( i8Counter = 5; i8Counter >= 0; i8Counter-- )
-    {
-        u64Temp = mu8Temp[i8Counter];
-        u64Temp <<= (i8Counter * 8);
-        u64ReturnStatus|=u64Temp;
-    }
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 	u64ReturnStatus = Memory_Pool_DiagnosisSimulateInfo_Get().u64LedFaultStatus;
 #endif
@@ -123,9 +105,7 @@ void M_GPIOSense_LED_Driver_DiagClear(void)
  ******************************************************************************/
 uint64_t M_GPIOSense_DisplayFault_Read(void)
 {
-    int8_t i8Counter;
 	uint64_t u64ReturnStatus=0UL;
-    uint64_t u64Temp=0UL;
 	/*Switch Page to CMD2_P2.*/
 	uint8_t u8PageSwitch[2]={0x1EU,0x2BU};
 	uint8_t u8DataAddress=0x00U;
@@ -257,7 +237,6 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	}
 	else
 	{ /* Nothing */ }
-	u8ReadData[6] &= 0x07U;
 
 	/* Touch error status */	
 	/*Switch Page to CMD4_P1.*/
@@ -285,14 +264,16 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	}
 	else
 	{ /* Nothing */ }
-	u8ReadData[7] &= 0x03U;
 	
-	for(i8Counter=7; i8Counter>=0; i8Counter--)
-	{
-		u64Temp=u8ReadData[i8Counter];
-		u64Temp<<=(i8Counter*8);
-		u64ReturnStatus|=u64Temp;
-	}
+	u64ReturnStatus = (uint64_t)(u8ReadData[0U] & 0x9AU);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[1U] & 0x03U)) << 8U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[2U] & 0x01U)) << 16U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[3U] & 0x01U)) << 24U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[4U] & 0x7FU)) << 32U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[5U] & 0x02U)) << 40U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[6U] & 0x07U)) << 48U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[7U] & 0x03U)) << 56U);
+
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 	u64ReturnStatus=Memory_Pool_DiagnosisSimulateInfo_Get().u64DispFaultStatus;
 #endif
@@ -331,7 +312,7 @@ uint8_t M_GPIOSense_NT51926_Status_Get(void)
 	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData, 1U, 10U) != DRIVER_TRUE)
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
-		u8ReadData = 0xFFU;
+		u8ReadData = 0xFFU; /* If I2C master bus read error， Set u8Temp = 0x07U */ 
 	}
 	else
 	{ /* Nothing */ }
