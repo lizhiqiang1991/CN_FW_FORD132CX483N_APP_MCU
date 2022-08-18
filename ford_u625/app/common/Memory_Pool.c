@@ -52,7 +52,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.02.08" };
+const uint8_t cmu8McuVersion[] = { "T.01.02.09" };
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -1680,14 +1680,13 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             *(pDataBuffer + 2U) = (gtDiagnosisInfo.u32DisplayStatus >> 8U) & 0xC7U;
             *(pDataBuffer + 3U) = (gtDiagnosisInfo.u32DisplayStatus >> 16U) & 0x00;
 #endif
-            /* Clear all latched flags when actual status released*/
-            gtDiagnosisInfo.u32DisplayStatus = (gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get();
+            /* Updates previous display status. */
+            gtDiagnosisInfo.u32DisplayStatusPreHostCommand = gtDiagnosisInfo.u32DisplayStatus;
 
             /* Clear INT_ERROR  */
             gtDiagnosisInfo.u8IntStatus = gtDiagnosisInfo.u8IntStatus & (~BIT_INT_ERR_POS);
 
-            /* Updates previous display status. */
-            gtDiagnosisInfo.u32DisplayStatusPreHostCommand = gtDiagnosisInfo.u32DisplayStatus;
+			Memory_Pool_DisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get());
 
             *pLength = LEN_DISPLAY_STATUS + LEN_SUBADDRESS;
             break;
