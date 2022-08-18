@@ -23,15 +23,16 @@ tpower_management_def gtPowerManageInfo;
 tdiagnosis_simulate_def gtDiagnosisSimulateInfo = 
 {
 	.u8DispFaultPinLevel = GPIO_HIGH,
-	.u64DispFaultStatus = 0U,
+	.u8DispFaultStatus = {0U,0U,0U,0U,0U,0U,1U,0U},
 	.u8LedINTPinLevel = GPIO_HIGH,
-	.u64LedFaultStatus = 0U,
+	.u8LedFaultStatus = {0U,0U,0U,0U,0U,0U},
 	.u8PG1V2PinLevel = GPIO_HIGH,
 	.u8PG3V3PinLevel = GPIO_HIGH,
 	.u8LockPinLevel = GPIO_HIGH,
 	.u16BatteryVol = (BP_VMIN_CFG + 1U),
 	.u16FPCTXVol = (DIAG_FPC_TX_DISCON_VOL + 1U),
 	.u16FPCRXVol = (DIAG_FPC_RX_DISCON_VOL + 1U),
+	.i16PCBATemperature = (TEMP_DERATING_DEFAULT_DERA_TEMP - (1*TEMP_DERATING_TEMP_RESOLUTION)),
 };
 #endif
 
@@ -52,7 +53,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.02.09" };
+const uint8_t cmu8McuVersion[] = { "T.01.02.10" };
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -604,7 +605,11 @@ void Memory_Pool_PCBATemp_Set(int16_t i16SetValue)
  ******************************************************************************/
 int16_t Memory_Pool_PCBATemp_Get(void)
 {
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+    return gtDiagnosisSimulateInfo.i16PCBATemperature;
+#else
     return gtDataCollectInfo.i16PCBATemperature;
+#endif
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1686,7 +1691,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
             /* Clear INT_ERROR  */
             gtDiagnosisInfo.u8IntStatus = gtDiagnosisInfo.u8IntStatus & (~BIT_INT_ERR_POS);
 
-			Memory_Pool_DisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get());
+			Memory_Pool_DisplayStatus_Set((gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get());
 
             *pLength = LEN_DISPLAY_STATUS + LEN_SUBADDRESS;
             break;
@@ -2149,20 +2154,37 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
         case CMD_DIAGNOSIS_SIMULATE:
-			gtDiagnosisSimulateInfo.u8DispFaultPinLevel = 0U;
-			gtDiagnosisSimulateInfo.u64DispFaultStatus = 0U;
-			gtDiagnosisSimulateInfo.u8LedINTPinLevel = 0U;
-			gtDiagnosisSimulateInfo.u64LedFaultStatus = 0U;
-			gtDiagnosisSimulateInfo.u8PG1V2PinLevel = 0U;
-			gtDiagnosisSimulateInfo.u8PG3V3PinLevel = 0U;
-			gtDiagnosisSimulateInfo.u8LockPinLevel = 0U;
-			gtDiagnosisSimulateInfo.u16BatteryVol = 0U;
-			gtDiagnosisSimulateInfo.u16FPCTXVol = 0U;
-			gtDiagnosisSimulateInfo.u16FPCRXVol = 0U;
+			gtDiagnosisSimulateInfo.u8DispFaultPinLevel = *(pCmdBuffer + 1U) & 0x01U;
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[0] = *(pCmdBuffer + 2U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[1] = *(pCmdBuffer + 3U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[2] = *(pCmdBuffer + 4U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[3] = *(pCmdBuffer + 5U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[4] = *(pCmdBuffer + 6U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[5] = *(pCmdBuffer + 7U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[6] = *(pCmdBuffer + 8U);
+			gtDiagnosisSimulateInfo.u8DispFaultStatus[7] = *(pCmdBuffer + 9U);
+			
+			gtDiagnosisSimulateInfo.u8LedINTPinLevel = *(pCmdBuffer + 10U) & 0x01U;
+			gtDiagnosisSimulateInfo.u8LedFaultStatus[0] = *(pCmdBuffer + 11U);
+			gtDiagnosisSimulateInfo.u8LedFaultStatus[1] = *(pCmdBuffer + 12U);
+			gtDiagnosisSimulateInfo.u8LedFaultStatus[2] = *(pCmdBuffer + 13U);
+			gtDiagnosisSimulateInfo.u8LedFaultStatus[3] = *(pCmdBuffer + 14U);
+			gtDiagnosisSimulateInfo.u8LedFaultStatus[4] = *(pCmdBuffer + 15U);
+			gtDiagnosisSimulateInfo.u8LedFaultStatus[5] = *(pCmdBuffer + 16U);
+
+			gtDiagnosisSimulateInfo.u8PG1V2PinLevel = *(pCmdBuffer + 17U) & 0x01U;
+			gtDiagnosisSimulateInfo.u8PG3V3PinLevel = *(pCmdBuffer + 18U) & 0x01U;
+			gtDiagnosisSimulateInfo.u8LockPinLevel = *(pCmdBuffer + 19U) & 0x01U;
+
+			gtDiagnosisSimulateInfo.u16BatteryVol = (uint16_t)((*(pCmdBuffer + 20U))<<8U|(*(pCmdBuffer + 21U))<<0U);
+			gtDiagnosisSimulateInfo.u16FPCTXVol = (uint16_t)((*(pCmdBuffer + 22U))<<8U|(*(pCmdBuffer + 23U))<<0U);
+			gtDiagnosisSimulateInfo.u16FPCRXVol = (uint16_t)((*(pCmdBuffer + 24U))<<8U|(*(pCmdBuffer + 25U))<<0U);
+
+			gtDiagnosisSimulateInfo.i16PCBATemperature = (int16_t)((*(pCmdBuffer + 26U))<<8U|(*(pCmdBuffer + 27U))<<0U);
 		break;
 #endif
-        default:
-            /* Nothing */
-            break;
+		default:
+		/* Nothing */
+		break;
     }
 }

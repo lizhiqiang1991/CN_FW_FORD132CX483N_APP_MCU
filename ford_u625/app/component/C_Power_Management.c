@@ -105,7 +105,9 @@ static void C_Power_Manager_Control(void)
                     break;
                 case OFF_POWER_STATE:
                     /* Disable power system. */
+#if (!BACKDOOR_DIAGNOSIS_SIMULATE)
                     M_PM_Sequnce_Execute(Memory_Pool_PowerStatus_Get());
+#endif
                     Memory_Pool_PowerStatus_Set(POWER_OFF_READY);
 
                     /* Clear INIT bit in Display Status. */
@@ -124,9 +126,10 @@ static void C_Power_Manager_Control(void)
 					{/*Nothing*/}
                     break;
                 case SHUTDOWN1OR2_STATE:
-                    /* Mask serdes communication bus to avoid that shutdown flow be broken */
+					 /* Mask serdes communication bus to avoid that shutdown flow be broken */
+#if (!BACKDOOR_DIAGNOSIS_SIMULATE)
                     Memory_Pool_CommunicationMask_Set(true);
-
+#endif
                     /* Disable diagnosis functions*/
                     Memory_Pool_DiagnosisEnable_Set(false);
                     (void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);

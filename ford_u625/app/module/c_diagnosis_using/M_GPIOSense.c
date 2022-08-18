@@ -29,11 +29,11 @@ bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_deboun
 	}
 	else if((pPort == U301_P1V2_PGOOD_PORT) && (u8Pin == U301_P1V2_PGOOD_PIN))
 	{
-		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8LockPinLevel;
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8PG1V2PinLevel;
 	}
 	else if((pPort == U301_P3V3_PGOOD_PORT) && (u8Pin == U301_P3V3_PGOOD_PIN))
 	{
-		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8LockPinLevel;
+		u8IOLevel = Memory_Pool_DiagnosisSimulateInfo_Get().u8PG3V3PinLevel;
 	}
 	else
 	{/* Nothing */}
@@ -57,6 +57,16 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
     /* Get the supply status of LED driver*/
     (void)HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 10U);
     (void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[0U], 6U, 10U);
+	
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	mu8Temp[0U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[0U];
+	mu8Temp[1U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[1U];
+	mu8Temp[2U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[2U];
+	mu8Temp[3U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[3U];
+	mu8Temp[4U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[4U];
+	mu8Temp[5U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[5U];
+#endif
+
 	u64ReturnStatus = (uint64_t)(mu8Temp[0U] & 0xAAU);
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[1U] & 0xAAU)) << 8U);
 
@@ -68,10 +78,6 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[4U] & 0xCFU)) << 32U);
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[5U] & 0x55U)) << 40U);
 
-#if (BACKDOOR_DIAGNOSIS_SIMULATE)
-	u64ReturnStatus = Memory_Pool_DiagnosisSimulateInfo_Get().u64LedFaultStatus;
-#endif
-	
 	return u64ReturnStatus;
 }
 /******************************************************************************
@@ -264,6 +270,17 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	}
 	else
 	{ /* Nothing */ }
+
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u8ReadData[0U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[0U];
+	u8ReadData[1U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[1U];
+	u8ReadData[2U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[2U];
+	u8ReadData[3U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[3U];
+	u8ReadData[4U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[4U];
+	u8ReadData[5U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[5U];
+	u8ReadData[6U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[6U];
+	u8ReadData[7U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[7U];
+#endif
 	
 	u64ReturnStatus = (uint64_t)(u8ReadData[0U] & 0x9AU);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[1U] & 0x03U)) << 8U);
@@ -274,9 +291,6 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[6U] & 0x07U)) << 48U);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[7U] & 0x03U)) << 56U);
 
-#if (BACKDOOR_DIAGNOSIS_SIMULATE)
-	u64ReturnStatus=Memory_Pool_DiagnosisSimulateInfo_Get().u64DispFaultStatus;
-#endif
 	return u64ReturnStatus;
 }
 /******************************************************************************
@@ -317,6 +331,9 @@ uint8_t M_GPIOSense_NT51926_Status_Get(void)
 	else
 	{ /* Nothing */ }
 
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u8ReadData =  Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[6U];
+#endif
 	u8ReadData &= 0x07U;
 	
 	return u8ReadData;

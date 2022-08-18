@@ -169,10 +169,10 @@ typedef struct
 typedef struct
 {
 	uint8_t u8DispFaultPinLevel;
-	uint64_t u64DispFaultStatus;
+	uint8_t u8DispFaultStatus[8];
 	
 	uint8_t u8LedINTPinLevel;
-	uint64_t u64LedFaultStatus;
+	uint8_t u8LedFaultStatus[6];
 	
 	uint8_t u8PG1V2PinLevel;
 	uint8_t u8PG3V3PinLevel;
@@ -181,6 +181,8 @@ typedef struct
 	uint16_t u16BatteryVol;
 	uint16_t u16FPCTXVol;
 	uint16_t u16FPCRXVol;
+	
+	int16_t i16PCBATemperature;
 } tdiagnosis_simulate_def;
 #endif
 
