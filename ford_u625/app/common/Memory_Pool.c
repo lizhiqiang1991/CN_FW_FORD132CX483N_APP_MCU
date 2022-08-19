@@ -16,7 +16,13 @@ tdata_collection_def gtDataCollectInfo;
 tbacklight_def gtBacklightInfo;
 ttemperture_def gtTemperatureInfo;
 tbatt_protect_def gtBattProtectInfo;
-tdiagnosis_def gtDiagnosisInfo = {.u32DisplayStatusPreHostCommand = 0x00U, .u16IcCommunicationDiagnosis = NUMBER_ZERO};
+tdiagnosis_def gtDiagnosisInfo = 
+{
+	.u32DisplayStatusPreHostCommand = 0x00U, 
+	.u32DisplayStatus = 0x00U,
+	.u32ActualDisplayStatus = 0x00U,
+};
+
 tpower_management_def gtPowerManageInfo;
 
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
@@ -53,7 +59,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.02.11" };
+const uint8_t cmu8McuVersion[] = { "T.01.02.12" };
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:

@@ -450,6 +450,10 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 			/* If I2C master bus read error， Set u8Temp = 0x07U */
 			if(Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
 			{
+				u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
+				u64Temp |= (((uint64_t)u8Temp) << 48U);
+				Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+				
 				tDiagCtrl.u8NT51926StatusDebunceStandby= 0U;
 				if((u8Temp != NT51925_STATUS_NORMAL)  && (u8Temp != 0x07U))
 				{
@@ -457,9 +461,6 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 					if(tDiagCtrl.u8NT51926StatusDebunce >= C_DIAG_NT51926_Comm_DEBUNCE)
 					{
 						tDiagCtrl.u8NT51926StatusDebunce = C_DIAG_NT51926_Comm_DEBUNCE;
-						u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
-						u64Temp |= (((uint64_t)u8Temp) << 48U);
-						Memory_Pool_NT51926Diagnosis_Set(u64Temp);
 					}			
 					else
 					{/*Nothing*/}
@@ -471,7 +472,11 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 				}
 			}
 			else if(Memory_Pool_LcdStatus_Get() == DISPLAY_OFF)
-			{	
+			{
+				u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
+				u64Temp |= (((uint64_t)u8Temp) << 48U);
+				Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+			
 				tDiagCtrl.u8NT51926StatusDebunce = 0U;
 				if((u8Temp != NT51925_STATUS_STANDY)  && (u8Temp != 0x07U))
 				{
@@ -479,9 +484,6 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 					if(tDiagCtrl.u8NT51926StatusDebunceStandby >= C_DIAG_NT51926_Comm_DEBUNCE)
 					{
 						tDiagCtrl.u8NT51926StatusDebunceStandby = C_DIAG_NT51926_Comm_DEBUNCE;
-						u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
-						u64Temp |= (((uint64_t)u8Temp) << 48U);
-						Memory_Pool_NT51926Diagnosis_Set(u64Temp);
 					}			
 					else
 					{/*Nothing*/}
@@ -536,6 +538,11 @@ static void C_Diagnosis_ParaInit(void)
 	Memory_Pool_DisplayStatusBp_Set(0U);
 	Memory_Pool_DiagnosisEnable_Set(false);
 	Memory_Pool_LockLoss_Set(false);
+	Memory_Pool_NT51926Diagnosis_Set(0UL);
+	Memory_Pool_IcCommDiagnosis_Set(0U);
+	Memory_Pool_LEDDiagnosis_Set(0UL);	
+	Memory_Pool_GeneralDiagnosis_Set(0U);
+	
 	tDiagCtrl.DiagProtectAction = DIAG_ACTION_NONE;
 	tDiagCtrl.u16LEDDriverCommTime = C_DIAG_LP8864_I2CTIME;
 	tDiagCtrl.u16NT51926CommTime = C_DIAG_NT51926_I2CTIME;
@@ -563,7 +570,7 @@ static void C_Diagnosis_ParaInit(void)
 	tDispFaultMaster.u8CurrentGPIOStatus = GPIO_HIGH;
 	tDispFaultMaster.u8DebounceMax = DEBOUNCE_3_TIMES;
 	tDispFaultMaster.blEnable = true;
-	Memory_Pool_NT51926Diagnosis_Set(BIT_A3_PANEL_DP_NORMAL_RUN_POS);
+
 
 	tSerdesLock.u8DebounceHigh = 0U;
 	tSerdesLock.u8DebounceLow = 0U;
@@ -607,7 +614,6 @@ static void C_Diagnosis_ParaInit(void)
 	tIcComm.u8DebounceMax = DEBOUNCE_3_TIMES;
 	tIcComm.blEnable = true;
 
-	Memory_Pool_IcCommDiagnosis_Set(0U);
 	
 #if(BACKDOOR_ICDIAG_OPEN)
 	ICDIAG_Initialize();
