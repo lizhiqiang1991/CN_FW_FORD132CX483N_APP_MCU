@@ -853,7 +853,7 @@ static void C_Display_Manage_Control(void)
 			tDisplayManageTask.u16Timer3 = TIME_2ms;
             break;
         case EVENT_MESSAGE_DISPLAY_ENABLE :
-			if((tDisplayCtrl.u8DisplayEnLock == DISP_SEQ_LOCK_OFF) && (Memory_Pool_PowerStatus_Get() != POWER_OFF))
+			if((tDisplayCtrl.u8DisplayEnLock == DISP_SEQ_LOCK_OFF) && (Memory_Pool_PowerStatus_Get() != POWER_OFF) && (Memory_Pool_PowerStatus_Get() != POWER_OFF_READY))
 			{	
 				tDisplayCtrl.u8DisplayEnLock = DISP_SEQ_LOCK_ON;
 				
