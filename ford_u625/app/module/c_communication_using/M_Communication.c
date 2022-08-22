@@ -14,7 +14,7 @@ static tcommunication_info_def tCommunicationInfo;
  ******************************************************************************/
 void M_COM_TxBuffer_Config(uint8_t *pTxBuff, uint8_t u8Length)
 {
-    HAL_I2C_MS_TxBuf_Config(pTxBuff, u8Length);
+	HAL_I2C_MS_TxBuf_Config(pTxBuff, u8Length);
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -25,7 +25,7 @@ void M_COM_TxBuffer_Config(uint8_t *pTxBuff, uint8_t u8Length)
  ******************************************************************************/
 void M_COM_RxBuffer_Config(uint8_t *pRxBuff, uint8_t u8Length)
 {
-    HAL_I2C_MS_RxBuf_Config(pRxBuff, u8Length);
+	HAL_I2C_MS_RxBuf_Config(pRxBuff, u8Length);
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -36,32 +36,32 @@ void M_COM_RxBuffer_Config(uint8_t *pRxBuff, uint8_t u8Length)
  ******************************************************************************/
 void M_COM_TxBufferData_Set(uint8_t *pTxBuff, uint8_t u8Length)
 {
-    uint8_t u8ResultValue;
-    uint8_t u8LengthTemp = u8Length;
+	uint8_t u8ResultValue = 0U;
+	uint8_t u8LengthTemp = u8Length;
 
-    if (*pTxBuff == 0xF4U)
-    {
-        u8ResultValue = Common_Checksum_Calculation(pTxBuff, u8LengthTemp) + 0x01U;
-        *(pTxBuff + u8LengthTemp) = u8ResultValue;
-    }
-    else
-    {
+	if (*pTxBuff == 0xF4U)
+	{
+		u8ResultValue = Common_Checksum_Calculation(pTxBuff, u8LengthTemp) + 0x01U;
+		*(pTxBuff + u8LengthTemp) = u8ResultValue;
+	}
+	else
+	{
 #if(FORD_SPSS_CRC_ROLL_EN)
 		if(tCommunicationInfo.u8TxRollingCounter == 0xFFU)
 		{
-			tCommunicationInfo.u8TxRollingCounter = NUMBER_ZERO;
+			tCommunicationInfo.u8TxRollingCounter = 0U;
 		}
 		else
 		{
 			tCommunicationInfo.u8TxRollingCounter++;
 		}
-		
-        *(pTxBuff + u8LengthTemp) = tCommunicationInfo.u8TxRollingCounter;
-        u8LengthTemp = u8Length + LEN_ROLLING_COUNTER;
-        u8ResultValue = CRC8_Calculation(pTxBuff, u8LengthTemp);
-        *(pTxBuff + u8LengthTemp) = u8ResultValue;
+
+		*(pTxBuff + u8LengthTemp) = tCommunicationInfo.u8TxRollingCounter;
+		u8LengthTemp = u8Length + LEN_ROLLING_COUNTER;
+		u8ResultValue = CRC8_Calculation(pTxBuff, u8LengthTemp);
+		*(pTxBuff + u8LengthTemp) = u8ResultValue;
 #endif
-    }
+	}
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -72,7 +72,7 @@ void M_COM_TxBufferData_Set(uint8_t *pTxBuff, uint8_t u8Length)
  ******************************************************************************/
 uint32_t M_COM_RxLength_Get(void)
 {
-    return HAL_I2C_MS_RxTransferCount_Get();
+	return HAL_I2C_MS_RxTransferCount_Get();
 }
 
 /******************************************************************************
@@ -84,18 +84,18 @@ uint32_t M_COM_RxLength_Get(void)
  ******************************************************************************/
 void M_COM_I2cInit(uint8_t *pTxBuff, uint8_t u8TxSize, uint8_t *pRxBuff, uint8_t u8RxSize, cy_cb_scb_i2c_handle_events_t pCallback)
 {
-    i2c_master_slave_typedef tI2CMS;
+	i2c_master_slave_typedef tI2CMS;
 
-    tCommunicationInfo.u8RxRollingCounter = NUMBER_ZERO;
-    tCommunicationInfo.u8TxRollingCounter = NUMBER_ZERO;
+	tCommunicationInfo.u8RxRollingCounter = 0U;
+	tCommunicationInfo.u8TxRollingCounter = 0U;
 
-    tI2CMS.pBase = I2C_COM_HW;
-    tI2CMS.pConfig = &I2C_COM_config;
-    tI2CMS.tSysint.intrSrc = I2C_COM_IRQ;
-    tI2CMS.tSysint.intrPriority = 3U;
-    tI2CMS.pCallback = pCallback;
+	tI2CMS.pBase = I2C_COM_HW;
+	tI2CMS.pConfig = &I2C_COM_config;
+	tI2CMS.tSysint.intrSrc = I2C_COM_IRQ;
+	tI2CMS.tSysint.intrPriority = 3U;
+	tI2CMS.pCallback = pCallback;
 
-    (void) HAL_I2C_MS_Init(tI2CMS, pTxBuff, u8TxSize, pRxBuff, u8RxSize);
+	(void) HAL_I2C_MS_Init(tI2CMS, pTxBuff, u8TxSize, pRxBuff, u8RxSize);
 }
 
 /******************************************************************************
@@ -107,10 +107,10 @@ void M_COM_I2cInit(uint8_t *pTxBuff, uint8_t u8TxSize, uint8_t *pRxBuff, uint8_t
  ******************************************************************************/
 void M_COM_I2cDeInit(void)
 {
-    i2c_master_slave_typedef tI2CMS;
+	i2c_master_slave_typedef tI2CMS;
 
-    tI2CMS.pBase = I2C_COM_HW;
-    HAL_I2C_MS_DeInit(tI2CMS);
+	tI2CMS.pBase = I2C_COM_HW;
+	HAL_I2C_MS_DeInit(tI2CMS);
 }
 
 /******************************************************************************
@@ -384,6 +384,7 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 				u8CheckResult=FORMAT_LEN_FAIL;
 			}
 		break;
+
 		case ICDIAG_CMD_READ:
 			if(u8Length == LEN_SUBADDRESS)
 			{
@@ -394,6 +395,7 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 				u8CheckResult=FORMAT_LEN_FAIL;
 			}
 		break;			
+
 		case ICDIAG_CMD_ICCTRL:
 			if(u8Length == (LEN_SUBADDRESS+LEN_ICDIAG_ICCTRL))
 			{
@@ -409,6 +411,7 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			}
 		break;
 #endif
+
 #if(BACKDOOR_DIAGNOSIS_SIMULATE)
 		case CMD_DIAGNOSIS_SIMULATE:
 			if(u8Length == (LEN_SUBADDRESS+LEN_DIAGNOSIS_SIMULATE))
@@ -438,10 +441,10 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
  ******************************************************************************/
 bool M_COM_RxMSGCRC8Value_Check(uint8_t *pRxBuff, uint8_t u8Length)
 {
-	bool bCheckResult=false;
+	bool bCheckResult = false;
 
 #if(FORD_SPSS_CRC_ROLL_EN)
-	uint8_t u8CRCinMSG=*(pRxBuff + u8Length - LEN_CRC8);
+	uint8_t u8CRCinMSG = *(pRxBuff + u8Length - LEN_CRC8);
 
 	u8Length = u8Length-LEN_CRC8;
 

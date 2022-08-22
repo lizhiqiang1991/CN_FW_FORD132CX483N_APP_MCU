@@ -13,8 +13,8 @@
 #include "M_DataCollecting.h"
 #include "main.h"
 
-// DATA COLLECTING State Machine Define
-// The Max Number of State
+/* DATA COLLECTING State Machine Define */
+/* The Max Number of State */
 #define MAX_DC_STATE_NO             	0x03U
 #define STATE_DATA_COLLECTING_INIT     	0x00U
 #define STATE_DATA_COLLECTING_CTRL     	0x01U
@@ -26,8 +26,6 @@ typedef struct
 	uint16_t u16Timer2;
 	uint32_t u32Timeout;
 }tdata_collecting_task_def;
-
-#define SHIFT_RIGHT_BYTE   				8U
 
 void C_Data_Collecting_Timer1(void);
 extern void (*const Data_Collecting_State_Machine[MAX_DC_STATE_NO])(void);

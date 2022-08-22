@@ -927,7 +927,7 @@
                         <Param id="RunMode" value="CY_TCPWM_PWM_CONTINUOUS"/>
                         <Param id="DeadClocks" value="0"/>
                         <Param id="EnablePeriodSwap" value="false"/>
-                        <Param id="Period0" value="1022"/>
+                        <Param id="Period0" value="1023"/>
                         <Param id="Period1" value="32768"/>
                         <Param id="EnableCompareSwap" value="false"/>
                         <Param id="Compare0" value="0"/>

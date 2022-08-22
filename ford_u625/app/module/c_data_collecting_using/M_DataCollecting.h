@@ -53,7 +53,8 @@ typedef struct
 }data_collecting_info_def;
 
 typedef struct
-{	 int16_t i16ActulValue;
+{	 
+	int16_t i16ActulValue;
 	uint16_t u16ADCVol;
 }tmtx_tbl_element_def;
 

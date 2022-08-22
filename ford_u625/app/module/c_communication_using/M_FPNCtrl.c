@@ -10,14 +10,14 @@ static tFPN_production_byte_def tFPNProductionByte;
 
 static uint8_t M_FPNCtrl_FPNCheckSum_Calculate(uint8_t *pFPNBuff)
 {
-    uint8_t u8AddIndex = NUMBER_ZERO;
-    uint8_t u8SumTemp = NUMBER_ZERO;
+    uint8_t u8AddIndex = 0U;
+    uint8_t u8SumTemp = 0U;
     uint8_t u8FPNbufftemp[FPN_SIZE];
 
     memcpy(u8FPNbufftemp,pFPNBuff,FPN_SIZE);
 
     /* get sum */
-    for (u8AddIndex = NUMBER_ZERO;u8AddIndex < FPN_CHECKSUM_INDEX;u8AddIndex++)
+    for (u8AddIndex = 0U;u8AddIndex < FPN_CHECKSUM_INDEX;u8AddIndex++)
     {
     	u8SumTemp += u8FPNbufftemp[u8AddIndex];
     }
@@ -28,7 +28,7 @@ static uint8_t M_FPNCtrl_FPNCheckSum_Calculate(uint8_t *pFPNBuff)
 
 static uint8_t  M_FPNCtrl_FPNCheckSum_Compare (uint8_t u8TCS,uint8_t u8SCS)
 {
-    uint8_t u8CheckReault = NUMBER_ZERO;
+    uint8_t u8CheckReault = 0U;
 
     if(u8TCS == u8SCS)
     {
@@ -46,8 +46,8 @@ static uint8_t M_FPNCtrl_DeliveryFPNWriteToEE_Process(void)
 {
     uint8_t *pu8Delivery_assembly = NULL;
     uint8_t  u8ProcessStatus = 0U;
-    uint8_t u8Temp = NUMBER_ZERO;
-    uint8_t u8CompResulat = NUMBER_ZERO;
+    uint8_t u8Temp = 0U;
+    uint8_t u8CompResulat = 0U;
 
     /* Write FPN to EEPROM */
     if(tFPNCtrlDelivery.FPN_Flag_t.FPNCtrlFlag == FPN_ENABLE)
@@ -133,9 +133,9 @@ uint8_t M_FPNCtrl_DeliveryFPNControl_Process(tFPN_ctrl_def *fpn_t)
 uint8_t M_FPNCtrl_SerNumFPNWriteToEE_Process(void)
 {
     uint8_t *pu8SerNum_assembly = NULL;
-    uint8_t  u8ProcessStatus = NUMBER_ZERO;
-    uint8_t u8Temp = NUMBER_ZERO;
-    uint8_t u8CompResulat = NUMBER_ZERO;
+    uint8_t  u8ProcessStatus = 0U;
+    uint8_t u8Temp = 0U;
+    uint8_t u8CompResulat = 0U;
 
     /* Write FPN to EEPROM */
     if(tFPNCtrlSerNum.FPN_Flag_t.FPNCtrlFlag == FPN_ENABLE)

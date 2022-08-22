@@ -22,9 +22,9 @@
 typedef struct
 {
 	uint16_t u16BLDeratingRate;
-    uint16_t u16Timer1;
-    uint16_t u16Timer2;
-    uint32_t u32Timeout;
+	uint16_t u16Timer1;
+	uint16_t u16Timer2;
+	uint32_t u32Timeout;
 }tbacklight_manage_task_def;
 
 void C_Backlight_Manage_Timer1(void);

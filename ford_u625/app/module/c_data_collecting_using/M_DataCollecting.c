@@ -881,13 +881,16 @@ void M_DC_Function_Execute(uint8_t u8Action)
 			gtDCInfo.u8Index = 0;
 			gtDCInfo.u8FIRInit = 0U;
 			gtDCInfo.u8IIRInit = 0U;
-			break;
+		break;
+
 		case DC_TURNON_VBATT_MEASURE:
 			HAL_GPIO_High(EN_VBATT_SENSE_PORT,EN_VBATT_SENSE_PIN);
-			break;
+		break;
+
 		case DC_START_MEASURE:
 			HAL_ADC_Start_Convert();
-			break;
+		break;
+
 		case DC_GETVALUE:
 			/*When initialize, fill in all data as first time detected ADC.*/
 			if(gtDCInfo.u8FIRInit == 0U)
@@ -934,33 +937,41 @@ void M_DC_Function_Execute(uint8_t u8Action)
 
 			gtDCInfo.u8Index++;
 			gtDCInfo.u8Index%=SAMPLE_ELEMENT_NUM;
-			break;
+		break;
+
 		case DC_QUERY_VBATT_TABLE:
 			gtDCInfo.i16PresentVbattAnaVol=HAL_ADC0_Get_Channel_mVolt(HAL_ADC_VBATT_VOLT,gtDCInfo.i16PresentVbattADC);
 			gtDCInfo.i16PresentVbatt=M_DC_CheckTable(&mtVbatt[0],gtDCInfo.i16PresentVbattAnaVol);
-			break;
+		break;
+
 		case DC_QUERY_VSYNC_TABLE:
 			gtDCInfo.i16PresentVSyncAnaVol=HAL_ADC0_Get_Channel_mVolt(HAL_ADC_SYNC_VOLT,gtDCInfo.i16PresentVSyncADC);
 			gtDCInfo.i16PresentVSync=M_DC_CheckTable(&mtVsync[0],gtDCInfo.i16PresentVSyncAnaVol);
-			break;
+		break;
+
 		case DC_QUERY_PCBT_TABLE:
 			gtDCInfo.i16PresentTPCBAnaVol=HAL_ADC0_Get_Channel_mVolt(HAL_ADC_PCB_TEMP,gtDCInfo.i16PresentPCBTempADC);
 			gtDCInfo.i16PresentTPCB=M_DC_CheckTable(&mtTpcb[0],gtDCInfo.i16PresentTPCBAnaVol);
-			break;
+		break;
+
 		case DC_QUERY_BLT_TABLE:
 			gtDCInfo.i16PresentTBacklightAnaVol=HAL_ADC0_Get_Channel_mVolt(HAL_ADC_BACKLIGHT_TEMP,gtDCInfo.i16PresentBacklightTempADC);
 			gtDCInfo.i16PresentTBacklight=M_DC_CheckTable(&mtTbl[0],gtDCInfo.i16PresentTBacklightAnaVol);
-			break;
+		break;
+
 		case DC_QUERY_FPCTXOUT_TABLE:
 			gtDCInfo.i16PresentFPCTxAnaVol=HAL_ADC0_Get_Channel_mVolt(HAL_ADC_FPCTXOUT_VOLT,gtDCInfo.i16PresentFPCTxOutADC);
 			gtDCInfo.i16PresentFPCTxOut=gtDCInfo.i16PresentFPCTxAnaVol;
-			break;
+		break;
+
 		case DC_QUERY_FPCRXOUT_TABLE:
 			gtDCInfo.i16PresentFPCRxAnaVol=HAL_ADC0_Get_Channel_mVolt(HAL_ADC_FPCRXOUT_VOLT,gtDCInfo.i16PresentFPCRxOutADC);
 			gtDCInfo.i16PresentFPCRxOut=gtDCInfo.i16PresentFPCRxAnaVol;
-			break;
+		break;
+
 		default:
-			break;
+			/* Nothing */
+		break;
 	}
 	M_DC_Status_Set(u8Action);
 }
@@ -975,6 +986,7 @@ void M_DC_Function_Execute(uint8_t u8Action)
 void M_DC_Callback(void)
 {
 	uint32_t intrMask = HAL_ADC0_GetIntStatusMask();
+
 	if((HAL_ADC_EOS_MASK & intrMask) != 0U)
 	{
 		gtDCInfo.mi16PCBTempADCData[gtDCInfo.u8Index] = HAL_ADC0_Get_ADCRead(HAL_ADC_PCB_TEMP);

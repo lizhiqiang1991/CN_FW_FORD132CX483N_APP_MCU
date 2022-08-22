@@ -19,16 +19,16 @@
 
 typedef struct
 {
-    uint16_t u16PresentDuty;
-    uint16_t u16TargetDuty;
-    bool bDeratingEnable;
+	uint16_t u16PresentDuty;
+	uint16_t u16TargetDuty;
+	bool bDeratingEnable;
 } tbacklight_def;
 
 typedef struct
 {
-    int16_t i16PCBTemperature;
-    int16_t i16BLTemperature;
-    bool bTemperatureProtectEnable;
+	int16_t i16PCBTemperature;
+	int16_t i16BLTemperature;
+	bool bTemperatureProtectEnable;
 } ttemperture_def;
 
 typedef struct
@@ -39,8 +39,8 @@ typedef struct
 
 typedef struct
 {
-    uint8_t u8ID;
-    uint8_t u8Subversion;
+	uint8_t u8ID;
+	uint8_t u8Subversion;
 } tdisplay_identification_def;
 
 typedef struct
@@ -70,100 +70,93 @@ typedef struct
 /* FPN Read/Write */
 typedef struct
 {
-    uint8_t WRT_ST    : 1;
-    uint8_t INT_WRT   : 1;
-    uint8_t CKSUM_ERR : 1;
-    uint8_t RESERVED  : 5;
+	uint8_t WRT_ST    : 1;
+	uint8_t INT_WRT   : 1;
+	uint8_t CKSUM_ERR : 1;
+	uint8_t RESERVED  : 5;
 } __attribute__((__packed__)) tfpn_status_info_def;
 
 /* Retrieve Production phase byte Read/Write */
 typedef struct
 {
-    uint8_t WRT_ST   : 1;
-    uint8_t INT_WRT  : 1;
-    uint8_t RESERVED : 6;
+	uint8_t WRT_ST   : 1;
+	uint8_t INT_WRT  : 1;
+	uint8_t RESERVED : 6;
 } __attribute__((__packed__)) tProduct_pn_status_info_def;
 
 typedef struct
 {
-    uint8_t u8Command;
-    bool bCommunicationMask;
+	uint8_t u8Command;
+	bool bCommunicationMask;
 
-    uint8_t u8EppromIndex;
-    uint8_t mu8FPNSoft[25U];
-    uint8_t mu8FPNCore[25U];
-    uint8_t mu8FPNMain[25U];
-    uint8_t mu8FPNDelivery[25U];
-    uint8_t mu8FPNSerial[25U];
-    uint8_t mu8FPNID[25U];
-    uint8_t u8ProductionPhase;
+	uint8_t u8EppromIndex;
+	uint8_t mu8FPNSoft[25U];
+	uint8_t mu8FPNCore[25U];
+	uint8_t mu8FPNMain[25U];
+	uint8_t mu8FPNDelivery[25U];
+	uint8_t mu8FPNSerial[25U];
+	uint8_t mu8FPNID[25U];
+	uint8_t u8ProductionPhase;
 
-    tfpn_status_info_def tFPNDeliverystatusInfo;
-    tfpn_status_info_def tFPNSerialstatusInfo;
-    tProduct_pn_status_info_def tFPNSProductPhaseStatusInfo;
-    bool bWriteFPNDeliveryStatusReg;
-    bool bWriteFPNDelivery;
-    bool bWriteSerNumPNStatusReg;
-    bool bWriteSerNumFPN; 
-    bool bWriteProductPhasePNStatusReg;
-    bool bWriteProductPhaseFPN;
-    uint8_t mu8WriteFFPNDelivery[26U];
-    uint8_t mu8WriteFPNSerial[26U];
-    uint8_t u8WriteProductionPhase;
+	tfpn_status_info_def tFPNDeliverystatusInfo;
+	tfpn_status_info_def tFPNSerialstatusInfo;
+	tProduct_pn_status_info_def tFPNSProductPhaseStatusInfo;
+	bool bWriteFPNDeliveryStatusReg;
+	bool bWriteFPNDelivery;
+	bool bWriteSerNumPNStatusReg;
+	bool bWriteSerNumFPN; 
+	bool bWriteProductPhasePNStatusReg;
+	bool bWriteProductPhaseFPN;
+	uint8_t mu8WriteFFPNDelivery[26U];
+	uint8_t mu8WriteFPNSerial[26U];
+	uint8_t u8WriteProductionPhase;
 } tcommunication_def;
 
 typedef struct
 {
-    uint8_t u8DisplayEnable;
-    uint8_t u8DisplayScanning;
-    uint8_t u8DisplayShutdown;
-    bool bBacklightEnable;
+	uint8_t u8DisplayEnable;
+	uint8_t u8DisplayScanning;
+	uint8_t u8DisplayShutdown;
+	bool bBacklightEnable;
 
-    uint8_t u8DisplayEnableBackup;
+	uint8_t u8DisplayEnableBackup;
 	uint8_t u8DisplayEnableSet;
 
-    uint8_t u8DisplayStatus;
-    uint8_t u8TouchStatus;
-    uint8_t u8ScanStatus;
+	uint8_t u8DisplayStatus;
+	uint8_t u8TouchStatus;
+	uint8_t u8ScanStatus;
 
-    uint8_t u8LcdResetStatus;
+	uint8_t u8LcdResetStatus;
 
-    uint8_t u8FactoryMode;
-	
+	uint8_t u8FactoryMode;
+
 	uint32_t u32NT51926_Vcom;
-
 } tdisplay_management_def;
 
 typedef struct
 {
-    uint8_t u8PowerState;
-    uint8_t u8PowerStatus;
+	uint8_t u8PowerState;
+	uint8_t u8PowerStatus;
 
-    uint8_t u8SyncStatus;
-    bool bSoftwareReset;
+	uint8_t u8SyncStatus;
+	bool bSoftwareReset;
 } tpower_management_def;
 
 typedef struct
 {
-    uint8_t u8IntStatus;
-    bool bDiagnosisEnable;
-    uint32_t u32DisplayStatus;
-    uint32_t u32DisplayStatusPreHostCommand;
-    uint32_t u32ActualDisplayStatus;
-    uint32_t u32DisplayStatusBp;
-    bool bLockLoss;
+	uint8_t u8IntStatus;
+	bool bDiagnosisEnable;
+	uint32_t u32DisplayStatus;
+	uint32_t u32DisplayStatusPreHostCommand;
+	uint32_t u32ActualDisplayStatus;
+	uint32_t u32DisplayStatusBp;
+	bool bLockLoss;
 
-    uint16_t u16GeneralDiagnosis;
-    uint64_t u64LEDDriverDiagnosis;
-    uint64_t u64NT51926Diagnosis;
+	uint16_t u16GeneralDiagnosis;
+	uint64_t u64LEDDriverDiagnosis;
+	uint64_t u64NT51926Diagnosis;
 	uint16_t u16IcCommunicationDiagnosis;
 } tdiagnosis_def;
-
-typedef struct
-{
-    bool bI2cDesBusInit;
-    bool bI2cMcuBusInit;
-} tu625_def;
 
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 typedef struct
@@ -325,12 +318,6 @@ bool Memory_Pool_SoftwareReset_Get(void);
 
 void Memory_Pool_SyncStatus_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_SyncStatus_Get(void);
-
-void Memory_Pool_I2CDesInit_Set(bool bSetValue);
-bool Memory_Pool_I2CDesInit_Get(void);
-
-void Memory_Pool_I2CMcuInit_Set(bool bSetValue);
-bool Memory_Pool_I2CMcuInit_Get(void);
 
 void Memory_Pool_FactoryMode_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_FactoryMode_Get(void);

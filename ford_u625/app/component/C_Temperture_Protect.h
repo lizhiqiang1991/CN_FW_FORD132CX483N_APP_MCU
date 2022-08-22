@@ -22,18 +22,10 @@
 
 typedef struct
 {
-    uint16_t u16Timer1;
-    uint32_t u32Timeout;
-//    uint16_t u16Timer2;
-//    uint16_t u16Timer3;
-//    uint16_t u16Timer4;
+	uint16_t u16Timer1;
+	uint32_t u32Timeout;
 } ttemperture_protect_task_def;
 
-#define SHIFT_RIGHT_BYTE   				8U
-
-//void C_Temperture_Protect_Timer4(void);
-//void C_Temperture_Protect_Timer3(void);
-//void C_Temperture_Protect_Timer2(void);
 void C_Temperture_Protect_Timer1(void);
 extern void (*const Temperture_Protect_State_Machine[MAX_TP_STATE_NO])(void);
 

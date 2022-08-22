@@ -11,11 +11,11 @@ static tdata_collecting_task_def tDataCollectingTask;
  ******************************************************************************/
 static void C_Data_Collecting_Init(void)
 {
-    M_DC_Init();
-    M_DC_Function_Execute(DC_INIT_ADCVALUE);
-    tDataCollectingTask.u16Timer1 = TIME_DISABLE;
-    (void)Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_CTRL, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_CTRL]);
-    Task_TaskDone();
+	M_DC_Init();
+	M_DC_Function_Execute(DC_INIT_ADCVALUE);
+	tDataCollectingTask.u16Timer1 = TIME_DISABLE;
+	(void)Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_CTRL, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_CTRL]);
+	Task_TaskDone();
 }
 /******************************************************************************
  ;       Function Name			:	void C_Data_Collecting_Control(void)
@@ -31,7 +31,8 @@ static void C_Data_Collecting_Control(void)
 		case EVENT_FIRST :
 			M_DC_Function_Execute(DC_TURNON_VBATT_MEASURE);
 			tDataCollectingTask.u16Timer1 = TIME_10ms;
-			break;
+		break;
+
 		case EVENT_TIMER1 :
 			/*Convert to MV than look up table.*/
 			M_DC_Function_Execute(DC_QUERY_VBATT_TABLE);
@@ -64,10 +65,11 @@ static void C_Data_Collecting_Control(void)
 			/*Start Conversion*/
 			M_DC_Function_Execute(DC_START_MEASURE);
 			tDataCollectingTask.u16Timer1 = TIME_10ms;
-			break;
+		break;
+
 		default:
 			(void)Task_ChangeState(TYPE_DATA_COLLECTING, LEVEL5, STATE_DATA_COLLECTING_ERROR, Data_Collecting_State_Machine[STATE_DATA_COLLECTING_ERROR]);
-			break;
+		break;
 	}
 	Task_TaskDone();
 }
@@ -80,7 +82,7 @@ static void C_Data_Collecting_Control(void)
  ******************************************************************************/
 static void C_Data_Collecting_Error(void)
 {
-    Task_TaskDone();
+	Task_TaskDone();
 }
 /******************************************************************************
  ;       Function Name			:	void C_Data_Collecting_Timer1(void)
@@ -91,17 +93,17 @@ static void C_Data_Collecting_Error(void)
  ******************************************************************************/
 void C_Data_Collecting_Timer1(void)
 {
-    if (tDataCollectingTask.u16Timer1 > TIME_UP)
-    {
-        tDataCollectingTask.u16Timer1--;
-        if (tDataCollectingTask.u16Timer1 == TIME_UP)
-        {
-            tDataCollectingTask.u16Timer1 = TIME_DISABLE;
-            (void)Task_ChangeEvent(TYPE_DATA_COLLECTING, LEVEL3, EVENT_TIMER1);
-        }
+	if (tDataCollectingTask.u16Timer1 > TIME_UP)
+	{
+		tDataCollectingTask.u16Timer1--;
+		if (tDataCollectingTask.u16Timer1 == TIME_UP)
+		{
+			tDataCollectingTask.u16Timer1 = TIME_DISABLE;
+			(void)Task_ChangeEvent(TYPE_DATA_COLLECTING, LEVEL3, EVENT_TIMER1);
+		}
 		else
 		{ /* Nothing */ }
-    }
+	}
 	else
 	{ /* Nothing */ }
 }

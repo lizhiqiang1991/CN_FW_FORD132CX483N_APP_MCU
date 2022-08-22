@@ -65,8 +65,8 @@ volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
  ******************************************************************************/
 static void C_Communication_Flash_Read(void)
 {
-	uint8_t u8FlashDataIndex = 0;
-	uint32_t u32FlashDataOffset = 0;
+	uint8_t u8FlashDataIndex = 0U;
+	uint32_t u32FlashDataOffset = 0U;
 	CCommunication_AllFactoryData cCommunicaiotnAllFactoryData;
 
 	/* Reset Temp All Factory Data */
@@ -98,11 +98,11 @@ static void C_Communication_Flash_Read(void)
  ******************************************************************************/
 static void C_Communication_Flash_Write(uint8_t u8Case)
 {
-	tFPN_ctrl_def tFPNCtrlDelivery = {NUMBER_ZERO};
-	tFPN_ctrl_def tFPNCtrlSerNum = {NUMBER_ZERO};
-	tFPN_production_byte_def tFPNProductionByte = {NUMBER_ZERO};
+	tFPN_ctrl_def tFPNCtrlDelivery = {0U};
+	tFPN_ctrl_def tFPNCtrlSerNum = {0U};
+	tFPN_production_byte_def tFPNProductionByte = {0U};
 
-	uint8_t u8FPN_Control_Status = NUMBER_ZERO;
+	uint8_t u8FPN_Control_Status = 0U;
 
 	switch (u8Case)
 	{
@@ -221,22 +221,22 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
  ******************************************************************************/
 static void C_Communication_Event_Assign(uint8_t u8Message)
 {
-	uint8_t u8Temp;
+	uint8_t u8Temp = 0U;
 
 	switch (u8Message)
 	{
 		case CMD_BACKLIGHT_PWM:
 			(void)Task_ChangeEvent(TYPE_BACKLIGHT_MANAGE, LEVEL4, EVENT_MESSAGE);
 		break;
-		
+
 		case CMD_DISPLAY_SCANNING:
 			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_SCANNING);
 		break;
-		
+
 		case CMD_DISPLAY_ENABLE:
 			u8Temp = Memory_Pool_DisplayEnable_Reg_Get();
-            if(u8Temp != DISPLAY_OFF_TOUCH_ON)
-            {
+			if(u8Temp != DISPLAY_OFF_TOUCH_ON)
+			{
 				if ((u8Temp & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
 				{
 					Memory_Pool_BacklightEnable_Set(true);					
@@ -248,11 +248,11 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				Memory_Pool_DisplayEnable_Set(u8Temp);
 
 				(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
-            }
-            else
+			}
+			else
 			{/*Nothing*/}
-		
-            break;
+		break;
+
 		case CMD_DISPLAY_SHUTDOWN:
 			u8Temp = Memory_Pool_Shutdown_Get();
 			if ((u8Temp & BIT_SHDWN_POS) == SHUTDOWN_ENABLE)
@@ -264,6 +264,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			else
 			{/* Nothing */ }
 		break;		
+
 		case CMD_FACTORY_MODE:
 			if (Memory_Pool_FactoryMode_Get() == NORMAL_MODE)
 			{
@@ -518,7 +519,6 @@ void C_Communication_ParaInit(void)
 	memset(mu8BackupTxBuff, 0xFFU, BUFFER_SIZE);
 
 	Memory_Pool_CommunicationMask_Set(false);
-	Memory_Pool_I2CDesInit_Set(false);
 	Memory_Pool_VBattProtectState_Set(false);
 	Memory_Pool_WriteFPNDeliveryStatusReg_Set(false);
 	Memory_Pool_WriteFPNDelivery_Set(false);
@@ -527,7 +527,7 @@ void C_Communication_ParaInit(void)
 	Memory_Pool_WriteProductPhasePNStatusReg_Set(false);
 	Memory_Pool_WriteProductPhaseFPN_Set(false);
 
-	*pUpdateKey = NUMBER_ZERO;
+	*pUpdateKey = 0U;
 
 	tCommunicationTask.u16Timer1 = TIME_DISABLE;
 	tCommunicationTask.u16Timer2 = TIME_DISABLE;
@@ -549,6 +549,11 @@ void C_Communication_ParaInit(void)
  ******************************************************************************/
 static void C_Communiction_Init(void)
 {
+	uint8_t u8PowerState = Memory_Pool_PowerState_Get();
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u8PowerState = NORMAL_RUN_STATE;
+#endif
+	
 	switch (Task_Current_Event_Get())
 	{
 		case EVENT_FIRST :
@@ -558,11 +563,10 @@ static void C_Communiction_Init(void)
 
 		case EVENT_TIMER_I2C_DES_INIT_DELAY :
 			/* Check power ready and MCU is in the normal run mode */
-			if (Memory_Pool_PowerState_Get() == NORMAL_RUN_STATE)
+			if (u8PowerState == NORMAL_RUN_STATE)
 			{
 				/* Power is ready and start I2C Initialize. */
 				M_COM_I2cInit(mu8TxBuff, BUFFER_SIZE, mu8RxBuff, BUFFER_SIZE, (cy_cb_scb_i2c_handle_events_t) C_Communication_Callback);
-				Memory_Pool_I2CDesInit_Set(true);
 #if(DEBUG_POWER_UP)
 				HAL_GPIO_Toggle( U301_INTB_IN_PORT,  U301_INTB_IN_PIN); 
 #endif

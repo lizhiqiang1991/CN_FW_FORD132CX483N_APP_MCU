@@ -39,7 +39,7 @@ bool Common_LevelDebounce(uint8_t u8IOLevel, tgpio_debounce_def *ptDebounce)
 	if(u8IOLevel == GPIO_LOW)
 	{
 		ptDebounce->u8NewGPIOStatus = GPIO_LOW;
-		ptDebounce->u8DebounceHigh = NUMBER_ZERO;
+		ptDebounce->u8DebounceHigh = 0U;
 		if(ptDebounce->u8DebounceLow < ptDebounce->u8DebounceMax)
 		{
 			ptDebounce->u8DebounceLow += 1U;
@@ -53,7 +53,7 @@ bool Common_LevelDebounce(uint8_t u8IOLevel, tgpio_debounce_def *ptDebounce)
 	else
 	{
 		ptDebounce->u8NewGPIOStatus = GPIO_HIGH;
-		ptDebounce->u8DebounceLow = NUMBER_ZERO;
+		ptDebounce->u8DebounceLow = 0U;
 		if(ptDebounce->u8DebounceHigh < ptDebounce->u8DebounceMax)
 		{
 			ptDebounce->u8DebounceHigh += 1U;

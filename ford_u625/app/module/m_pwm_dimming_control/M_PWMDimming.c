@@ -156,7 +156,7 @@ static uint8_t MPWMDimming_BLPWMTargetVal_Set(uint16_t u16BLPWMtargetVal)
     if(u16BLPWMtargetVal >= 0x3ff)
     {
 
-        TempMPWMDimmingControl.u16TargetBLPWM_10bit = 0x400;
+        TempMPWMDimmingControl.u16TargetBLPWM_10bit = 0x3ff;
 
     }
     else

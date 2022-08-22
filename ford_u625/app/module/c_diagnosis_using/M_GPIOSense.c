@@ -11,9 +11,9 @@
  ******************************************************************************/
 bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_debounce_def *ptDebounce)
 {
-    uint8_t u8IOLevel;
-	
-    HAL_GPIO_Read(pPort, u8Pin, &u8IOLevel);
+	uint8_t u8IOLevel=0U;
+
+	HAL_GPIO_Read(pPort, u8Pin, &u8IOLevel);
 #if(BACKDOOR_DIAGNOSIS_SIMULATE)
 	if((pPort == U301_LED_INT_PORT) && (u8Pin == U301_LED_INT_PIN))
 	{
@@ -39,7 +39,7 @@ bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_deboun
 	{/* Nothing */}
 #endif
 
-    return Common_LevelDebounce(u8IOLevel, ptDebounce);
+	return Common_LevelDebounce(u8IOLevel, ptDebounce);
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -50,14 +50,14 @@ bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_deboun
  ******************************************************************************/
 uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
 {
-    uint8_t u8SendData = 0x0EU;
-    uint8_t mu8Temp[6U];
+	uint8_t u8SendData = 0x0EU;
+	uint8_t mu8Temp[6U] = {0U};
 	uint64_t u64ReturnStatus=0UL;
 
-    /* Get the supply status of LED driver*/
-    (void)HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 10U);
-    (void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[0U], 6U, 10U);
-	
+	/* Get the supply status of LED driver*/
+	(void)HAL_I2C_Master_Write(LP8864_ADDRESS, &u8SendData, sizeof(u8SendData), 10U);
+	(void)HAL_I2C_Master_Read(LP8864_ADDRESS, &mu8Temp[0U], 6U, 10U);
+
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 	mu8Temp[0U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[0U];
 	mu8Temp[1U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8LedFaultStatus[1U];
@@ -70,38 +70,17 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
 	u64ReturnStatus = (uint64_t)(mu8Temp[0U] & 0xAAU);
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[1U] & 0xAAU)) << 8U);
 
-    /* Get the supply status of LED driver*/
+	/* Get the supply status of LED driver*/
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[2U] & 0xAAU)) << 16U);
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[3U] & 0xAAU)) << 24U);
 
-    /* Get the supply status of LED driver*/
+	/* Get the supply status of LED driver*/
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[4U] & 0xCFU)) << 32U);
 	u64ReturnStatus |= (((uint64_t)(mu8Temp[5U] & 0x55U)) << 40U);
 
 	return u64ReturnStatus;
 }
-/******************************************************************************
- ;       Function Name			:	
- ;       Function Description	:
- ;       Parameters				:	void
- ;       Return Values			:
- ;       Source ID				:
- ******************************************************************************/
-#if 0
-void M_GPIOSense_LED_Driver_DiagClear(void)
-{
-	uint8_t u8Temp[7];
-	/* Clear All error of LED driver. */
-	u8Temp[0]=0x0EU;
-	u8Temp[1]=0xFFU;
-	u8Temp[2]=0xFFU;
-	u8Temp[3]=0xFFU;
-	u8Temp[4]=0xFFU;
-	u8Temp[5]=0x00U;
-	u8Temp[6]=0x7EU;
-	HAL_I2C_Master_Write(LP8864_ADDRESS, &u8Temp[0], 7U, 10U);
-}
-#endif
+
 /******************************************************************************
  ;       Function Name			:	uint64_t M_GPIOSense_DisplayFault_Read(void)
  ;       Function Description	:

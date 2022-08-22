@@ -32,10 +32,10 @@
 
 typedef struct
 {
-    uint16_t u16Timer1;
-    uint16_t u16Timer2;
+	uint16_t u16Timer1;
+	uint16_t u16Timer2;
 	uint16_t u16Timer3;
-    uint32_t u32Timeout;
+	uint32_t u32Timeout;
 } tdisplay_manage_task_def;
 
 typedef enum

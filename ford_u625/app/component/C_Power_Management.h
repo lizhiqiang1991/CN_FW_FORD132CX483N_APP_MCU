@@ -23,8 +23,8 @@
 
 typedef struct
 {
-    uint16_t u16Timer1;
-    uint32_t u32Timeout;
+	uint16_t u16Timer1;
+	uint32_t u32Timeout;
 } tpower_manage_task_def;
 
 #define OFF_POWER_STATE				0x00U

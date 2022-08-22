@@ -19,8 +19,8 @@
 
 typedef struct
 {
-    uint16_t u16Timer1;
-    uint32_t u32Timeout;
+	uint16_t u16Timer1;
+	uint32_t u32Timeout;
 } tbattery_protect_task_def;
 
 void C_Battery_Protect_Timer1(void);

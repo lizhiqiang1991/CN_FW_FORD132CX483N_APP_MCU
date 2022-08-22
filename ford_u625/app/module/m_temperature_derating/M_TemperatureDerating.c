@@ -392,7 +392,16 @@ static DeratingApp_ReturnMethod_Typedef TemperatureDerating_State_Derating(void)
         i16DeratingTableIndex = (BLTemperature - gBLDeratingLimitedTemp) / TEMP_DERATING_TEMP_RESOLUTION;
 #endif
         /* Avoid to go out of array range. */
-        i16DeratingTableIndex = (i16DeratingTableIndex > (TEMP_DERATING_TABLE_SIZE - 1))?(TEMP_DERATING_TABLE_SIZE - 1):i16DeratingTableIndex;
+        if(i16DeratingTableIndex >= (TEMP_DERATING_TABLE_SIZE - 1))
+        {
+        	i16DeratingTableIndex = (TEMP_DERATING_TABLE_SIZE - 1);
+        }
+		else if(i16DeratingTableIndex <= 0)
+		{
+			i16DeratingTableIndex = 0;
+		}
+		else
+		{/* Nothing */ }
 
         DeratingTempToPWMDown.DeratingPWM = gDeratingTable[i16DeratingTableIndex];
 #if(DERATINGAPP_FLOAT_OPERATION)

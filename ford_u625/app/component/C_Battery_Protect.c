@@ -31,10 +31,12 @@ static void C_Battery_Protect_Control(void)
 		case EVENT_FIRST :
 			tBatteryProtectTask.u16Timer1=TIME_3000ms; /*Start battery protect after 3s*/
 		break;
-        case EVENT_TIMER1 :
+
+		case EVENT_TIMER1 :
 			tBatteryProtectTask.u16Timer1=TIME_5ms;
 			M_BP_State_Maching((uint16_t)(tBatteryProtectTask.u16Timer1-1));
 		break;
+
 		default:
 			(void)Task_ChangeState(TYPE_BATTERY_PROTECT, LEVEL5, STATE_BATTERY_PROTECT_ERROR, Battery_Protect_State_Machine[STATE_BATTERY_PROTECT_ERROR]);
 		break;

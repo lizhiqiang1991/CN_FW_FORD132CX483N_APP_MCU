@@ -27,25 +27,26 @@
  ******************************************************************************/
 static void Main_TaskInit(void)
 {
-    uint8_t u8counter = 0;
-    Task_RecorderInit();
-    Task_QueueManagerInit();
+	uint8_t u8counter = 0;
+	
+	Task_RecorderInit();
+	Task_QueueManagerInit();
 
-    // If you want to increase or decrease the tasks,please change TASK_NUM at same time.
-    // The recorder will remember the task that it need to execute.
-    Task_TaskInRecorder(Power_Manage_State_Machine[STATE_INIT ], TYPE_POWER_MANAGE, u8counter++);
-    Task_TaskInRecorder(Display_Manage_State_Machine[STATE_INIT ], TYPE_DISPLAY_MANAGE, u8counter++);
-    Task_TaskInRecorder(Communication_State_Machine[STATE_INIT ], TYPE_COMMUNICATION, u8counter++);
-    Task_TaskInRecorder(Backlight_Manage_State_Machine[STATE_INIT ], TYPE_BACKLIGHT_MANAGE, u8counter++);
-    Task_TaskInRecorder(Data_Collecting_State_Machine[STATE_INIT ], TYPE_DATA_COLLECTING, u8counter++);
-    Task_TaskInRecorder(Diagnosis_State_Machine[STATE_INIT ], TYPE_DIAGNOSIS, u8counter++);
-    Task_TaskInRecorder(Battery_Protect_State_Machine[STATE_INIT ], TYPE_BATTERY_PROTECT, u8counter++);
-    Task_TaskInRecorder(Temperture_Protect_State_Machine[STATE_INIT ], TYPE_TEMPERTURE_PROTECT, u8counter++);
-    // The assigner will arbitrate the priority for each tasks.
-    Task_AssignedTask();
+	// If you want to increase or decrease the tasks,please change TASK_NUM at same time.
+	// The recorder will remember the task that it need to execute.
+	Task_TaskInRecorder(Power_Manage_State_Machine[STATE_INIT ], TYPE_POWER_MANAGE, u8counter++);
+	Task_TaskInRecorder(Display_Manage_State_Machine[STATE_INIT ], TYPE_DISPLAY_MANAGE, u8counter++);
+	Task_TaskInRecorder(Communication_State_Machine[STATE_INIT ], TYPE_COMMUNICATION, u8counter++);
+	Task_TaskInRecorder(Backlight_Manage_State_Machine[STATE_INIT ], TYPE_BACKLIGHT_MANAGE, u8counter++);
+	Task_TaskInRecorder(Data_Collecting_State_Machine[STATE_INIT ], TYPE_DATA_COLLECTING, u8counter++);
+	Task_TaskInRecorder(Diagnosis_State_Machine[STATE_INIT ], TYPE_DIAGNOSIS, u8counter++);
+	Task_TaskInRecorder(Battery_Protect_State_Machine[STATE_INIT ], TYPE_BATTERY_PROTECT, u8counter++);
+	Task_TaskInRecorder(Temperture_Protect_State_Machine[STATE_INIT ], TYPE_TEMPERTURE_PROTECT, u8counter++);
+	// The assigner will arbitrate the priority for each tasks.
+	Task_AssignedTask();
 
-    // Executer will push task into the queue.
-    Task_PushTaskInQueue();
+	// Executer will push task into the queue.
+	Task_PushTaskInQueue();
 }
 /******************************************************************************
  ;       Function Name			:	void Main_UartInit(void)
@@ -57,12 +58,12 @@ static void Main_TaskInit(void)
 #ifdef DEBUG_UART_EN
 static void Main_UartInit(void)
 {
-    debug_uart_tydef tDebugUart;
+	debug_uart_tydef tDebugUart;
 
-    tDebugUart.pBase = DEBUG_PORT;
-    tDebugUart.pConfig = &DEBUG_UART_config;
+	tDebugUart.pBase = DEBUG_PORT;
+	tDebugUart.pConfig = &DEBUG_UART_config;
 
-    (void) HAL_UART_Init(tDebugUart);
+	(void) HAL_UART_Init(tDebugUart);
 }
 #endif
 /******************************************************************************
@@ -74,13 +75,13 @@ static void Main_UartInit(void)
  ******************************************************************************/
 static void Main_SysTickInit(void)
 {
-    systick_typedef tSysTick;
+	systick_typedef tSysTick;
 
-    tSysTick.tClockSource = CY_SYSTICK_CLOCK_SOURCE_CLK_CPU;
-    tSysTick.u32Interval = SYSTICK_COUNT;
-    tSysTick.pCallback = &Main_TimerCore;
+	tSysTick.tClockSource = CY_SYSTICK_CLOCK_SOURCE_CLK_CPU;
+	tSysTick.u32Interval = SYSTICK_COUNT;
+	tSysTick.pCallback = &Main_TimerCore;
 
-    (void) HAL_SYSTICK_Init(tSysTick);
+	(void) HAL_SYSTICK_Init(tSysTick);
 }
 /******************************************************************************
  ;       Function Name			:	void Main_BspInit(void)
@@ -91,12 +92,12 @@ static void Main_SysTickInit(void)
  ******************************************************************************/
 static void Main_BspInit(void)
 {
-    (void) cybsp_init();
+	(void) cybsp_init();
 #ifdef DEBUG_UART_EN
-    (void) Main_UartInit();
+	(void) Main_UartInit();
 #endif
-    (void) Main_SysTickInit();
-    HAL_UART_Printf("Initial Complete!\n");
+	(void) Main_SysTickInit();
+	HAL_UART_Printf("Initial Complete!\n");
 }
 /******************************************************************************
 
@@ -108,22 +109,22 @@ static void Main_BspInit(void)
  ******************************************************************************/
 int main(void)
 {
-    uint32_t u32SuperLoopCnt = 0UL;
+	uint32_t u32SuperLoopCnt = 0UL;
 
 
-    Main_BspInit();
-    Main_TaskInit();
+	Main_BspInit();
+	Main_TaskInit();
 
-    __enable_irq();
+	__enable_irq();
 
-    HAL_UART_Printf("Task Start!\n");
+	HAL_UART_Printf("Task Start!\n");
 
-    while (u32SuperLoopCnt < (uint32_t) (LOOP_MAX))
-    {
-        Task_ProcessTask();
-    }
+	while (u32SuperLoopCnt < (uint32_t) (LOOP_MAX))
+	{
+		Task_ProcessTask();
+	}
 
-    return 0U;
+	return 0U;
 }
 /******************************************************************************
  ;       Function Name			:	void Main_TimerCore(void)
@@ -139,7 +140,7 @@ void Main_TimerCore(void)
 	C_Power_Manage_Timer1();
 	C_Display_Manage_Timer1();
 	C_Display_Manage_Timer2();
-    C_Display_Manage_Timer3();
+	C_Display_Manage_Timer3();
 	C_Communication_Timer1();
 	C_Communication_Timer2();
 	C_Backlight_Manage_Timer1();

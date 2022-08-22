@@ -51,9 +51,9 @@ typedef void (*CALLBACK_DIAG_ACTION_RECOVER)(void);
 
 typedef struct
 {
-    uint16_t u16Timer1;
-    uint16_t u16Timer2;
-    uint32_t u32Timeout;
+	uint16_t u16Timer1;
+	uint16_t u16Timer2;
+	uint32_t u32Timeout;
 }tdiagnosis_task_def;
 
 typedef enum
@@ -67,7 +67,7 @@ typedef enum
 
 typedef struct
 {
- 	DIAGPROTECT_ACTION DiagProtectAction;
+	DIAGPROTECT_ACTION DiagProtectAction;
 	uint16_t u16LEDDriverCommTime;
 	uint8_t  u8LEDDriverRegDebunce;
 	uint8_t  u8LEDDriverRegDebunce_RECOV;	

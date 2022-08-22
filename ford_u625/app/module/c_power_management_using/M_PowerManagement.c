@@ -11,13 +11,13 @@ static uint8_t M_PM_CheckPowerPG(uint8_t u8Status, uint8_t u8Times)
 	uint8_t u8Return = LOW_LEVEL;
 	
     
-   	if (u8Times == NUMBER_ZERO)
+   	if (u8Times == 0U)
    	{   /* times can not be zero */
        u8Return = LOW_LEVEL;
    	}
 	else
    	{
-		for(u8CheckTime = u8Times; u8CheckTime > NUMBER_ZERO; u8CheckTime--)
+		for(u8CheckTime = u8Times; u8CheckTime > 0U; u8CheckTime--)
 	    {
 	        switch(u8Status)
 	        {
@@ -43,7 +43,6 @@ static uint8_t M_PM_CheckPowerPG(uint8_t u8Status, uint8_t u8Times)
 	        
 	    }
 	}
-    
     /* error flag */
     return u8Return;
 }

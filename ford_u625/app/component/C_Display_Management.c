@@ -748,7 +748,6 @@ static void C_Display_Management_ParaInit(void)
     Memory_Pool_Shutdown_Set(0U);
     Memory_Pool_DisplayScan_Set(SCAN_VT_HL);
     Memory_Pool_DisplayEnable_Set(DISPLAY_OFF_TOUCH_OFF);
-	Memory_Pool_I2CMcuInit_Set(false);
 	Memory_Pool_VBattProtectState_Set(BATT_PROTECT_OFF);
 
     tDisplayManageTask.u16Timer1 = TIME_DISABLE;
@@ -818,9 +817,7 @@ static void C_Display_Manage_Init(void)
             }
             break;
         case EVENT_DISPLAY_INITIAL_DELAY :
-            	
 	        /* Delay display control. */
-	        Memory_Pool_I2CMcuInit_Set(true);
 #if(DEBUG_POWER_UP)			
 			HAL_GPIO_Toggle( U301_INTB_IN_PORT,  U301_INTB_IN_PIN); 
 #endif

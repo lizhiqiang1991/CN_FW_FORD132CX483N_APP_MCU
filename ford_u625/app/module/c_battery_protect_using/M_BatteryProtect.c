@@ -233,6 +233,7 @@ void M_BP_State_Maching(uint16_t u16RoundTime)
 			else
 			{/*Nothing*/}
 		break;
+
 		default:
 			tBPManagement.u8VbattState=BP_STATE_NORM_V;
 			tBPManagement.u16LoEnterNormalTime=0U;
