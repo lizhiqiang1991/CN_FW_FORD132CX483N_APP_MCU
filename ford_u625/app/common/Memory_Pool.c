@@ -58,7 +58,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.02.13" };
+const uint8_t cmu8McuVersion[] = { "T.01.02.14" };
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
