@@ -176,6 +176,8 @@ typedef struct
 	uint16_t u16FPCRXVol;
 	
 	int16_t i16PCBATemperature;
+
+	uint16_t u16IcCommunicationDiagnosis;
 } tdiagnosis_simulate_def;
 #endif
 

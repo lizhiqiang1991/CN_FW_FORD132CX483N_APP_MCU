@@ -422,7 +422,6 @@ uint8_t M_COM_RxMSGFormat_Check(uint8_t u8subaddress, uint8_t u8Length)
 			{
 				u8CheckResult=FORMAT_LEN_FAIL;
 			}
-			u8CheckResult=FORMAT_WRITE_CHECK_SAFETY;
 		break;
 #endif
 		default:
