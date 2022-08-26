@@ -347,6 +347,10 @@ static MBacklightControlStateMachine_E MBacklightControl_StateNormal(void)
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
+	else if(DERATING_DISABLE == TemperatureDerating_TurnOnOff_Get())
+	{
+		TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
+	}
     else if(StateMachineControl.AmbientTemperature > TemperatureDerating_GetLimitedTemperature(LIMITED_DERATING_TEMP))
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_DERATING;
@@ -405,6 +409,10 @@ static MBacklightControlStateMachine_E MBacklightControl_StateDerating(void)
     {
         TempBacklightStateMachine = E_MBL_STATEMACHINE_SHUTDOWM;
     }
+	else if(DERATING_DISABLE == TemperatureDerating_TurnOnOff_Get())
+	{
+		TempBacklightStateMachine = E_MBL_STATEMACHINE_NORMAL;
+	}
     else if(StateMachineControl.AmbientTemperature >= TemperatureDerating_GetLimitedTemperature(LIMITED_SHUTDOWN_TEMP))
     {
 		Memory_Pool_GeneralDiagnosis_Set(Memory_Pool_GeneralDiagnosis_Get() | BIT_A3_BL_SHUTDOWN_ERROR_POS);
