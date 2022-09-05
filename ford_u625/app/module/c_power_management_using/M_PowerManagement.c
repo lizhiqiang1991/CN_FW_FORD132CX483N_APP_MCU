@@ -114,7 +114,7 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 						Cy_SysLib_Delay(11U); /* 11ms */
 						HAL_GPIO_High( U301_DISP_GLOBAL_RESET_PORT, U301_DISP_GLOBAL_RESET_PIN);
 
-						Cy_SysLib_Delay(101U); /* 101ms */
+						Cy_SysLib_Delay(51U); /* >50ms */
 	                    HAL_GPIO_High( U301_PDB_PORT, U301_PDB_PIN);
 	                    HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
 	                    /* INTB Init. */
