@@ -174,6 +174,7 @@ typedef struct
 	uint16_t u16BatteryVol;
 	uint16_t u16FPCTXVol;
 	uint16_t u16FPCRXVol;
+	uint16_t u16FPCBLVol;
 	
 	int16_t i16PCBATemperature;
 

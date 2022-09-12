@@ -15,20 +15,20 @@ static tgpio_debounce_def tFpcRx;
 static tgpio_debounce_def tP1V2Good;
 static tgpio_debounce_def tP3V3Good;
 static tgpio_debounce_def tIcComm;
-
+static tgpio_debounce_def tFpcBL;
 
 CALLBACK_DIAG_ACTION_PROTECT CallbackDiagActionProtect=NULL;
 CALLBACK_DIAG_ACTION_RECOVER CallbackDiagActionRecover=NULL;
 
 tdiagnosis_ctrl_def tDiagCtrl;
 
-/******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
- ;       Function Description	:	This state will do power management initialize
- ;       Parameters				:	void
+/*******************************************************************************************
+ ;       Function Name			:	static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
+ ;       Function Description	:	This function will do LP8864 diagnosis
+ ;       Parameters				:	uint16_t u16RoutineTime
  ;       Return Values			:	void
  ;		Source ID				:
- ******************************************************************************/
+ ******************************************************************************************/
 static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 {
  	uint64_t u64LEDDiagnosis=0UL;
@@ -95,13 +95,13 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 	else
 	{/*Nothing*/}
 }
-/******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
- ;       Function Description	:	This state will do power management initialize
- ;       Parameters				:	void
+/*********************************************************************************************************
+ ;       Function Name			:	static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
+ ;       Function Description	:	This function will do NT51926 diagnosis
+ ;       Parameters				:	uint16_t u16RoutineTime
  ;       Return Values			:	void
  ;		Source ID				:
- ******************************************************************************/
+ *********************************************************************************************************/
 static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 {
 	uint64_t u64Temp=0UL;
@@ -200,13 +200,13 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 	else
 	{/*Nothing*/}
 }
-/******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
- ;       Function Description	:	This state will do power management initialize
+/**********************************************************************************
+ ;       Function Name			:	static void C_Diagnosis_IO_SerdesLock(void)
+ ;       Function Description	:	This function will do Serdes Lock pin diagnosis
  ;       Parameters				:	void
  ;       Return Values			:	void
  ;		Source ID				:
- ******************************************************************************/
+ **********************************************************************************/
 static void C_Diagnosis_IO_SerdesLock(void)
 {
      uint16_t u16Temp;
@@ -240,8 +240,8 @@ static void C_Diagnosis_IO_SerdesLock(void)
 	{/*Nothing*/}
 }
 /******************************************************************************
- ;       Function Name			:	void (void)
- ;       Function Description	:	This state will do power management initialize
+ ;       Function Name			:	static void C_Diagnosis_Vol_FPCTx(void)
+ ;       Function Description	:	This function will do Lcd FPC TX diagnosis
  ;       Parameters				:	void
  ;       Return Values			:	void
  ;		Source ID				:
@@ -304,8 +304,8 @@ static void C_Diagnosis_Vol_FPCTx(void)
 	{/*Nothing*/}
 }
 /******************************************************************************
- ;       Function Name			:	void (void)
- ;       Function Description	:	This state will do power management initialize
+ ;       Function Name			:	static void C_Diagnosis_Vol_FPCRx(void)
+ ;       Function Description	:	This function will do Lcd FPC RX diagnosis
  ;       Parameters				:	void
  ;       Return Values			:	void
  ;		Source ID				:
@@ -367,9 +367,74 @@ static void C_Diagnosis_Vol_FPCRx(void)
 	else
 	{/*Nothing*/}
 }
+/********************************************************************************
+ ;       Function Name			:	static void C_Diagnosis_Vol_FPC_BL(void)
+ ;       Function Description	:	This function will do backlight FPC diagnosis
+ ;       Parameters				:	void
+ ;       Return Values			:	void
+ ;		 Source ID				:
+ ********************************************************************************/
+static void C_Diagnosis_Vol_FPC_BL(void)
+{
+    uint16_t u16Temp;
+ 	uint16_t u16VolTemp = Memory_Pool_BLTempAnaVol_Get();
+#if (BACKDOOR_DIAGNOSIS_SIMULATE)
+	u16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().u16FPCBLVol;
+#endif
+
+	/* Check diagnosis is enable or not*/
+	if(tFpcBL.blEnable == true)
+	{
+		/* Count Debounce. */
+		if(u16VolTemp > DIAG_FPC_BL_DISCON_VOL)
+		{
+			tFpcBL.u8DebounceLow=0U;
+			if(tFpcBL.u8DebounceHigh < tFpcBL.u8DebounceMax)
+			{
+				tFpcBL.u8DebounceHigh+=1U;
+			}
+			else
+			{/*Nothing*/}
+		}
+		else
+		{
+			if(tFpcBL.u8DebounceLow < tFpcBL.u8DebounceMax)
+			{
+				tFpcBL.u8DebounceLow+=1U;
+			}
+			else
+			{/*Nothing*/}
+			tFpcBL.u8DebounceHigh=0U;
+		}
+
+		/* Action: Protect */
+		if(tFpcBL.u8DebounceHigh >= tFpcBL.u8DebounceMax)
+		{
+			/* Record 0xA3 Status */
+			u16Temp = Memory_Pool_GeneralDiagnosis_Get();
+			Memory_Pool_GeneralDiagnosis_Set(u16Temp | BIT_A3_BL_FPC_ERROR_POS);
+		}
+		else
+		{/*Nothing*/}
+
+		/* Action: Release protect. */
+		if(tFpcBL.u8DebounceLow >= tFpcBL.u8DebounceMax)
+		{
+			/* Record 0xA3 Status */
+			u16Temp = Memory_Pool_GeneralDiagnosis_Get();
+			u16Temp&=~BIT_A3_BL_FPC_ERROR_POS;
+			Memory_Pool_GeneralDiagnosis_Set(u16Temp);
+		}
+		else
+		{/*Nothing*/}
+	}
+	else
+	{/*Nothing*/}
+}
+
 /******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
- ;       Function Description	:	This state will do power management initialize
+ ;       Function Name			:	static void C_Diagnosis_IO_P1V2Good(void)
+ ;       Function Description	:	This function will do P1V2 PG pin diagnosis
  ;       Parameters				:	void
  ;       Return Values			:	void
  ;		Source ID				:
@@ -401,8 +466,8 @@ static void C_Diagnosis_IO_P1V2Good(void)
 	{/*Nothing*/}
 }
 /******************************************************************************
- ;       Function Name			:	void C_TD7800_Manage_Init(void)
- ;       Function Description	:	This state will do power management initialize
+ ;       Function Name			:	static void C_Diagnosis_IO_P3V3Good(void)
+ ;       Function Description	:	This function will do P3V3 PG pin diagnosis
  ;       Parameters				:	void
  ;       Return Values			:	void
  ;		Source ID				:
@@ -426,13 +491,13 @@ static void C_Diagnosis_IO_P3V3Good(void)
 	else
 	{/*Nothing*/}
 }
-/******************************************************************************
- ;       Function Name			:	static void C_Diagnosis_IC_Communitation(void)
- ;       Function Description	:	This state will do power management initialize
- ;       Parameters				:	void
+/******************************************************************************************************
+ ;       Function Name			:	static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
+ ;       Function Description	:	This function will do NT51926 status and I2C R/W diagnosis
+ ;       Parameters				:	uint16_t u16RoutineTime
  ;       Return Values			:	void
  ;		Source ID				:
- ******************************************************************************/
+ ******************************************************************************************************/
 static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 {
 	uint8_t u8Temp;
@@ -524,14 +589,14 @@ static void C_Diagnosis_ParaInit(void)
 	tLedInt.u8NewGPIOStatus = GPIO_HIGH;
 	tLedInt.u8CurrentGPIOStatus = GPIO_HIGH;
 	tLedInt.u8DebounceMax = DEBOUNCE_3_TIMES;
-	tLedInt.blEnable = true;
+	tLedInt.blEnable = false;
 
 	tDispFaultMaster.u8DebounceHigh = 0U;
 	tDispFaultMaster.u8DebounceLow = 0U;
 	tDispFaultMaster.u8NewGPIOStatus = GPIO_HIGH;
 	tDispFaultMaster.u8CurrentGPIOStatus = GPIO_HIGH;
 	tDispFaultMaster.u8DebounceMax = DEBOUNCE_3_TIMES;
-	tDispFaultMaster.blEnable = true;
+	tDispFaultMaster.blEnable = false;
 
 
 	tSerdesLock.u8DebounceHigh = 0U;
@@ -574,8 +639,14 @@ static void C_Diagnosis_ParaInit(void)
 	tIcComm.u8NewGPIOStatus = GPIO_HIGH;
 	tIcComm.u8CurrentGPIOStatus = GPIO_HIGH;
 	tIcComm.u8DebounceMax = DEBOUNCE_3_TIMES;
-	tIcComm.blEnable = true;
+	tIcComm.blEnable = false;
 
+	tFpcBL.u8DebounceHigh = 0U;
+	tFpcBL.u8DebounceLow = 0U;
+	tFpcBL.u8NewGPIOStatus = GPIO_HIGH;
+	tFpcBL.u8CurrentGPIOStatus = GPIO_HIGH;
+	tFpcBL.u8DebounceMax = DEBOUNCE_3_TIMES;
+	tFpcBL.blEnable = false;
 	
 #if(BACKDOOR_ICDIAG_OPEN)
 	ICDIAG_Initialize();
@@ -632,7 +703,7 @@ static void C_Diagnosis_Action(void)
 	else
 	{/*Nothing*/}
 
-	if(u64LEDDiagnosis != 0U)
+	if((u64LEDDiagnosis != 0U) || ((u16GeneralDiagnosis&(BIT_A3_BL_FPC_ERROR_POS)) > 0U))
 	{
 		u32Temp|=BIT_BLERR_POS;
 	}
@@ -651,7 +722,7 @@ static void C_Diagnosis_Action(void)
 
 	/* Release BLERR */
 	if((u64LEDDiagnosis == 0U)
-		&& ((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS | BIT_A3_POWER_LOW_VOL_ERROR_POS | BIT_A3_POWER_HIGH_VOL_ERROR_POS)) == 0U))
+		&& ((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS | BIT_A3_POWER_LOW_VOL_ERROR_POS | BIT_A3_POWER_HIGH_VOL_ERROR_POS | BIT_A3_BL_FPC_ERROR_POS)) == 0U))
 	{
 		u32Temp&=~BIT_BLERR_POS;
 	}
@@ -716,7 +787,7 @@ static void C_Diagnosis_Action(void)
 			else
 			{/*Nothing*/}
 		}
-		else if((u16GeneralDiagnosis&(BIT_A3_PANEL_FPC_TX_L_ERROR_POS | BIT_A3_PANEL_FPC_RX_R_ERROR_POS)) > 0U)
+		else if((u16GeneralDiagnosis&(BIT_A3_PANEL_FPC_TX_L_ERROR_POS | BIT_A3_PANEL_FPC_RX_R_ERROR_POS | BIT_A3_BL_FPC_ERROR_POS)) > 0U)
 		{
 			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_RSTRQ;
 			u32Temp |= BIT_RST_RQ_POS;
@@ -844,9 +915,10 @@ static void C_Diagnosis_Control(void)
 					tLedInt.blEnable = false;
 				}
 				
-				if ((Memory_Pool_DisplayEnable_Get() & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
+				if ((Memory_Pool_DisplayEnable_Reg_Get() & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
 				{
 					tSerdesLock.blEnable = true;
+					tFpcBL.blEnable = true;
 				}
 				else{ /* Nothing */}
 			
@@ -855,6 +927,7 @@ static void C_Diagnosis_Control(void)
 				C_Diagnosis_IO_P1V2Good();
 				C_Diagnosis_IO_P3V3Good();
 				C_Diagnosis_IO_SerdesLock();
+				C_Diagnosis_Vol_FPC_BL();
 #if(CX430_TDDI_NT51926)
 				C_Diagnosis_IO_DispFaultMaster((uint16_t)(TIME_10ms)- 1U);
 				C_Diagnosis_IC_Communitation((uint16_t)(TIME_10ms)- 1U);			

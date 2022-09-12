@@ -28,6 +28,7 @@
 
 #define DIAG_FPC_TX_DISCON_VOL			1800U /*Unit: 1 mv*/
 #define DIAG_FPC_RX_DISCON_VOL			1800U /*Unit: 1 mv*/
+#define DIAG_FPC_BL_DISCON_VOL			3000U /*Unit: 1 mv*/
 
 #define DEBOUNCE_3_TIMES			  		3U
 

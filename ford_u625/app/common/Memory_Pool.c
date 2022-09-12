@@ -40,6 +40,7 @@ tdiagnosis_simulate_def gtDiagnosisSimulateInfo =
 	.u16FPCRXVol = (DIAG_FPC_RX_DISCON_VOL + 1U),
 	.i16PCBATemperature = (TEMP_DERATING_DEFAULT_DERA_TEMP - (1*TEMP_DERATING_TEMP_RESOLUTION)),
 	.u16IcCommunicationDiagnosis = 0U,
+	.u16FPCBLVol = (DIAG_FPC_BL_DISCON_VOL),
 };
 #endif
 
@@ -59,7 +60,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.03.00" };
+const uint8_t cmu8McuVersion[] = { "T.01.03.01" };
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -2117,6 +2118,7 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 			gtDiagnosisSimulateInfo.i16PCBATemperature = (int16_t)((*(pCmdBuffer + 26U))<<8U|(*(pCmdBuffer + 27U))<<0U);
 
 			gtDiagnosisSimulateInfo.u16IcCommunicationDiagnosis = (uint16_t)((*(pCmdBuffer + 28U))<<8U|(*(pCmdBuffer + 29U))<<0U);
+			gtDiagnosisSimulateInfo.u16FPCBLVol = (uint16_t)((*(pCmdBuffer + 30U))<<8U|(*(pCmdBuffer + 31U))<<0U);
 		break;
 #endif
 		default:
