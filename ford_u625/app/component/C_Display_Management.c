@@ -119,6 +119,9 @@ static void C_Display_Management_CallbackLeavingBatteryProtected(void)
  */
 static void C_Display_Management_CallbackEnteringDiagnosisProtected(void)
 {
+	/* Backup backlight status */
+	tDisplayCtrl.bBacklightSetBackup = Memory_Pool_BacklightEnable_Get();
+	
     /* Turns off backlight */
     Memory_Pool_BacklightEnable_Set(false);
 	MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
@@ -137,11 +140,9 @@ static void C_Display_Management_CallbackEnteringDiagnosisProtected(void)
  */
 static void C_Display_Management_CallbackLeavingDiagnosisProtected(void)
 {
-#if 0
 	tDisplayCtrl.bDiagnosisProtect = false;
 	tDisplayCtrl.bDiagnosisProtectLeve = true;	
 	(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
-#endif
   /* NOTHING */
 }
 
@@ -762,6 +763,7 @@ static void C_Display_Management_ParaInit(void)
 	tDisplayCtrl.bBacklightSet = false;
 	tDisplayCtrl.bDiagnosisProtectLeve = false;
 	tDisplayCtrl.bDiagnosisProtect = false;
+	tDisplayCtrl.bBacklightSetBackup = false;
 }
 /******************************************************************************
  ;       Function Name			:	static void C_Display_Manage_Init(void)
@@ -900,26 +902,21 @@ static void C_Display_Manage_Control(void)
 					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 					tDisplayCtrl.u8DispSeqStatus = u8Status;
 				}
-#if 0			
 				else if(tDisplayCtrl.bDiagnosisProtectLeve == true)
 				{
 					/* Action =>if not detect error, turn on the display, touch , back-light*/
 					Memory_Pool_DisplayEnable_Set(Memory_Pool_DisplayEnableBp_Get());
 					tDisplayCtrl.u8CurrentDisplaySet = Memory_Pool_DisplayEnable_Get();
-		            if ((Memory_Pool_DisplayEnable_Get() & BIT_DISP_EN_POS) == DISPLAY_DISABLE)
-		            {
-		                /* Delay time and disable back-light function */
-						MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
-		            }
-		            else
-		            { /* Nothing */}
-					u8Status = DS_ACTION_NONE;
+					
+					Memory_Pool_BacklightEnable_Set(tDisplayCtrl.bBacklightSetBackup);
+					tDisplayCtrl.bBacklightSet = Memory_Pool_BacklightEnable_Get();						
 
+					u8Status = DS_ACTION_NONE;
 					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 					tDisplayCtrl.u8DispSeqStatus = u8Status;					
 					tDisplayCtrl.bDiagnosisProtectLeve = false; /* Recover disable */
+					tDisplayCtrl.bBacklightSetBackup = false; /* Clear Recover setting */
 				}
-#endif				
 				else
 				{
 					u8Status = DS_ACTION_NONE;
