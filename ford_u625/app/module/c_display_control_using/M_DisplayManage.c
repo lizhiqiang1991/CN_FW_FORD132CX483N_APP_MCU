@@ -1,5 +1,6 @@
 #include "M_DisplayManage.h"
 #include "M_GPIOSense.h"
+#include "M_PowerManagement.h"
 #include "Memory_Pool.h"
 
 
@@ -556,7 +557,14 @@ void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel)
 	}
 	else
 	{
-		HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
+		if(Memory_Pool_PowerStatus_Get() == POWER_OFF_READY)
+		{
+			HAL_GPIO_Low( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
+		}
+		else
+		{
+			HAL_GPIO_High( U301_INTB_IN_PORT,  U301_INTB_IN_PIN);
+		}
 	}
 }
 /******************************************************************************

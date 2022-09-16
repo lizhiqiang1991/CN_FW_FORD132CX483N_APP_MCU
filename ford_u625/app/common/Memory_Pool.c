@@ -7,6 +7,7 @@
 #include "ICDiagApp.h"
 #include "M_TemperatureDerating.h"
 #include "M_DisplayManage.h"
+#include "M_PowerManagement.h"
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 #include "M_BatteryProtect.h"
 #endif
@@ -60,7 +61,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  小版號  : 對應軟體function ready或整合而進版，當大版號進位後，此碼歸零，範圍: 1 ~ 99
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
-const uint8_t cmu8McuVersion[] = { "T.01.03.02" };
+const uint8_t cmu8McuVersion[] = { "T.01.03.03" };
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -1128,10 +1129,19 @@ void Memory_Pool_DisplayStatus_Set(uint32_t u32SetValue)
         /* Compares interrupt status if sending INTB. */
         if((u8TempRegVal & BIT_INT_ERR_POS) == 0U)
         {
-           /* Send INTB Strategy Control Msg. */  
-           (void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);     
+			if(Memory_Pool_PowerStatus_Get() != POWER_OFF_READY)
+			{
+				/* Send INTB Strategy Control Msg. */
+				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+			}
+			else
+			{/*Nothing*/}    
         }
+		else
+		{/*Nothing*/}
     }
+	else
+	{/*Nothing*/}	
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
