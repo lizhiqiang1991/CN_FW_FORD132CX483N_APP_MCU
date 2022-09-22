@@ -304,7 +304,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 								Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() | (BIT_DISP_ST_POS));
 
 								/* Read TDDI Vcom value */
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 								Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());			
 #endif							
 							}
@@ -946,7 +946,7 @@ static void C_Display_Manage_Control(void)
 
             break;
         case EVENT_MESSAGE_TDDI_VCOM :
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 			if ((Memory_Pool_LcdStatus_Get() == DISPLAY_ON) && (Memory_Pool_LcdResetStatus_Get() == LCD_RESET_HIGH))
 			{	
 				Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());

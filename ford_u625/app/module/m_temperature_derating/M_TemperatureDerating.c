@@ -219,7 +219,42 @@ static float gDeratingTable[TEMP_DERATING_TABLE_SIZE];
  * @details When table is not loaded from flash, the PWM duty is recoverd by the look up table.
  * 
  */
-
+#if(CX430_TDDI_NT51926)
+static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
+{
+    100, /**< 70 Degree. */
+    100, /**< 71 Degree. */
+    100, /**< 72 Degree. */
+    100, /**< 73 Degree. */
+    100, /**< 74 Degree. */
+    100, /**< 75 Degree. */
+    100, /**< 76 Degree. */
+    100, /**< 77 Degree. */
+    100, /**< 78 Degree. */
+    100, /**< 79 Degree. */
+    100, /**< 80 Degree. */
+    100, /**< 81 Degree. */
+    100, /**< 82 Degree. */
+    100, /**< 83 Degree. */
+    100, /**< 84 Degree. */
+    100, /**< 85 Degree. */
+    85, /**< 86 Degree. */
+    71, /**< 87 Degree. */
+    59, /**< 88 Degree. */
+    48, /**< 89 Degree. */
+    38, /**< 90 Degree. */
+    29, /**< 91 Degree. */
+    22, /**< 92 Degree. */
+    16, /**< 93 Degree. */
+    10, /**< 94 Degree. */
+    10, /**< 95 Degree. */
+    10, /**< 96 Degree. */
+    10, /**< 97 Degree. */
+    10, /**< 98 Degree. */
+    10, /**< 99 Degree. */
+    10, /**< 100 Degree. */
+};
+#elif(BX726_TDDI_NT51926)
 /* Jacky@2022.08.26 modify for BX726 PCBA follow "20220804_CX430 and U625_V1.0.xlsx" */
 static int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
 {
@@ -254,41 +289,6 @@ static int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
     0,
     0,
     0,
-};
-#if 0
-static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] = 
-{
-    100, /**< 70 Degree. */
-    100, /**< 71 Degree. */
-    100, /**< 72 Degree. */
-    100, /**< 73 Degree. */
-    100, /**< 74 Degree. */
-    100, /**< 75 Degree. */
-    100, /**< 76 Degree. */
-    100, /**< 77 Degree. */
-    100, /**< 78 Degree. */
-    100, /**< 79 Degree. */
-    100, /**< 80 Degree. */
-    100, /**< 81 Degree. */
-    100, /**< 82 Degree. */
-    100, /**< 83 Degree. */
-    100, /**< 84 Degree. */
-    100, /**< 85 Degree. */
-    85, /**< 86 Degree. */
-    71, /**< 87 Degree. */
-    59, /**< 88 Degree. */
-    48, /**< 89 Degree. */
-    38, /**< 90 Degree. */
-    29, /**< 91 Degree. */
-    22, /**< 92 Degree. */
-    16, /**< 93 Degree. */
-    10, /**< 94 Degree. */
-    10, /**< 95 Degree. */
-    10, /**< 96 Degree. */
-    10, /**< 97 Degree. */
-    10, /**< 98 Degree. */
-    10, /**< 99 Degree. */
-    10, /**< 100 Degree. */
 };
 #endif
 /**

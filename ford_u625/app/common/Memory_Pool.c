@@ -49,12 +49,9 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #if(U717_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x00U };    
 #elif(CX430_TDDI_NT51926)
-#if(BX726_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x00U };
-#else
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x00U };
-#endif
-#else
+#elif(BX726_TDDI_NT51926)
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x00U };
 #endif
 
 /************************************************************************************
@@ -65,11 +62,9 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-#if(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.00" };
-#else
     const uint8_t cmu8McuVersion[] = { "T.00.01.03" };
-#endif
+#elif(BX726_TDDI_NT51926)
+    const uint8_t cmu8McuVersion[] = { "T.01.03.01" };
 #endif
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1310,7 +1305,7 @@ uint8_t Memory_Pool_SyncStatus_Get(void)
     return gtPowerManageInfo.u8SyncStatus;
 }
 
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 /******************************************************************************
  ;       Function Name			:	void Memory_Pool_NT51926_Vcom_Set(uint16_t u16SetValue)
  ;       Function Description	:

@@ -96,7 +96,7 @@ uint8_t M_DM_TouchControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 uint8_t M_DM_DisplayControl(uint8_t u8CurrentStatus, uint8_t u8Command, bool bLockLoss)
 {
     uint8_t u8ReturnStatus = 0U;
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 	uint8_t u8SendData1[2] = {0x1EU,0x20U};
 	uint8_t u8SendData2[2] = {0x01U,0x06U};
 
@@ -263,13 +263,13 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 {
 	uint8_t mu8SendData[2];	
 	uint8_t u8ReturnStatus;
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 	uint8_t u8ScanSel = 0U;
 #endif
 
 	if (u8CurrentStatus != u8Command)
 	{
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 		if(bFlashReloadDisable == false)
 		{
 			bFlashReloadDisable = true;
@@ -484,7 +484,7 @@ uint32_t M_DM_VCOM_Get(void)
  ******************************************************************************/
 void M_DM_VCOM_Set(uint8_t *pSetData)
 {
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 	uint8_t mu8SendData[4];
 
 	mu8SendData[0] = 0x1EU;
