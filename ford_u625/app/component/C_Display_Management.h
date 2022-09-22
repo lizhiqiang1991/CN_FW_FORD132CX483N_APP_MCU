@@ -59,6 +59,7 @@ typedef struct
 	uint8_t u8DispSeqStatus;
 	uint8_t u8CurrentDisplaySet;
 	bool bBacklightSet;
+	bool bBacklightSetBackup;
 	bool bDiagnosisProtect;
 	bool bDiagnosisProtectLeve;
 }tdisplay_ctrl_def;
