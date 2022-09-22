@@ -219,6 +219,43 @@ static float gDeratingTable[TEMP_DERATING_TABLE_SIZE];
  * @details When table is not loaded from flash, the PWM duty is recoverd by the look up table.
  * 
  */
+
+/* Jacky@2022.08.26 modify for BX726 PCBA follow "20220804_CX430 and U625_V1.0.xlsx" */
+static int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
+{
+    100,    /* 87 degree */
+    88,
+    75,
+    63,
+    50,
+    38,
+    25,
+    13,
+    10,
+    0,      /* 96 degree */
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+};
+#if 0
 static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] = 
 {
     100, /**< 70 Degree. */
@@ -253,6 +290,7 @@ static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
     10, /**< 99 Degree. */
     10, /**< 100 Degree. */
 };
+#endif
 /**
  * @brief A look up table for catching the PWM duty according to backlight temperature. 
  * 

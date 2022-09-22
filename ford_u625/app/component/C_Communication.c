@@ -50,9 +50,15 @@ volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
 	const uint8_t mu8Soft[] = { "RU5T-14D358-SA" };
 	const uint8_t mu8Main[] = { "RU5T-14D359-SA" };    
 #elif(CX430_TDDI_NT51926)
+#if(BX726_TDDI_NT51926)
+	const uint8_t mu8Core[] = { "SU5T-14F180-RA" };
+	const uint8_t mu8Soft[] = { "SU5T-14D358-RA" };
+	const uint8_t mu8Main[] = { "SU5T-14D359-RA" };
+#else
 	const uint8_t mu8Core[] = { "SU5T-14F180-PA" };
 	const uint8_t mu8Soft[] = { "SU5T-14D358-PA" };
 	const uint8_t mu8Main[] = { "SU5T-14D359-PA" };
+#endif
 #else
 #endif
 /* -- Local Functions -- */

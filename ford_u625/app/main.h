@@ -16,6 +16,7 @@
 /* -- Marco Define -- */
 #define CX430_TDDI_NT51926				true
 #define U717_TDDI_NT51926				false
+#define BX726_TDDI_NT51926				true
 
 #if (CX430_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN			false
@@ -23,7 +24,7 @@
 #define FORD_SPSSV1P1					false
 #define FORD_I2CCOMV1P9					true
 #define INT_TCH_LATCH					false
-#define BACKDOOR_WRITE_DERATINGDATA		true
+#define BACKDOOR_WRITE_DERATINGDATA		false
 #define BACKDOOR_ICDIAG_OPEN			false
 #define BACKDOOR_DIAGNOSIS_SIMULATE		false
 #define DEBUG_POWER_UP					false
