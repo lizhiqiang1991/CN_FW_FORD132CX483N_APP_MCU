@@ -15,7 +15,13 @@
 #include "public.h"
 
 /*---------------------------- Definition -----------------------------------*/
+#if(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+//#define DEBUG_UART_EN
+#elif(BX726_TDDI_NT51926)
 #define DEBUG_UART_EN
+#else
+#endif
+
 #define DEBUG_GPIO_EN
 #define DEBUG_PORT				DEBUG_UART_HW
 

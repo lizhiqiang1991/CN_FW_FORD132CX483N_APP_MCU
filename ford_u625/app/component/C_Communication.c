@@ -57,6 +57,7 @@ volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
 	const uint8_t mu8Core[] = { "SU5T-14F180-RA" };
 	const uint8_t mu8Soft[] = { "SU5T-14D358-RA" };
 	const uint8_t mu8Main[] = { "SU5T-14D359-RA" };
+#else
 #endif
 /* -- Local Functions -- */
 /******************************************************************************
