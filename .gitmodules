@@ -13,3 +13,6 @@
 [submodule "mtb_shared/mtb-hal-cat2/latest-v2.X"]
 	path = mtb_shared/mtb-hal-cat2/latest-v2.X
 	url = https://github.com/cypresssemiconductorco/mtb-hal-cat2
+[submodule "ford_u625/submodule"]
+	path = ford_u625/submodule
+	url = auogit:TM_DD_U625PSOC4_MCU
