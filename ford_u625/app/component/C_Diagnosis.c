@@ -928,7 +928,6 @@ static void C_Diagnosis_Control(void)
 			if(Memory_Pool_DiagnosisEnable_Get() == false) 
 			{
 				tDiagnosisTask.u16Timer2 = TIME_DISABLE;
-				tDiagnosisTask.u16Timer1 = TIME_DISABLE;
 			}
 			else
 			{ /* Nothing */}
@@ -984,13 +983,8 @@ static void C_Diagnosis_Control(void)
 		break;
 		
 #if(BACKDOOR_ICDIAG_OPEN)
-		case EVENT_MESSAGE_ICDIAG:
-			if(Memory_Pool_DiagnosisEnable_Get() == true)
-			{			
-				ICDIAG_Main();
-			}
-			else
-			{/*Nothing*/}
+		case EVENT_MESSAGE_ICDIAG:		
+			ICDIAG_Main();
 			tDiagnosisTask.u16Timer1 = TIME_10ms;
 		break;			
 #endif
