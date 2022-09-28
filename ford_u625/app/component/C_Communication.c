@@ -270,6 +270,8 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		break;		
 
 		case CMD_FACTORY_MODE:
+
+
 			if (Memory_Pool_FactoryMode_Get() == NORMAL_MODE)
 			{
 				Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
@@ -296,12 +298,24 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			}
 			else if (Memory_Pool_FactoryMode_Get() == NORMAL_DISALBE_MODE)
 			{
+
 				Memory_Pool_PowerState_Set(NORMAL_DISABLE_STATE);
 				Memory_Pool_PowerStatus_Set(POWER_ON_READY);
 				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
+#if(BX726_TDDI_NT51926)
+			else if ( DISALBE_DIAG_MODE == Memory_Pool_FactoryMode_Get() )
+			{
+				HAL_UART_Printf("Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());
+				Memory_Pool_DiagnosisEnable_Set(0U);
+				HAL_UART_Printf("Disable Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());
+			}
+#endif
 			else
-			{ /* Nothing */ }
+			{
+				/* Nothing */
+			}
+
 		break;
 			
 		case CMD_DERATING_ENABLE:

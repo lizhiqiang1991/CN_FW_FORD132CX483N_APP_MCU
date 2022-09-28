@@ -202,7 +202,11 @@
 #define LEN_TOUCH_RESET						0x01U
 #define LEN_FACTORY_MODE					0x01U
 #define LEN_TD7800_DATA						0x01U
+#if (BX726_TDDI_NT51926)
+#define LEN_TEMPERATURE_GET					0x05U
+#else
 #define LEN_TEMPERATURE_GET					0x04U
+#endif
 #define LEN_TEMPERATURE_ADC_GET				0x04U
 #define LEN_POWER_ERROR_STATUS				0x01U
 #define LEN_VOLTAGE_GET						0x04U
@@ -334,6 +338,9 @@
 #define OTP_MODE							0x01U
 #define TPT_MODE							0x02U
 #define NORMAL_DISALBE_MODE                 0x03U
+#if (BX726_TDDI_NT51926)
+#define DISALBE_DIAG_MODE                 	0x04U
+#endif
 
 #define  DISP_SEQ_LOCK_OFF					0x00U
 #define  DISP_SEQ_LOCK_ON					0x01U

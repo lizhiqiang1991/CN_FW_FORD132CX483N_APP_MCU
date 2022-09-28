@@ -7,7 +7,7 @@
  ;				Author		:	Fenderson Lu
  ;				Describe	:
  ******************************************************************************/
-/*---------------------------- Include File ---------------------------------*/
+/*---------------------------- Include File ----------------------------------*/
 #include "main.h"
 #include "C_Power_Management.h"
 #include "C_Communication.h"
@@ -17,6 +17,10 @@
 #include "C_Diagnosis.h"
 #include "C_Temperture_Protect.h"
 #include "C_Battery_Protect.h"
+#ifdef DEBUG_UART_EN
+#include "simple_cli.h"
+#include "FIDM_SupportCLI.h"
+#endif
 
 /******************************************************************************
  ;       Function Name			:	void Main_TaskInit(void)
@@ -65,6 +69,7 @@ static void Main_UartInit(void)
 
 	(void) HAL_UART_Init(tDebugUart);
 }
+
 #endif
 /******************************************************************************
  ;       Function Name			:	void Main_BspInit(void)
@@ -95,9 +100,9 @@ static void Main_BspInit(void)
 	(void) cybsp_init();
 #ifdef DEBUG_UART_EN
 	(void) Main_UartInit();
+	(void) FIDM_CLI_Init();
 #endif
 	(void) Main_SysTickInit();
-	HAL_UART_Printf("Initial Complete!\n");
 }
 /******************************************************************************
 
@@ -111,16 +116,18 @@ int main(void)
 {
 	uint32_t u32SuperLoopCnt = 0UL;
 
-
 	Main_BspInit();
 	Main_TaskInit();
 
 	__enable_irq();
 
-	HAL_UART_Printf("Task Start!\n");
+	HAL_UART_Printf("\r\nTask Start!\r\n");
 
 	while (u32SuperLoopCnt < (uint32_t) (LOOP_MAX))
 	{
+#ifdef DEBUG_UART_EN
+		SCLI_Run();
+#endif
 		Task_ProcessTask();
 	}
 

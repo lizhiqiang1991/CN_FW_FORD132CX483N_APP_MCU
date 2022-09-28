@@ -985,12 +985,17 @@ static void C_Diagnosis_Control(void)
 		
 #if(BACKDOOR_ICDIAG_OPEN)
 		case EVENT_MESSAGE_ICDIAG:
+#if(BX726_TDDI_NT51926)
+			ICDIAG_Main();
+#else
+
 			if(Memory_Pool_DiagnosisEnable_Get() == true)
 			{			
 				ICDIAG_Main();
 			}
 			else
 			{/*Nothing*/}
+#endif
 			tDiagnosisTask.u16Timer1 = TIME_10ms;
 		break;			
 #endif

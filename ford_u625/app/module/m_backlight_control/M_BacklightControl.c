@@ -677,4 +677,22 @@ void MBacklightControl_DimmingModuleRoutine6ms(void)
     MPWMDimming_Routine6ms();
 }
 
+
+#if (BX726_TDDI_NT51926)
+/**
+ * @brief Calls MPWMDimming_Routine6ms() to run independent state machine.
+ *
+ * @details 1.The different routine base time is immutable.\n
+ * 2.The different state machine checking time is immutable..
+ *
+ * @note 1.The state machine checking time is 6ms.\n
+ *
+ */
+MBacklightControlStateMachine_E MBacklightControl_GetBacklightState(void)
+{
+    return StateMachineControl.BacklightStateMachine;
+}
+#endif
+
+
 /* -- END -- */

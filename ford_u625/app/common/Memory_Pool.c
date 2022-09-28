@@ -11,6 +11,9 @@
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 #include "M_BatteryProtect.h"
 #endif
+#ifdef BX726_TDDI_NT51926
+#include "M_BacklightControl.h"
+#endif
 
 tcommunication_def gtCommunicationInfo;
 tdata_collection_def gtDataCollectInfo;
@@ -66,10 +69,28 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #if(CX430_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.03.04" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.01" };
+    const uint8_t cmu8McuVersion[] = { "T.01.03.04" };	/* Jacky@220928,
+    													   release to Social for derating test */
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.00.00" };
 #else
+#endif
+
+
+#if (BX726_TDDI_NT51926)
+/**
+ * @brief Calls MPWMDimming_Routine6ms() to run independent state machine.
+ *
+ * @details 1.The different routine base time is immutable.\n
+ * 2.The different state machine checking time is immutable..
+ *
+ * @note 1.The state machine checking time is 6ms.\n
+ *
+ */
+const uint8_t * Get_MCUVersion(void)
+{
+	return &cmu8McuVersion;
+}
 #endif
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1838,6 +1859,9 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 2U) = gtDataCollectInfo.i16PCBATemperature >> 8U;
 			*(pDataBuffer + 3U) = gtDataCollectInfo.i16BacklightTemperature;
 			*(pDataBuffer + 4U) = gtDataCollectInfo.i16BacklightTemperature >> 8U;
+#if (BX726_TDDI_NT51926)
+			*(pDataBuffer + 5U) = (uint8_t)MBacklightControl_GetBacklightState();
+#endif
 			*pLength = LEN_TEMPERATURE_GET + LEN_SUBADDRESS;
 		break;
 
@@ -1968,7 +1992,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			u8I2CICDiagBuffer = ICDIAG_GetRxBuffer();
 			for(u8Counter = 0U; u8Counter<LEN_ICDIAG_INFO; u8Counter++)
 			{
-				*(pDataBuffer + u8Counter + 1U) = (*u8I2CICDiagBuffer + u8Counter);
+				*(pDataBuffer + u8Counter + 1U) = *(u8I2CICDiagBuffer + u8Counter);
 			}					
 			*pLength = LEN_ICDIAG_INFO + LEN_SUBADDRESS;
 		break;
@@ -2031,7 +2055,11 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 		break;
 
 		case CMD_FACTORY_MODE:
+#if(BX726_TDDI_NT51926)
+			gtDisplayManageInfo.u8FactoryMode = *(pCmdBuffer + 1U) & 0x07U;
+#else
 			gtDisplayManageInfo.u8FactoryMode = *(pCmdBuffer + 1U) & 0x03U;
+#endif
 		break;
 
 		case CMD_DERATING_ENABLE:

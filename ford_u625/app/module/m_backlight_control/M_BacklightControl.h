@@ -63,5 +63,9 @@ CALLBACK_EX_ALERT_HANDLER_COMPLETE CallbackExAlertDisComplete);
 extern MBacklightControlStateMachine_E MBacklightControl_TriggerStateMachine(void);
 extern void MBacklightControl_DeratingModuleRoutine10ms(void);
 extern void MBacklightControl_DimmingModuleRoutine6ms(void);
+
+#if (BX726_TDDI_NT51926)
+extern MBacklightControlStateMachine_E MBacklightControl_GetBacklightState(void);
+#endif
 #endif
 /* -- END -- */
