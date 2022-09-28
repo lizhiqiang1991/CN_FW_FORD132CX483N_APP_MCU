@@ -3,7 +3,6 @@
 #include "M_PowerManagement.h"
 #include "Memory_Pool.h"
 
-
 static bool bFlashReloadDisable = false; 
 /******************************************************************************
  ;       Function Name			:	void Main_I2cMasterInit(void)
@@ -583,3 +582,63 @@ uint8_t M_DM_NT51926_ATTN_Read(void)
 }
 
 
+#if(BX726_TDDI_NT51926)
+int8_t M_DM_NT51926_VGAMMA_Get(uint8_t *pu8Out)
+{
+	int8_t	i8RtCode = -1, i8I2CErr = 0;
+	uint8_t u8PageSwitch[2U] = {0x1EU, CMD1_P0};
+	uint8_t u8DataAddress = 0x04U;
+	uint8_t u8ReadData[4U] = {0x00U};
+	uint8_t u8ReadLoop = 0U, u8ReadLen = sizeof(u8ReadData);
+
+	/* Switch Page to CMD1_P0.*/
+	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, sizeof(u8PageSwitch), 10U) != DRIVER_TRUE)
+	{
+		/* fail situation */
+		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+	}
+	else
+	{
+		/* Switch page success */
+
+
+		for(u8ReadLoop = 0U ; u8ReadLoop < u8ReadLen ; u8ReadLoop++)
+		{
+			/*Write data address.*/
+			if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, &u8DataAddress, 1U, 10U) != DRIVER_TRUE)
+			{
+				/* fail situation */
+				Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				i8I2CErr = -1;
+				break;
+			}
+			else
+			{
+				if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, pu8Out, 1U, 10U) != DRIVER_TRUE)
+				{
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+					i8I2CErr = -1;
+					break;
+				}
+				else
+				{
+					pu8Out++;
+				}
+
+				u8DataAddress++;
+			}
+		}
+
+		if( 0 == i8I2CErr)
+		{
+			i8RtCode = 1;
+		}
+		else
+		{
+			; /* TODO: i2c damage, error handle */
+		}
+
+	}
+	return i8RtCode;
+}
+#endif

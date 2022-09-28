@@ -69,8 +69,9 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #if(CX430_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.03.05" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.04" };	/* Jacky@220928,
-    													   release to Social for derating test */
+    const uint8_t cmu8McuVersion[] = { "T.01.03.05" };	/* Jacky@220928,
+    													   T.01.03.04 release to Social for derating test
+    													 */
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.00.00" };
 #else
@@ -87,9 +88,27 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  * @note 1.The state machine checking time is 6ms.\n
  *
  */
-const uint8_t * Get_MCUVersion(void)
+int8_t Get_MCUVersion(uint8_t *pu8Out)
 {
-	return &cmu8McuVersion;
+	uint8_t u8Len = 0U, u8Loop = 0U;
+	int8_t i8Rt = -1;
+
+
+	u8Len = strlen((const char *)cmu8McuVersion);
+	if( 0U < u8Len)
+	{
+		for( u8Loop = 0U ; u8Loop < u8Len ; u8Loop++ )
+		{
+			*pu8Out = cmu8McuVersion[u8Loop];
+			pu8Out++;
+		}
+		i8Rt = 1U;
+	}
+	else
+	{
+		;/* no elements in cmu8McuVersion[] */
+	}
+	return i8Rt;
 }
 #endif
 /******************************************************************************
@@ -1363,6 +1382,48 @@ uint32_t Memory_Pool_NT51926_Vcom_Get(void)
 {
 	return gtDisplayManageInfo.u32NT51926_Vcom; 
 }		
+
+int8_t Memory_Pool_NT51926_VGMA_Set(const uint8_t *pu8Input)	/* Jacky@220928, for VGMA*/
+{
+	int8_t i8Rt = 1;
+	uint8_t u8Loop = 0U;
+
+	if( NULL != pu8Input )
+	{
+		for( u8Loop = 0U ; u8Loop < 4U ; u8Loop++ )
+		{
+			gtDisplayManageInfo.u8NT51926VGMA[u8Loop] = *pu8Input;
+			pu8Input++;
+		}
+	}
+	else
+	{
+		i8Rt = -1; /* TODO: input buff fail */
+	}
+
+	return i8Rt;
+}
+
+int8_t Memory_Pool_NT51926_VGMA_Get(uint8_t *pu8Out)
+{
+	int8_t i8Rt = 0;
+	uint8_t u8Loop = 0U;
+
+	if( NULL != pu8Out)
+	{
+		for( u8Loop = 0U ; u8Loop < 4U ; u8Loop++ )
+		{
+			*pu8Out = gtDisplayManageInfo.u8NT51926VGMA[u8Loop];
+			pu8Out++;
+		}
+		i8Rt = 1;
+	}
+	else
+	{
+		i8Rt = -1;
+	}
+	return i8Rt;
+}
 #endif
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
@@ -1922,8 +1983,13 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 1U) = (uint8_t)(gtDisplayManageInfo.u32NT51926_Vcom & 0xFFU);
 			*(pDataBuffer + 2U) = (uint8_t)((gtDisplayManageInfo.u32NT51926_Vcom >> 8U) & 0xFFU);
 			*(pDataBuffer + 3U) = (uint8_t)((gtDisplayManageInfo.u32NT51926_Vcom >> 16U) & 0xFFU);
+#if (BX726_TDDI_NT51926)
+			*(pDataBuffer + 4U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[0U]);
+			*(pDataBuffer + 5U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[1U]);
+			*(pDataBuffer + 6U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[2U]);
+			*(pDataBuffer + 7U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[3U]);
+#endif
 			*pLength = LEN_VCOM_VALUE_GET + LEN_SUBADDRESS;
-
 			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_TDDI_VCOM);
 		break;
 

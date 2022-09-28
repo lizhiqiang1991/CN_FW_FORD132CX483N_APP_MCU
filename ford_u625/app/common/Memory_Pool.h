@@ -131,6 +131,7 @@ typedef struct
 	uint8_t u8FactoryMode;
 
 	uint32_t u32NT51926_Vcom;
+	uint8_t	u8NT51926VGMA[4U];
 } tdisplay_management_def;
 
 typedef struct
@@ -364,6 +365,8 @@ uint8_t Memory_Pool_PowerState_Get(void);
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 	void Memory_Pool_NT51926_Vcom_Set(uint32_t u32SetValue);
 	uint32_t Memory_Pool_NT51926_Vcom_Get(void);
+	int8_t Memory_Pool_NT51926_VGMA_Set(const uint8_t *);	/* Jacky@220928, for VGMA*/
+	int8_t Memory_Pool_NT51926_VGMA_Get(uint8_t *);
 #endif
 
 void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer);
@@ -414,7 +417,7 @@ tdiagnosis_simulate_def Memory_Pool_DiagnosisSimulateInfo_Get(void);
 #endif
 
 #if (BX726_TDDI_NT51926)
-extern const uint8_t * Get_MCUVersion(void);
+extern int8_t Get_MCUVersion(uint8_t *);
 #endif
 
 #endif

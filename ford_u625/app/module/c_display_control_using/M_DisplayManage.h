@@ -26,6 +26,29 @@
 #define NT51925_STATUS_NORMAL		0x01U
 #define NT51925_STATUS_BIST			0x02U
 #define NT51925_STATUS_MUTE			0x03U
+#if(BX726_TDDI_NT51926)
+#define CMD1		0x10U
+#define CMD2		0x20U
+#define CMD3		0x30U
+#define CMDD		0xD0U
+
+#define PAGE0		0x00U
+#define PAGE1		0x01U
+#define PAGE2		0x02U
+#define PAGE3		0x03U
+#define PAGE4		0x04U
+#define PAGE5		0x05U
+#define PAGE6		0x06U
+#define PAGE7		0x07U
+#define PAGE8		0x08U
+#define PAGE9		0x09U
+#define PAGEA		0x0AU
+#define PAGEB		0x0BU
+#define PAGEC		0x0CU
+#define PAGEF		0x0FU
+
+#define CMD1_P0		(uint8_t)(CMD1 | PAGE0)
+#endif
 
 #define LP8864_ADDRESS				0x3AU		// for LED driver
 
@@ -42,5 +65,9 @@ extern void M_DM_FW_DisplayStatus_Get(uint8_t *pReturnData);
 extern void M_DM_INTB_Ctrl(uint8_t u8DigitalLevel);
 extern uint8_t M_DM_NT51926_Status_Get(void);
 extern uint8_t M_DM_NT51926_ATTN_Read (void);
+
+#if(BX726_TDDI_NT51926)
+extern int8_t M_DM_NT51926_VGAMMA_Get(uint8_t *);
+#endif
 #endif
 
