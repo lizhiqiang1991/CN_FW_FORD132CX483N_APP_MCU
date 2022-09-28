@@ -67,7 +67,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.04" };
+    const uint8_t cmu8McuVersion[] = { "T.01.03.05" };
 #elif(BX726_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.03.04" };	/* Jacky@220928,
     													   release to Social for derating test */
@@ -1992,7 +1992,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			u8I2CICDiagBuffer = ICDIAG_GetRxBuffer();
 			for(u8Counter = 0U; u8Counter<LEN_ICDIAG_INFO; u8Counter++)
 			{
-				*(pDataBuffer + u8Counter + 1U) = *(u8I2CICDiagBuffer + u8Counter);
+				*(pDataBuffer + u8Counter + 1U) = u8I2CICDiagBuffer[u8Counter];
 			}					
 			*pLength = LEN_ICDIAG_INFO + LEN_SUBADDRESS;
 		break;
