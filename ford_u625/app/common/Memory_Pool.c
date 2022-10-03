@@ -69,8 +69,9 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #if(CX430_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.03.05" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.05" };	/* Jacky@220928,
-    													   T.01.03.04 release to Social for derating test
+    const uint8_t cmu8McuVersion[] = { "T.01.03.06" };	/* Jacky@220928,
+    													   T.01.03.04 release to Social for derating test (Table V1.0)
+    													   T.01.03.06 release to Social for derating test (Table V1.1)
     													 */
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.00.00" };
@@ -651,7 +652,19 @@ uint16_t Memory_Pool_BLTempAnaVol_Get(void)
  ******************************************************************************/
 void Memory_Pool_PCBATemp_Set(int16_t i16SetValue)
 {
+
+#if (HIJACK_ADC)
+	if(0x01U == MBacklightControl_GetADCHiJack())
+	{
+		gtDataCollectInfo.i16PCBATemperature = MBacklightControl_GetHADC();
+	}
+	else
+	{
+		gtDataCollectInfo.i16PCBATemperature = i16SetValue;
+	}
+#else
     gtDataCollectInfo.i16PCBATemperature = i16SetValue;
+#endif
 }
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)

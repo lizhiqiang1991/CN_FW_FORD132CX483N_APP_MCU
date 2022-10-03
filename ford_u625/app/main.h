@@ -48,6 +48,7 @@
 #define BACKDOOR_ICDIAG_OPEN			true
 #define BACKDOOR_DIAGNOSIS_SIMULATE		false
 #define DEBUG_POWER_UP					false
+#define HIJACK_ADC						true
 #endif
 
 /* -- Includes -- */

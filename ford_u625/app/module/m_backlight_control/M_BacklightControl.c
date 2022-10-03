@@ -55,6 +55,12 @@ typedef struct
 }MBacklightControlStateMachineControl_Typedef;
 
 /* -- Global Variables -- */
+#if (HIJACK_ADC)
+/* Jacky@20220930, for hijack pcba adc input*/
+static uint8_t gbHijackPCBA = 0U;
+static int16_t gi16FakePCBA = 0U;
+#endif
+
 /**
  * @brief Implements MBacklightControlStateMachineControl_Typedef data.
  * 
@@ -340,7 +346,14 @@ static MBacklightControlStateMachine_E MBacklightControl_StateNormal(void)
     uint16_t u16TempHostPWM = Memory_Pool_BacklightDuty_Get();
     MBacklightControlStateMachine_E TempBacklightStateMachine;
 
+#if(HIJACK_ADC)
+    if( 0x01U == gbHijackPCBA )
+    	StateMachineControl.AmbientTemperature = gi16FakePCBA*TEMP_DERATING_TEMP_RESOLUTION;
+    else
+    	StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
+#else
     StateMachineControl.AmbientTemperature = Memory_Pool_PCBATemp_Get()*TEMP_DERATING_TEMP_RESOLUTION;
+#endif
 
     if((StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_DIMMING)\
         ||(StateMachineControl.eMBLCtrlExternalEn == E_MBL_EXTERNAL_DISABLE_NODIMMNG))
@@ -692,6 +705,30 @@ MBacklightControlStateMachine_E MBacklightControl_GetBacklightState(void)
 {
     return StateMachineControl.BacklightStateMachine;
 }
+
+
+#if (HIJACK_ADC)
+uint8_t MBacklightControl_ADCHiJack(uint8_t u8OnOff)
+{
+	gbHijackPCBA = u8OnOff;
+	return gbHijackPCBA;
+}
+uint8_t MBacklightControl_GetADCHiJack(void)
+{
+	return gbHijackPCBA;
+}
+
+uint8_t MBacklightControl_SetHADC(int16_t fakeADC)
+{
+	gi16FakePCBA = fakeADC;
+	return 1U;
+}
+
+int16_t MBacklightControl_GetHADC(void)
+{
+	return gi16FakePCBA;
+}
+#endif
 #endif
 
 
