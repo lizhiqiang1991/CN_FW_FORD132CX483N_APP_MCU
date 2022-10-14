@@ -26,9 +26,9 @@
 #define INT_ERROR						0x01U
 #define INT_TOUCH						0x04U
 
-#define DIAG_FPC_TX_DISCON_VOL			1800U /*Unit: 1 mv*/
-#define DIAG_FPC_RX_DISCON_VOL			1800U /*Unit: 1 mv*/
-#define DIAG_FPC_BL_DISCON_VOL			3000U /*Unit: 1 mv*/
+#define DIAG_FPC_TX_DISCON_VOL			1800U /*Unit: 1 mv, FPC normal voltage */
+#define DIAG_FPC_RX_DISCON_VOL			1800U /*Unit: 1 mv, FPC normal voltage */
+#define DIAG_FPC_BL_DISCON_VOL			3180U /*Unit: 1 mv, FPC disconnect voltage */
 
 #define DEBOUNCE_3_TIMES			  		3U
 #define DEBOUNCE_4_TIMES			  		4U

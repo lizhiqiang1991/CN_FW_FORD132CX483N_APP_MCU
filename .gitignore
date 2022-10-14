@@ -14,9 +14,9 @@
 .metadata/
 # .cyignore
 .settings/
-# .cproject
+.cproject
 .project
-# .mtbLaunchConfigs/
+.mtbLaunchConfigs/
 
 # ModusToolbox Configurator generated code
 GeneratedSource/

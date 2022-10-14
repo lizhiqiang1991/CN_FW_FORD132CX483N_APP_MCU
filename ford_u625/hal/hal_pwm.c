@@ -160,7 +160,7 @@ void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust)
 	{
 		if(u32Compare0 > u32DutyAdjust)
 		{
-			Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, u32DutyAdjust + 1);
+			Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, u32DutyAdjust + 1u);
 		}
 		else
 		{
