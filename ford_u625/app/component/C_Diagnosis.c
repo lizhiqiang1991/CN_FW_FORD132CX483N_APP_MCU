@@ -125,7 +125,15 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				{
 					tDiagCtrl.u16NT51926CommTime = 0U;
 					u64Temp=M_GPIOSense_DisplayFault_Read()&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_TYPEC_ERR_POS);
-					if((u64Temp & (BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
+
+					if((Memory_Pool_ScanStatus_Get() == SCAN_VB_HL) || (Memory_Pool_ScanStatus_Get() == SCAN_VB_HR))
+					{
+						u64Temp &= (~BIT_A3_PANEL_GATE_ERROR_POS);
+					}
+					else
+					{/*Nothing*/}
+					
+					if((u64Temp & (BIT_A3_PANEL_DISPFAULT_TYPEB_POS)) > 0UL)
 					{
 						tDiagCtrl.u8NT51926DpRegDebunce_RECOV = 0U;
 						tDiagCtrl.u8NT51926DpRegDebunce ++;
@@ -139,12 +147,12 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					if(tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
 					{
 						tDiagCtrl.u8NT51926DpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;
-						u64Diagnosis |= (u64Temp & (BIT_A3_PANEL_DISPFAULT_TYPEB_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS));
+						u64Diagnosis |= (u64Temp & (BIT_A3_PANEL_DISPFAULT_TYPEB_POS));
 					}
 					else if(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
 					{
 						tDiagCtrl.u8NT51926DpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
-						u64Diagnosis &= ~(BIT_A3_PANEL_DISPFAULT_TYPEB_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS);
+						u64Diagnosis &= ~(BIT_A3_PANEL_DISPFAULT_TYPEB_POS);
 					}
 					else
 					{/*Nothing*/}
@@ -197,9 +205,14 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				tDiagCtrl.u8NT51926DpRegDebunce_RECOV = 0U;
 				tDiagCtrl.u8NT51926TpRegDebunce = 0U;
 				tDiagCtrl.u8NT51926TpRegDebunce_RECOV = 0U;
-			
-				/* Record 0xA3 status */
-				Memory_Pool_NT51926Diagnosis_Set(Memory_Pool_NT51926Diagnosis_Get() & BIT_A3_PANEL_DP_STATUS_POS );
+
+				if(Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
+				{
+					/* Record 0xA3 status */
+					Memory_Pool_NT51926Diagnosis_Set(Memory_Pool_NT51926Diagnosis_Get() & BIT_A3_PANEL_DP_STATUS_POS );
+				}
+				else
+				{/*Nothing*/}
 			}
 			else
 			{/*Nothing*/}
@@ -282,7 +295,7 @@ static void C_Diagnosis_Vol_FPCTx(void)
 	if(tFpcTx.blEnable == true)
 	{
 		/* Count Debounce. */
-		if(u16VolTemp <= DIAG_FPC_TX_DISCON_VOL)
+		if(u16VolTemp < DIAG_FPC_TX_DISCON_VOL)
 		{
 			tFpcTx.u8DebounceHigh=0U;
 			if(tFpcTx.u8DebounceLow < tFpcTx.u8DebounceMax)
@@ -346,7 +359,7 @@ static void C_Diagnosis_Vol_FPCRx(void)
 	if(tFpcRx.blEnable == true)
 	{
 		/* Count Debounce. */
-		if(u16VolTemp <= DIAG_FPC_RX_DISCON_VOL)
+		if(u16VolTemp < DIAG_FPC_RX_DISCON_VOL)
 		{
 			tFpcRx.u8DebounceHigh=0U;
 			if(tFpcRx.u8DebounceLow < tFpcRx.u8DebounceMax)
@@ -544,15 +557,92 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 			/* If I2C master bus read error， Set u8Temp = 0x07U */
 			if(Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
 			{
-				u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
-				u64Temp |= (((uint64_t)u8Temp) << 48U);
-				Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+				if(u8Temp != NT51925_STATUS_NORMAL)
+				{
+					if(u8Temp != 0x07U)
+					{
+						tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;
+						tDiagCtrl.u8NT51926DpStatusOnDebunce ++;
+					}
+					else
+					{/*Nothing*/}
+				}
+				else
+				{
+					tDiagCtrl.u8NT51926DpStatusOnDebunce = 0U;
+					tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV ++;
+				}
+				
+				if(tDiagCtrl.u8NT51926DpStatusOnDebunce >= C_DIAG_NT51926_STATE_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926DpStatusOnDebunce = C_DIAG_NT51926_STATE_DEBUNCE;
+					u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
+					u64Temp |= (((uint64_t)u8Temp) << 48U);
+				}
+				else if(tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = C_DIAG_NT51926_STATE_DEBUNCE;
+					u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
+					u64Temp |= (((uint64_t)u8Temp) << 48U);	
+				}
+				else
+				{/*Nothing*/}
+				
+				if((tDiagCtrl.u8NT51926DpStatusOnDebunce >= C_DIAG_NT51926_STATE_DEBUNCE)\
+					||	(tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE))
+				{
+					Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+				}
+				else
+				{/*Nothing*/}								
 			}
 			else if(Memory_Pool_LcdStatus_Get() == DISPLAY_OFF)
 			{
-				u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
-				u64Temp |= (((uint64_t)u8Temp) << 48U);
-				Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+				if(u8Temp != NT51925_STATUS_STANDY)
+				{
+					if(u8Temp != 0x07U)
+					{
+						tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = 0U;
+						tDiagCtrl.u8NT51926DpStatusOfDebunce ++;
+					}
+					else
+					{/*Nothing*/}
+				}
+				else
+				{
+					tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;
+					tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV ++;
+				}
+				
+				if(tDiagCtrl.u8NT51926DpStatusOfDebunce >= C_DIAG_NT51926_STATE_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926DpStatusOfDebunce = C_DIAG_NT51926_STATE_DEBUNCE;
+					u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
+					u64Temp |= (((uint64_t)u8Temp) << 48U);
+				}
+				else if(tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE)
+				{
+					tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = C_DIAG_NT51926_STATE_DEBUNCE;
+					u64Temp = Memory_Pool_NT51926Diagnosis_Get() & (~BIT_A3_PANEL_DP_STATUS_POS);	
+					u64Temp |= (((uint64_t)u8Temp) << 48U);	
+				}
+				else
+				{/*Nothing*/}
+				
+				if((tDiagCtrl.u8NT51926DpStatusOfDebunce >= C_DIAG_NT51926_STATE_DEBUNCE)\
+					||	(tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE))
+				{
+					
+					if(tDiagCtrl.u8NT51926DpStatusOnDebunce < C_DIAG_NT51926_STATE_DEBUNCE)
+					{
+						Memory_Pool_NT51926Diagnosis_Set(u64Temp);
+					}
+					else
+					{/*Nothing*/}
+				}
+				else
+				{/*Nothing*/}
+												
 			}
 			else
 			{/*Nothing*/}
@@ -576,7 +666,13 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 		}
 	}
 	else
-	{/*Nothing*/}
+	{
+		tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;
+		tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = 0U;
+		tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;
+		tDiagCtrl.u8NT51926DpStatusOnDebunce = 0U;
+		tDiagCtrl.u8NT51926I2cDebunce = 0U;
+	}
 }
 
 /******************************************************************************
@@ -612,6 +708,10 @@ static void C_Diagnosis_ParaInit(void)
 	tDiagCtrl.u8LEDDriverRegDebunce_RECOV = 0U;
 	tDiagCtrl.u16NT51926I2cCommTime = C_DIAG_NT51926_I2CTIME;
 	tDiagCtrl.u8NT51926I2cDebunce = 0U;
+	tDiagCtrl.u8NT51926DpStatusOnDebunce = 0U;	
+	tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;		
+	tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;	
+	tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = 0U;	
 
 	tLedInt.u8DebounceHigh = 0U;
 	tLedInt.u8DebounceLow = 0U;
@@ -704,7 +804,14 @@ static void C_Diagnosis_Action(void)
 	/************************************************************************************************/
 	u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 	/* Record 0x00. */
-	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS|BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) > 0UL)
+	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS)) > 0UL)
+	{
+		u32Temp|=BIT_LCDERR_POS;
+	}
+	else
+	{/*Nothing*/}
+	
+	if((tDiagCtrl.u8NT51926DpStatusOnDebunce >= C_DIAG_NT51926_STATE_DEBUNCE) || (tDiagCtrl.u8NT51926DpStatusOfDebunce >= C_DIAG_NT51926_STATE_DEBUNCE))
 	{
 		u32Temp|=BIT_LCDERR_POS;
 	}
@@ -776,7 +883,9 @@ static void C_Diagnosis_Action(void)
 
 	/* Release LCDERR. */
 	if(((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS )) == 0U)
-		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_DISPFAULT_TYPEC_POS)) == 0UL))
+		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS)) == 0UL)
+		&& (tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE) 
+		&& (tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE))
 	{
 		u32Temp&=~BIT_LCDERR_POS;
 	}
@@ -816,6 +925,18 @@ static void C_Diagnosis_Action(void)
 			else
 			{/*Nothing*/}
 		}
+		else if((tDiagCtrl.u8NT51926DpStatusOnDebunce >= C_DIAG_NT51926_STATE_DEBUNCE) || (tDiagCtrl.u8NT51926DpStatusOfDebunce >= C_DIAG_NT51926_STATE_DEBUNCE))
+		{
+			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_RSTRQ;
+			u32Temp |= BIT_RST_RQ_POS;
+			if(CallbackDiagActionProtect != NULL)
+			{
+				CallbackDiagActionProtect();
+			}
+			else
+			{/*Nothing*/}
+		}
+
 		else if((u16GeneralDiagnosis&(BIT_A3_PANEL_FPC_TX_L_ERROR_POS | BIT_A3_PANEL_FPC_RX_R_ERROR_POS | BIT_A3_BL_FPC_ERROR_POS)) > 0U)
 		{
 			tDiagCtrl.DiagProtectAction=DIAG_ACTION_DISPBL_OFF_RSTRQ;
@@ -841,9 +962,27 @@ static void C_Diagnosis_Action(void)
 		else
 		{/*Nothing*/}
 	}
+	else if(tDiagCtrl.DiagProtectAction == DIAG_ACTION_DISPBL_OFF_RSTRQ)
+	{
+		if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS)) > 0U)
+		{
+			tDiagCtrl.DiagProtectAction=DIAG_ACTION_SHUTDOWN;
+			Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
+			(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+		}		
+		else
+		{/*Nothing*/}
+	}
+
 	else if(tDiagCtrl.DiagProtectAction == DIAG_ACTION_DISPBL_OFF_RSTRQ_RECOV)
 	{
-		if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS | BIT_A3_POWER_P1V2_ERROR_POS | BIT_A3_COMM_LOSS_ERROR_POS)) == 0U)
+		if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS)) > 0U)
+		{
+			tDiagCtrl.DiagProtectAction=DIAG_ACTION_SHUTDOWN;
+			Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
+			(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+		}		
+		else if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS | BIT_A3_POWER_P1V2_ERROR_POS | BIT_A3_COMM_LOSS_ERROR_POS)) == 0U)
 		{
 			tDiagCtrl.DiagProtectAction=DIAG_ACTION_NONE;
 			/* Recover */

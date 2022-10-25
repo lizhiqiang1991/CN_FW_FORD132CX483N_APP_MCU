@@ -13,6 +13,8 @@
 #include "public.h"
 
 #define SAMPLE_ELEMENT_NUM		8U
+#define THERMAL_SIGNALSTABLETIME	20U /*Temperature stable counter.*/
+#define THERMAL_DEFAULT 			25  /*Default Temperature.*/
 
 typedef struct
 {

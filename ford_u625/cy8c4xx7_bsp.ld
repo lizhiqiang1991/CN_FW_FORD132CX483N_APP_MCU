@@ -47,6 +47,13 @@ GROUP(-lgcc -lc -lnosys)
 ;   <o1> Flash Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
  -----------------------------------------------------------------------------*/
+/* App with Bootloader */
+/* 
+__FLASH_START = 0x00008000;
+__FLASH_SIZE =  0x00018000;
+*/
+
+/* Flash Only have App */
 __FLASH_START = 0x00000000;
 __FLASH_SIZE =  0x00020000;
 

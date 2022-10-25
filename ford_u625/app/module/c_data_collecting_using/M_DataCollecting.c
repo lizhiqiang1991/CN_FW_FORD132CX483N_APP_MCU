@@ -760,6 +760,14 @@ const tmtx_tbl_element_def mtVsync[201] = {
 
 data_collecting_info_def gtDCInfo;
 
+/**
+ * @brief <b>Stable count for each temperature.</b>
+ * 
+ * @details Stable count for each temperature.\n
+ * 
+ */
+static uint8_t gu8BootCount = 0U;
+
 /******************************************************************************
 ;       Function Name			:	uint8_t M_DC_Status_Get(void)
 ;       Function Description	:	This state for error condition
@@ -877,10 +885,27 @@ void M_DC_Function_Execute(uint8_t u8Action)
 			gtDCInfo.fPresentPCBTempADC = 0.0f;
 			gtDCInfo.i16PresentVbattADC = 0;
 			gtDCInfo.i16PresentVSyncADC = 0;
-			gtDCInfo.u8Cnt = 0;
-			gtDCInfo.u8Index = 0;
+			gtDCInfo.i16PresentFPCTxOutADC = 0;
+			gtDCInfo.i16PresentFPCRxOutADC = 0;			
+			gtDCInfo.u8Cnt = 0U;
+			gtDCInfo.u8Index = 0U;
 			gtDCInfo.u8FIRInit = 0U;
 			gtDCInfo.u8IIRInit = 0U;
+			gu8BootCount = 0U;
+			/*Analog Voltage*/
+			gtDCInfo.i16PresentTPCBAnaVol = 0;
+			gtDCInfo.i16PresentTBacklightAnaVol = 0;
+			gtDCInfo.i16PresentVbattAnaVol = 0;
+			gtDCInfo.i16PresentVSyncAnaVol = 0;
+			gtDCInfo.i16PresentFPCTxAnaVol = 0;
+			gtDCInfo.i16PresentFPCRxAnaVol = 0;
+			/*Actual Value*/
+			gtDCInfo.i16PresentTPCB = THERMAL_DEFAULT;
+			gtDCInfo.i16PresentTBacklight = THERMAL_DEFAULT;
+			gtDCInfo.i16PresentVbatt = 0;
+			gtDCInfo.i16PresentVSync = 0;
+			gtDCInfo.i16PresentFPCTxOut = 0;
+			gtDCInfo.i16PresentFPCRxOut = 0;			
 		break;
 
 		case DC_TURNON_VBATT_MEASURE:
@@ -908,7 +933,7 @@ void M_DC_Function_Execute(uint8_t u8Action)
 				gtDCInfo.i16PresentFPCTxOutADC=gtDCInfo.mi16FPCTxOutADCData[gtDCInfo.u8Index];
 				gtDCInfo.i16PresentFPCRxOutADC=gtDCInfo.mi16FPCRxOutADCData[gtDCInfo.u8Index];
 			}
-			/*Use FIR filter for related data.*/
+			/*Use moving average for related data.*/
 			else
 			{
 				gtDCInfo.i16PresentVbattADC=M_DC_MoveAvgCal(&(gtDCInfo.mi16VbattADCData[0]),SAMPLE_ELEMENT_NUM);
@@ -916,10 +941,19 @@ void M_DC_Function_Execute(uint8_t u8Action)
 				gtDCInfo.i16PresentFPCTxOutADC=M_DC_MoveAvgCal(&(gtDCInfo.mi16FPCTxOutADCData[0]),SAMPLE_ELEMENT_NUM);
 				gtDCInfo.i16PresentFPCRxOutADC=M_DC_MoveAvgCal(&(gtDCInfo.mi16FPCRxOutADCData[0]),SAMPLE_ELEMENT_NUM);
 			}
+			
+			gu8BootCount++;
+			if(gu8BootCount >= THERMAL_SIGNALSTABLETIME)
+			{
+				gu8BootCount=THERMAL_SIGNALSTABLETIME;
+				gtDCInfo.u8IIRInit = 1U;
+			}
+			else
+			{ /* Nothing */ }			
+
 			/*When initialize, fill in all data as first time detected ADC.*/
 			if(gtDCInfo.u8IIRInit == 0U)
 			{
-				gtDCInfo.u8IIRInit=1U;
 				gtDCInfo.fPresentPCBTempADC=(float)gtDCInfo.mi16PCBTempADCData[gtDCInfo.u8Index];
 				gtDCInfo.i16PresentPCBTempADC=gtDCInfo.mi16PCBTempADCData[gtDCInfo.u8Index];
 				gtDCInfo.fPresentBacklightTempADC=(float)gtDCInfo.mi16BacklightTempADCData[gtDCInfo.u8Index];

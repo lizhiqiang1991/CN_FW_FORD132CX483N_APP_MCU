@@ -67,7 +67,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.05" };
+    const uint8_t cmu8McuVersion[] = { "T.01.03.06" };
 #elif(BX726_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.03.07" };	/* Jacky@220928,
     													   T.01.03.04 release to Social for derating test (Table V1.0)
@@ -2134,11 +2134,7 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 		break;
 
 		case CMD_FACTORY_MODE:
-#if(BX726_TDDI_NT51926)
 			gtDisplayManageInfo.u8FactoryMode = *(pCmdBuffer + 1U) & 0x07U;
-#else
-			gtDisplayManageInfo.u8FactoryMode = *(pCmdBuffer + 1U) & 0x03U;
-#endif
 		break;
 
 		case CMD_DERATING_ENABLE:
@@ -2153,16 +2149,19 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 		break;
 
 		case CMD_LOCK_DELIVERY_ASSEMBLY:
+			gtCommunicationInfo.u8EppromIndex = CMD_DELIVERY_ASSEMBLY_DATA;
 			gtCommunicationInfo.tFPNDeliverystatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
 			gtCommunicationInfo.bWriteFPNDeliveryStatusReg = FPN_ENABLE;
 		break;  
 
 		case CMD_LOCK_SERIAL_NUMBER:
+			gtCommunicationInfo.u8EppromIndex = CMD_SERIAL_NUMBER_DATA;
 			gtCommunicationInfo.tFPNSerialstatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
 			gtCommunicationInfo.bWriteSerNumPNStatusReg = FPN_ENABLE;
 		break;
 
 		case CMD_LOCK_PRODUCTION_PHASE_BYTE:
+			gtCommunicationInfo.u8EppromIndex = CMD_PRODUCTION_PHASE_BYTE_DATA;
 			gtCommunicationInfo.tFPNSProductPhaseStatusInfo.WRT_ST = (*(pCmdBuffer + 1U) & BIT_WRT_ST_POS);
 			gtCommunicationInfo.bWriteProductPhasePNStatusReg = FPN_ENABLE;
 		break;

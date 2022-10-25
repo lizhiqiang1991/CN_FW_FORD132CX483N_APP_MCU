@@ -189,21 +189,21 @@ static const float gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
     100.0f, /**< 83 Degree. */
     100.0f, /**< 84 Degree. */
     100.0f, /**< 85 Degree. */
-    85.0f, /**< 86 Degree. */
-    71.0f, /**< 87 Degree. */
-    59.0f, /**< 88 Degree. */
-    48.0f, /**< 89 Degree. */
-    38.0f, /**< 90 Degree. */
-    29.0f, /**< 91 Degree. */
-    22.0f, /**< 92 Degree. */
-    16.0f, /**< 93 Degree. */
-    10.0f, /**< 94 Degree. */
+    100.0f, /**< 86 Degree. */
+    100.0f, /**< 87 Degree. */
+    88.0f, /**< 88 Degree. */
+    75.0f, /**< 89 Degree. */
+    63.0f, /**< 90 Degree. */
+    50.0f, /**< 91 Degree. */
+    38.0f, /**< 92 Degree. */
+    25.0f, /**< 93 Degree. */
+    13.0f, /**< 94 Degree. */
     10.0f, /**< 95 Degree. */
-    10.0f, /**< 96 Degree. */
-    10.0f, /**< 97 Degree. */
-    10.0f, /**< 98 Degree. */
-    10.0f, /**< 99 Degree. */
-    10.0f, /**< 100 Degree. */
+    0.0f, /**< 96 Degree. */
+    0.0f, /**< 97 Degree. */
+    0.0f, /**< 98 Degree. */
+    0.0f, /**< 99 Degree. */
+    0.0f, /**< 100 Degree. */
 };
 /**
  * @brief A look up table for catching the PWM duty according to backlight temperature. 
@@ -238,21 +238,21 @@ static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
     100, /**< 83 Degree. */
     100, /**< 84 Degree. */
     100, /**< 85 Degree. */
-    85, /**< 86 Degree. */
-    71, /**< 87 Degree. */
-    59, /**< 88 Degree. */
-    48, /**< 89 Degree. */
-    38, /**< 90 Degree. */
-    29, /**< 91 Degree. */
-    22, /**< 92 Degree. */
-    16, /**< 93 Degree. */
-    10, /**< 94 Degree. */
+    100, /**< 86 Degree. */
+    100, /**< 87 Degree. */
+    88, /**< 88 Degree. */
+    75, /**< 89 Degree. */
+    63, /**< 90 Degree. */
+    50, /**< 91 Degree. */
+    38, /**< 92 Degree. */
+    25, /**< 93 Degree. */
+    13, /**< 94 Degree. */
     10, /**< 95 Degree. */
-    10, /**< 96 Degree. */
-    10, /**< 97 Degree. */
-    10, /**< 98 Degree. */
-    10, /**< 99 Degree. */
-    10, /**< 100 Degree. */
+     0, /**< 96 Degree. */
+     0, /**< 97 Degree. */
+     0, /**< 98 Degree. */
+     0, /**< 99 Degree. */
+     0, /**< 100 Degree. */
 };
 #elif(BX726_TDDI_NT51926)
 /* Jacky@2022.09.30 modify for BX726 PCBA follow "20220804_CX430 and U625_V1.1.xlsx" */

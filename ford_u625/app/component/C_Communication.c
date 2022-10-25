@@ -270,8 +270,6 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		break;		
 
 		case CMD_FACTORY_MODE:
-
-
 			if (Memory_Pool_FactoryMode_Get() == NORMAL_MODE)
 			{
 				Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
@@ -310,6 +308,15 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				Memory_Pool_DiagnosisEnable_Set(0U);
 				HAL_UART_Printf("Disable Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());
 			}
+#elif(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+			else if ( Memory_Pool_FactoryMode_Get() == DISALBE_DIAG_MODE)
+			{
+				Memory_Pool_DiagnosisEnable_Set(false);
+			}
+			else if ( Memory_Pool_FactoryMode_Get() == ENALBE_DIAG_MODE)
+			{
+				Memory_Pool_DiagnosisEnable_Set(true);
+			}			
 #endif
 			else
 			{
@@ -503,7 +510,13 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 				{/* Nothing */ }
 			}
 			else
-			{/* Nothing */ }
+			{
+				/* Clear all data. */
+				memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
+				/* MCU returns data.*/
+				M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
+			}
+			
 			memset(mu8RxBuff, 0xFFU, BUFFER_SIZE);
 			M_COM_RxBuffer_Config(mu8RxBuff, BUFFER_SIZE);
 		break;
