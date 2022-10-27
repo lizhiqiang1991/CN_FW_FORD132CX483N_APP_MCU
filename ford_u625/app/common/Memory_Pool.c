@@ -69,7 +69,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #if(CX430_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.03.05" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.03.07" };	/* Jacky@220928,
+    const uint8_t cmu8McuVersion[] = { "T-01.03.07" };	/* Jacky@220928,
     													   T.01.03.04 release to Social for derating test (Table V1.0)
     													   T.01.03.06 release to Social for derating test (Table V1.1)
     													 */
@@ -1750,8 +1750,9 @@ tdiagnosis_simulate_def Memory_Pool_DiagnosisSimulateInfo_Get(void)
  ******************************************************************************/
 void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 {
-	uint8_t u8Counter = 0U;
+	uint8_t u8Counter = 0U, u8loop = 0u, u8FetchLen;
 	uint8_t u8Temp = 0U;
+
 
 #if(BACKDOOR_ICDIAG_OPEN)
 	uint8_t *u8I2CICDiagBuffer;
@@ -1954,11 +1955,24 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 		break;
 
 		case CMD_MCU_VERSION_GET:
+			/**/
+#if (BX726_TDDI_NT51926)
+			u8loop = 0U;
+			u8FetchLen = strlen((char *)cmu8McuVersion);
+			do{
+				*pDataBuffer = cmu8McuVersion[u8loop];
+				pDataBuffer++;
+				u8loop++;
+				u8FetchLen--;
+			}while(u8FetchLen > 0U);
+			*pLength = LEN_MCU_VERSION_GET + LEN_SUBADDRESS;
+#else
 			for(u8Counter = 0U; u8Counter < LEN_MCU_VERSION_GET; u8Counter++)
 			{
 				*(pDataBuffer + u8Counter + 1U) = cmu8McuVersion[u8Counter];
 			}
 			*pLength = LEN_MCU_VERSION_GET + LEN_SUBADDRESS;
+#endif
 		break;
 
 		case CMD_JUMP_TO_BOOTLOADER:

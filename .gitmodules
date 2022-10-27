@@ -1,18 +1,3 @@
-[submodule "mtb_shared/core-lib/latest-v1.X"]
-	path = mtb_shared/core-lib/latest-v1.X
-	url = https://github.com/cypresssemiconductorco/core-lib
-[submodule "mtb_shared/core-make/release-v1.9.0"]
-	path = mtb_shared/core-make/release-v1.9.0
-	url = https://github.com/cypresssemiconductorco/core-make
-[submodule "mtb_shared/mtb-pdl-cat2/latest-v1.X"]
-	path = mtb_shared/mtb-pdl-cat2/latest-v1.X
-	url = https://github.com/cypresssemiconductorco/mtb-pdl-cat2
-[submodule "mtb_shared/recipe-make-cat2/latest-v1.X"]
-	path = mtb_shared/recipe-make-cat2/latest-v1.X
-	url = https://github.com/cypresssemiconductorco/recipe-make-cat2
-[submodule "mtb_shared/mtb-hal-cat2/latest-v2.X"]
-	path = mtb_shared/mtb-hal-cat2/latest-v2.X
-	url = https://github.com/cypresssemiconductorco/mtb-hal-cat2
 [submodule "ford_u625/submodule"]
 	path = ford_u625/submodule
 	url = auogit:TM_DD_U625PSOC4_MCU
