@@ -269,8 +269,11 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 	if (u8CurrentStatus != u8Command)
 	{
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
+		bFlashReloadDisable = false;
+
 		if(bFlashReloadDisable == false)
 		{
+			HAL_UART_Printf("\r\nNT51926 stop reload, show:%02x!\r\n",u8Command);
 			bFlashReloadDisable = true;
 
 			mu8SendData[0] = 0x1EU;
