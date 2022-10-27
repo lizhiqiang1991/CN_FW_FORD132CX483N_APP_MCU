@@ -355,7 +355,7 @@ MDetectTchAttn_ATTNTriggerType_E eAttnTriType)
  */
 void MDetectTchAttn_Routine2ms(void)
 {
-#if (!M_DETECT_TCH_ATTN_EX_INT)
+#if ((!M_DETECT_TCH_ATTN_EX_INT) && (M_DETECT_TCH_ATTN_NO_DEBUNCE == true))
     switch(mDetectTchAttnControl.eStateMachine)
     {
         default:

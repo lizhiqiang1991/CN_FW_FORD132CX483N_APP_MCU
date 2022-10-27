@@ -155,12 +155,22 @@ void HAL_PWM_CH4_DeInit(void)
 void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust)
 {
 	uint32_t u32Compare0 = Cy_TCPWM_PWM_GetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM);
+	uint32_t u32DutyOutput = 0UL;
+	
+	if(u32DutyAdjust >= (uint32_t)PWM_OUT_DIM_config.period0)
+	{
+		u32DutyOutput = (uint32_t)PWM_OUT_DIM_config.period0 + 1UL;
+	}
+	else
+	{
+		u32DutyOutput = u32DutyAdjust;
+	}
 
 	if(u32Compare0 >= PWM_OUT_DIM_config.period0)
 	{
-		if(u32Compare0 > u32DutyAdjust)
+		if(u32Compare0 > u32DutyOutput)
 		{
-			Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, u32DutyAdjust + 1u);
+			Cy_TCPWM_PWM_SetCompare0(PWM_OUT_DIM_HW, PWM_OUT_DIM_NUM, u32DutyOutput);
 		}
 		else
 		{
@@ -175,7 +185,7 @@ void HAL_PWM_Duty_Output_Adjust(uint32_t u32Channel, uint32_t u32DutyAdjust)
 		}
 		else
 		{
-			HALPwmConfig.u32Compare0Value = u32DutyAdjust;
+			HALPwmConfig.u32Compare0Value = u32DutyOutput;
 			HALPwmConfig.bUpdateLock = true;
 		}
 	}

@@ -105,6 +105,7 @@ static void C_Power_Manager_Control(void)
                     break;
                 case OFF_POWER_STATE:
                     /* Disable power system. */
+					tPowerManageTask.u16Timer1=TIME_DISABLE;				
 #if (!BACKDOOR_DIAGNOSIS_SIMULATE)
                     M_PM_Sequnce_Execute(Memory_Pool_PowerStatus_Get());
 #endif
@@ -167,7 +168,6 @@ static void C_Power_Manager_Control(void)
 			if(u8SyncLowDebounce >= SYNC_LOW_DEBOUNCE_MAX)
 			{
 				u8SyncLowDebounce=SYNC_LOW_DEBOUNCE_MAX;
-				tPowerManageTask.u16Timer1=TIME_DISABLE;
 				Memory_Pool_SyncStatus_Set(SYNC_DISABLE);
 				Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
 				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
@@ -176,6 +176,23 @@ static void C_Power_Manager_Control(void)
 			{
 				tPowerManageTask.u16Timer1=TIME_2ms;
 			}
+
+			if(Memory_Pool_SyncStatus_Get() == SYNC_DISABLE)
+			{
+                if(Memory_Pool_PowerState_Get() == OFF_POWER_STATE)
+                {
+                    tPowerManageTask.u16Timer1=TIME_DISABLE;    
+                }
+                else
+                {
+                    tPowerManageTask.u16Timer1=TIME_2ms;
+                    Memory_Pool_PowerState_Set(SHUTDOWN1OR2_STATE);
+                    (void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
+                }
+			}
+			else
+			{/*Nothing*/}
+			
 			break;
 		default:
 			(void)Task_ChangeState(TYPE_POWER_MANAGE, LEVEL5, STATE_POWER_MANAGE_ERROR, Power_Manage_State_Machine[STATE_POWER_MANAGE_ERROR]);

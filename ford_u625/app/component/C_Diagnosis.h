@@ -26,8 +26,8 @@
 #define INT_ERROR						0x01U
 #define INT_TOUCH						0x04U
 
-#define DIAG_FPC_TX_DISCON_VOL			1800U /*Unit: 1 mv, FPC normal voltage */
-#define DIAG_FPC_RX_DISCON_VOL			1800U /*Unit: 1 mv, FPC normal voltage */
+#define DIAG_FPC_TX_DISCON_VOL			2640U /*Unit: 1 mv, FPC normal voltage */
+#define DIAG_FPC_RX_DISCON_VOL			2640U /*Unit: 1 mv, FPC normal voltage */
 #define DIAG_FPC_BL_DISCON_VOL			3180U /*Unit: 1 mv, FPC disconnect voltage */
 
 #define DEBOUNCE_3_TIMES			  		3U
@@ -38,6 +38,7 @@
 #define C_DIAG_LP8864_REG_DEBUNCE			4U 
 #define C_DIAG_NT51926_REG_DEBUNCE			4U
 #define C_DIAG_NT51926_Comm_DEBUNCE			4U
+#define C_DIAG_NT51926_STATE_DEBUNCE		4U
 
 
 #define EVENT_MESSAGE_DISANOSIS_ENABLE		EVENT_MESSAGE
@@ -82,6 +83,10 @@ typedef struct
 
 	uint16_t u16NT51926I2cCommTime;
 	uint8_t  u8NT51926I2cDebunce;
+	uint8_t  u8NT51926DpStatusOnDebunce;
+	uint8_t  u8NT51926DpStatusOnDebunce_RECOV;
+	uint8_t  u8NT51926DpStatusOfDebunce;
+	uint8_t  u8NT51926DpStatusOfDebunce_RECOV;	
 
 }tdiagnosis_ctrl_def;
 

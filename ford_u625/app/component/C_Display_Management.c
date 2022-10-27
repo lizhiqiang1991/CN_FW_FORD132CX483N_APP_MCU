@@ -54,9 +54,22 @@ static MDetectTchAttn_TouchController_E C_Display_Management_CallbackTCHState(vo
  */
 static void C_Display_Management_CallbackTCHClickHandler(void)
 {
+	uint8_t u8TempRegVal = Memory_Pool_IntStatus_Get();
     Memory_Pool_IntStatus_Set(Memory_Pool_IntStatus_Get() | BIT_INT_TCH_POS);
-    /* Send INTB Strategy Control Msg. */
-    (void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+    
+    /* Compares interrupt status if sending INTB. */
+    if((u8TempRegVal & BIT_INT_TCH_POS) == 0U)
+    {
+		if(Memory_Pool_PowerStatus_Get() != POWER_OFF_READY)
+		{
+			/* Send INTB Strategy Control Msg. */
+    		(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+		}
+		else
+		{/*Nothing*/}    
+    }
+	else
+	{/*Nothing*/}
 }
 /**
  * @brief When SDM Detects The behavior of Leaving Click for TP,
@@ -309,7 +322,8 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 								/* Read TDDI Vcom value */
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 								Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());
-
+#endif
+#if (BX726_TDDI_NT51926)
 								if( true == M_DM_NT51926_VGAMMA_Get(u8NTVGMA) )
 								{
 									/* Read success */
@@ -470,6 +484,11 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 						case DS_ACTION_DISPLAY_CTRL:
 							/* Disable LCD */
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));	
+
+							/* Set 0x00 TSC_ST bit */							
+							Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() & (~BIT_TSC_ST_POS));
+							Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TSC_ST_POS));
+							Memory_Pool_TouchStatus_Set(TOUCH_OFF);
 							
 							if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
 							{
@@ -478,11 +497,6 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 							}
 							else
 							{
-								/* Set 0x00 TSC_ST bit */            				
-                				Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() & (~BIT_TSC_ST_POS));
-								Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TSC_ST_POS));
-								Memory_Pool_TouchStatus_Set(TOUCH_OFF);
-								
 								u8ReturnStatus	= DS_ACTION_DISPLAY_STATUS;							
 								tDisplayManageTask.u16Timer1 = TIME_151ms;
 							}													
@@ -517,9 +531,6 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 							/* Reset Touch */
 							Memory_Pool_TouchStatus_Set(M_DM_TouchControl(Memory_Pool_TouchStatus_Get(), u8SetValue));
 							
-							/* Set 0x00 TSC_ST bit */            				
-                			Memory_Pool_DisplayStatus_Set(Memory_Pool_DisplayStatus_Get() & (~BIT_TSC_ST_POS));
-							Memory_Pool_ActualDisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_TSC_ST_POS)); 
 							if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
 							{
 								Memory_Pool_PowerState_Set(OFF_POWER_STATE);
@@ -879,7 +890,7 @@ static void C_Display_Manage_Control(void)
 				tDisplayCtrl.u8CurrentDisplaySet = Memory_Pool_DisplayEnable_Get();
 				tDisplayCtrl.bBacklightSet = Memory_Pool_BacklightEnable_Get();
 								
-				if(Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE)
+				if((Memory_Pool_PowerState_Get() == SHUTDOWN1OR2_STATE) || (Memory_Pool_SyncStatus_Get() == SYNC_DISABLE))
 				{
 					/* Action => do shutdown sequence*/
 					MBacklightControl_ExternalTurnOnOffBL(E_MBL_EXTERNAL_DISABLE_NODIMMNG);
@@ -887,7 +898,7 @@ static void C_Display_Manage_Control(void)
 					tDisplayCtrl.bBacklightSet = false;
 					Memory_Pool_DisplayEnable_Set(DISPLAY_OFF_TOUCH_OFF);
 					u8Status = DS_ACTION_NONE;
-					tDisplayManageTask.u16Timer1 = TIME_2ms;
+					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 				}
 				else if(tDisplayCtrl.bDiagnosisProtect == true )
 				{	
@@ -947,7 +958,12 @@ static void C_Display_Manage_Control(void)
 			}
 			else
 			{
-				(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+				if((Memory_Pool_PowerStatus_Get() != POWER_OFF) && (Memory_Pool_PowerStatus_Get() != POWER_OFF_READY))
+				{
+					(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_DISPLAY_ENABLE);
+				}
+				else
+				{ /* Nothing */}
             }
 			
             break;
