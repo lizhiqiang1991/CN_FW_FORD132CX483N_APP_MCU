@@ -294,6 +294,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				Memory_Pool_DiagnosisEnable_Set(false);
 				(void)Task_ChangeEvent(TYPE_DIAGNOSIS, LEVEL5, EVENT_MESSAGE_DISANOSIS_ENABLE);
 			}
+#if 0
 			else if (Memory_Pool_FactoryMode_Get() == NORMAL_DISALBE_MODE)
 			{
 
@@ -301,6 +302,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				Memory_Pool_PowerStatus_Set(POWER_ON_READY);
 				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
+#endif
 #if(BX726_TDDI_NT51926)
 			else if ( DISALBE_DIAG_MODE == Memory_Pool_FactoryMode_Get() )
 			{
