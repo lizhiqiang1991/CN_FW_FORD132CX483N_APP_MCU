@@ -7,6 +7,7 @@
 #include "hal_gpio.h"
 //#include "C_memory_pool.h"
 #define IIR_STAGE	3000.0f /*Base on 10ms, 3000 means 30 seconds close feature.*/
+#define IIR_STAGE_BL	25.0f /*Base on 10ms, 25 means 250m seconds close feature.*/
 
 //vbatt table actually value is 10 times than
 const tmtx_tbl_element_def mtVbatt[212] = {
@@ -965,7 +966,7 @@ void M_DC_Function_Execute(uint8_t u8Action)
 			{
 				gtDCInfo.fPresentPCBTempADC=M_DC_IIRFIlter(gtDCInfo.fPresentPCBTempADC, IIR_STAGE, gtDCInfo.mi16PCBTempADCData[gtDCInfo.u8Index]);
 				gtDCInfo.i16PresentPCBTempADC=(int16_t)gtDCInfo.fPresentPCBTempADC;
-				gtDCInfo.fPresentBacklightTempADC=M_DC_IIRFIlter(gtDCInfo.fPresentBacklightTempADC, IIR_STAGE, gtDCInfo.mi16BacklightTempADCData[gtDCInfo.u8Index]);
+				gtDCInfo.fPresentBacklightTempADC=M_DC_IIRFIlter(gtDCInfo.fPresentBacklightTempADC, IIR_STAGE_BL, gtDCInfo.mi16BacklightTempADCData[gtDCInfo.u8Index]);
 				gtDCInfo.i16PresentBacklightTempADC=(int16_t)gtDCInfo.fPresentBacklightTempADC;
 			}
 
