@@ -525,6 +525,10 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 
 		/* Transmit data complete */
 		case CY_SCB_I2C_SLAVE_RD_CMPLT_EVENT:
+			if (mu8TxBuff[CMD_SUBADDRESS_POS] == CMD_DISPLAY_STATUS)
+            {
+              Memory_Pool_DisplayStatus_Set(Memory_Pool_ActualDisplayStatus_Get() & (~BIT_ALL_ERROR_POS));
+            }
 			/* Nothing */
 		break;
 

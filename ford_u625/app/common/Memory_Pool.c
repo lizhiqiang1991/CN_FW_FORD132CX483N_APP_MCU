@@ -1774,7 +1774,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			/* Clear INT_ERROR  */
 			gtDiagnosisInfo.u8IntStatus = gtDiagnosisInfo.u8IntStatus & (~BIT_INT_ERR_POS);
 
-			Memory_Pool_DisplayStatus_Set((gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get());
+			//Memory_Pool_DisplayStatus_Set((gtDiagnosisInfo.u32DisplayStatus&(~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get());
 
 			*pLength = LEN_DISPLAY_STATUS + LEN_SUBADDRESS;
 		break;
