@@ -32,6 +32,8 @@ tdiagnosis_ctrl_def tDiagCtrl;
 static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 {
  	uint64_t u64LEDDiagnosis=0UL;
+	//uint64_t u64LED;
+	//u64LED = M_GPIOSense_LED_Driver_Diagnosis();
 
 	/* Check diagnosis is enable or not*/
 	if(tLedInt.blEnable == true)

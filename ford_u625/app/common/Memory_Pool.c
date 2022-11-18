@@ -55,7 +55,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #elif(CX430_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x00U };
 #elif(BX726_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x00U };
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x01U };
 #else
 #endif
 
@@ -1956,7 +1956,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 
 		case CMD_MCU_VERSION_GET:
 			/**/
-#if (BX726_TDDI_NT51926)
+#if (0)
 			u8loop = 0U;
 			u8FetchLen = strlen((char *)cmu8McuVersion);
 			do{

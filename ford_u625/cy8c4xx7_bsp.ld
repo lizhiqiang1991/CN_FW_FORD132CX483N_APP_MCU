@@ -54,7 +54,7 @@ __FLASH_SIZE =  0x00018000;
 */
 
 /* Flash Only have App */
-__FLASH_START = 0x00000000;
+__FLASH_START = 0x00008000;
 __FLASH_SIZE =  0x00020000;
 
 /*--------------------- Embedded RAM Configuration ---------------------------
