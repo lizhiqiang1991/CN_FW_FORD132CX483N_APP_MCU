@@ -585,7 +585,7 @@ uint8_t M_DM_NT51926_ATTN_Read(void)
 }
 
 
-#if(BX726_TDDI_NT51926)
+//#if(BX726_TDDI_NT51926)
 int8_t M_DM_NT51926_VGAMMA_Get(uint8_t *pu8Out)
 {
 	int8_t	i8RtCode = -1, i8I2CErr = 0;
@@ -644,4 +644,4 @@ int8_t M_DM_NT51926_VGAMMA_Get(uint8_t *pu8Out)
 	}
 	return i8RtCode;
 }
-#endif
+//#endif

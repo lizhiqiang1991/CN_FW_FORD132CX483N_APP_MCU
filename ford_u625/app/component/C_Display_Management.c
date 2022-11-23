@@ -169,9 +169,9 @@ static void C_Display_Management_CallbackLeavingDiagnosisProtected(void)
 static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8SetValue)
 {	
 	uint8_t u8ReturnStatus = DS_ACTION_NONE;
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 	uint8_t u8NTVGMA[4U] = {0x00};
-#endif
+//#endif
 
 	if(tDisplayCtrl.bPowerStartupEvent == true)
 	{
@@ -323,7 +323,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 								Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());
 #endif
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 								if( true == M_DM_NT51926_VGAMMA_Get(u8NTVGMA) )
 								{
 									/* Read success */
@@ -340,7 +340,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 								{
 									;/* TODO:NT51926 VGAMA read fail */
 								}
-#endif							
+//#endif							
 							}
 							else
 							{

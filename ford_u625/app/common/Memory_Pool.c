@@ -11,9 +11,9 @@
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 #include "M_BatteryProtect.h"
 #endif
-#ifdef BX726_TDDI_NT51926
+//#ifdef BX726_TDDI_NT51926
 #include "M_BacklightControl.h"
-#endif
+//#endif
 
 tcommunication_def gtCommunicationInfo;
 tdata_collection_def gtDataCollectInfo;
@@ -67,7 +67,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T.01.04.00" };
+    const uint8_t cmu8McuVersion[] = { "T-01.04.00" };
 #elif(BX726_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T-01.05.00" };	/* Jacky@220928,
     													   T.01.03.04 release to Social for derating test (Table V1.0)
@@ -1934,9 +1934,9 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 2U) = gtDataCollectInfo.i16PCBATemperature >> 8U;
 			*(pDataBuffer + 3U) = gtDataCollectInfo.i16BacklightTemperature;
 			*(pDataBuffer + 4U) = gtDataCollectInfo.i16BacklightTemperature >> 8U;
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 			*(pDataBuffer + 5U) = (uint8_t)MBacklightControl_GetBacklightState();
-#endif
+//#endif
 			*pLength = LEN_TEMPERATURE_GET + LEN_SUBADDRESS;
 		break;
 
@@ -2010,12 +2010,12 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 1U) = (uint8_t)(gtDisplayManageInfo.u32NT51926_Vcom & 0xFFU);
 			*(pDataBuffer + 2U) = (uint8_t)((gtDisplayManageInfo.u32NT51926_Vcom >> 8U) & 0xFFU);
 			*(pDataBuffer + 3U) = (uint8_t)((gtDisplayManageInfo.u32NT51926_Vcom >> 16U) & 0xFFU);
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 			*(pDataBuffer + 4U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[0U]);
 			*(pDataBuffer + 5U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[1U]);
 			*(pDataBuffer + 6U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[2U]);
 			*(pDataBuffer + 7U) = (uint8_t)(gtDisplayManageInfo.u8NT51926VGMA[3U]);
-#endif
+//#endif
 			*pLength = LEN_VCOM_VALUE_GET + LEN_SUBADDRESS;
 			(void)Task_ChangeEvent(TYPE_DISPLAY_MANAGE, LEVEL4, EVENT_MESSAGE_TDDI_VCOM);
 		break;
