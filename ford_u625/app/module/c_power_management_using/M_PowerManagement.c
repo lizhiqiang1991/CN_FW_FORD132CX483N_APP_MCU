@@ -72,18 +72,19 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
         case POWER_ON:
             HAL_GPIO_High( U301_HV_LDO_EN_PORT, U301_HV_LDO_EN_PIN);
             HAL_GPIO_High( U301_P3V3_EN_PORT, U301_P3V3_EN_PIN);
-            Cy_SysLib_Delay(9U);  /* <=10ms */
+            //Cy_SysLib_Delay(9U);  /* <=10ms */
+			Cy_SysLib_Delay(5U);  /* <=10ms */
 
 			/*Start AD Conversion*/
             M_DC_Function_Execute(DC_START_MEASURE);
 
 	        if (HIGH_LEVEL == M_PM_CheckPowerPG(P3V3_PGOOD, 12U)) /* about 1ms */
 			{
-                Cy_SysLib_Delay(2U);  /* 2ms */
-			    Cy_SysLib_DelayUs(200U); /* 200us */
-                
+                //Cy_SysLib_Delay(2U);  /* 2ms */
+			    //Cy_SysLib_DelayUs(200U); /* 200us */
+
 				s16VBatAdc = HAL_ADC0_Get_ADCRead(HAL_ADC_VBATT_VOLT);
-				s16VBatAdc = HAL_ADC0_Get_Channel_mVolt(HAL_ADC_VBATT_VOLT,(uint16_t)s16VBatAdc);	
+				s16VBatAdc = HAL_ADC0_Get_Channel_mVolt(HAL_ADC_VBATT_VOLT,(uint16_t)s16VBatAdc);
 				if((s16VBatAdc < POWER_VMINRCV_ADC_CFG) ||(s16VBatAdc > POWER_VMAXRCV_ADC_CFG))
 				{
 					/* Record 0xA3 Status */
@@ -99,7 +100,7 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 					else
 					{ /* Nothing */ }
 
-					u8Return = POWER_VBAT_FAIL;								   
+					u8Return = POWER_VBAT_FAIL;
 				}
 				else
 				{	
