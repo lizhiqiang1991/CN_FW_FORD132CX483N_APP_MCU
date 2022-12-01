@@ -682,7 +682,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 							/* Enable LCD */
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));				
 							u8ReturnStatus  = DS_ACTION_DISPLAY_STATUS;          
-							tDisplayManageTask.u16Timer1 = TIME_190ms;
+							tDisplayManageTask.u16Timer1 = TIME_200ms;
 
 							break;
 						case DS_ACTION_DISPLAY_STATUS:

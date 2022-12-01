@@ -1245,6 +1245,29 @@ uint32_t Memory_Pool_ActualDisplayStatus_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
+uint32_t Memory_Pool_ReadAfterDisplayStatus_Get(void)
+{
+    return gtDiagnosisInfo.u32ReadAfterDisplayStatus;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+void Memory_Pool_ReadAfterDisplayStatus_Set(uint32_t u32SetValue)
+{
+    gtDiagnosisInfo.u32ReadAfterDisplayStatus = u32SetValue;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+
 bool Memory_Pool_LockLoss_Get(void)
 {
     return gtDiagnosisInfo.bLockLoss;

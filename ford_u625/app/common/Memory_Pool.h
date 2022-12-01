@@ -151,6 +151,7 @@ typedef struct
 	uint32_t u32DisplayStatusPreHostCommand;
 	uint32_t u32ActualDisplayStatus;
 	uint32_t u32DisplayStatusBp;
+	uint32_t u32ReadAfterDisplayStatus;
 	bool bLockLoss;
 
 	uint16_t u16GeneralDiagnosis;
@@ -304,6 +305,9 @@ uint32_t Memory_Pool_DisplayStatus_Get(void);
 
 void Memory_Pool_ActualDisplayStatus_Set(uint32_t u32SetValue);
 uint32_t Memory_Pool_ActualDisplayStatus_Get(void);
+
+void Memory_Pool_ReadAfterDisplayStatus_Set(uint32_t u32SetValue);
+uint32_t Memory_Pool_ReadAfterDisplayStatus_Get(void);
 
 void Memory_Pool_DiagnosisEnable_Set(bool bSetValue);
 bool Memory_Pool_DiagnosisEnable_Get(void);
