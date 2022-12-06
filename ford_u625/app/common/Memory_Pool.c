@@ -2175,6 +2175,8 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 		break;
 
 		case CMD_DERATING_ENABLE:
+			//Memory_Pool_PCBATemp_Set((uint16_t)(*(pCmdBuffer + 1U)));	//David Test de-rating function use 0xBA command input temperature.
+			//gtBacklightInfo.bDeratingEnable = true;						//David Test de-rating function use 0xBA command input temperature.
 			if ((*(pCmdBuffer + 1U) & BIT_DERATING_EN_POS) == BIT_DERATING_EN_POS)
 			{
 				gtBacklightInfo.bDeratingEnable = true;

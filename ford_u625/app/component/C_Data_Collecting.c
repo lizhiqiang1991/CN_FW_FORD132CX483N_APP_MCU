@@ -89,6 +89,7 @@ static void C_Data_Collecting_Control(void)
 				Memory_Pool_PCBATempAnaVol_Set(gtDCInfo.i16PresentTPCBAnaVol);
 				Memory_Pool_BLTempAnaVol_Set(gtDCInfo.i16PresentTBacklightAnaVol);
 				/*Set temperature values.*/
+				//Memory_Pool_PCBATemp_Set(gtDCInfo.i16PresentTPCB);	//David Test de-rating function use 0xBA command input temperature.
 				Memory_Pool_PCBATemp_Set(gtDCInfo.i16PresentTPCB);
 				Memory_Pool_BLTemp_Set(gtDCInfo.i16PresentTBacklight);
 			}

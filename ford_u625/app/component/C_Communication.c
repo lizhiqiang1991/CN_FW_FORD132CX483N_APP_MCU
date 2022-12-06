@@ -274,6 +274,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 			{
 				Memory_Pool_PowerState_Set(NORMAL_RUN_STATE);
 				Memory_Pool_PowerStatus_Set(POWER_ON_READY);
+				Memory_Pool_DiagnosisEnable_Set(true);									//Sync U625 functional action
 				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 			else if (Memory_Pool_FactoryMode_Get() == OTP_MODE)
@@ -303,27 +304,27 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				(void)Task_ChangeEvent(TYPE_POWER_MANAGE, LEVEL4, EVENT_MESSAGE);
 			}
 #endif
-#if(BX726_TDDI_NT51926)
-			else if ( DISALBE_DIAG_MODE == Memory_Pool_FactoryMode_Get() )
-			{
-				HAL_UART_Printf("Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());
-				Memory_Pool_DiagnosisEnable_Set(0U);
-				HAL_UART_Printf("Disable Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());
-			}
-#elif(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+// #if(BX726_TDDI_NT51926)																					//Sync U625 functional action
+// 			else if ( DISALBE_DIAG_MODE == Memory_Pool_FactoryMode_Get() )									//Sync U625 functional action
+// 			{																								//Sync U625 functional action
+// 				HAL_UART_Printf("Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());					//Sync U625 functional action
+// 				Memory_Pool_DiagnosisEnable_Set(0U);														//Sync U625 functional action
+// 				HAL_UART_Printf("Disable Diagnosis:%02x!\r\n", Memory_Pool_DiagnosisEnable_Get());			//Sync U625 functional action
+// 			}																								//Sync U625 functional action
+// #elif(CX430_TDDI_NT51926 || U717_TDDI_NT51926)															//Sync U625 functional action
 			else if ( Memory_Pool_FactoryMode_Get() == DISALBE_DIAG_MODE)
 			{
 				Memory_Pool_DiagnosisEnable_Set(false);
 			}
-			else if ( Memory_Pool_FactoryMode_Get() == ENALBE_DIAG_MODE)
-			{
-				Memory_Pool_DiagnosisEnable_Set(true);
-			}			
-#endif
-			else
-			{
-				/* Nothing */
-			}
+//			else if ( Memory_Pool_FactoryMode_Get() == ENALBE_DIAG_MODE)									//Sync U625 functional action
+//			{																								//Sync U625 functional action
+//				Memory_Pool_DiagnosisEnable_Set(true);														//Sync U625 functional action
+//			}																								//Sync U625 functional action
+// #endif
+ 			else
+ 			{
+ 				/* Nothing */
+ 			}
 
 		break;
 			

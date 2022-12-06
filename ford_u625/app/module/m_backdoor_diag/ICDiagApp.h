@@ -80,9 +80,12 @@
 
 /* -- Macro Define  -- */
 #if(CX430_TDDI_NT51926)
-#define	ICDIAG_CMD_ICFETCH				0xEBU /* Host to FIDM Command : Fetch command */
-#define	ICDIAG_CMD_READ					0xECU /* Host to FIDM Command : Read command */
-#define	ICDIAG_CMD_ICCTRL				0xEDU /* Host to FIDM Command : Write command */
+// #define	ICDIAG_CMD_ICFETCH				0xEBU /* Host to FIDM Command : Fetch command */
+// #define	ICDIAG_CMD_READ					0xECU /* Host to FIDM Command : Read command */
+// #define	ICDIAG_CMD_ICCTRL				0xEDU /* Host to FIDM Command : Write command */
+#define	ICDIAG_CMD_ICFETCH				0xD0U /* Host to FIDM Command : Fetch command */
+#define	ICDIAG_CMD_READ					0xD1U /* Host to FIDM Command : Read command */
+#define	ICDIAG_CMD_ICCTRL				0xD2U /* Host to FIDM Command : Write command */
 #elif(BX726_TDDI_NT51926)
 #define	ICDIAG_CMD_ICFETCH				0xD0U /* Host to FIDM Command : Fetch command */
 #define	ICDIAG_CMD_READ					0xD1U /* Host to FIDM Command : Read command */
