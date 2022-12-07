@@ -42,7 +42,7 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
        {
            // write 29 11 and delay 300ms ,then BL_EN pull high.When BL_EN is high,it could clear error bit.
 		   //Clear BSTOVPL status. When power on sequence, cause BSTOVPL will be set.
-           //tDiagCtrl.bFirstLedIntDebounceFinsh = M_GPIOSense_LED_Driver_Clear();
+           tDiagCtrl.bFirstLedIntDebounceFinsh = M_GPIOSense_LED_Driver_Clear();
         }
 		/* When LED_INT debounce 3 times, start to read LP8864 status and record error flags. */
 		if(M_GPIOSense_LevelDeboucne(U301_LED_INT_PORT, U301_LED_INT_PIN, &tLedInt) == true)

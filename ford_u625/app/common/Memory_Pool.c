@@ -2108,7 +2108,8 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			u8I2CICDiagBuffer = ICDIAG_GetRxBuffer();
 			for(u8Counter = 0U; u8Counter<LEN_ICDIAG_INFO; u8Counter++)
 			{
-				*(pDataBuffer + u8Counter + 1U) = u8I2CICDiagBuffer[u8Counter];
+				//*(pDataBuffer + u8Counter + 1U) = u8I2CICDiagBuffer[u8Counter];
+				*(pDataBuffer + u8Counter) = u8I2CICDiagBuffer[u8Counter];
 			}					
 			*pLength = LEN_ICDIAG_INFO + LEN_SUBADDRESS;
 		break;
