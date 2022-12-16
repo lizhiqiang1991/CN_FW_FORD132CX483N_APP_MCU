@@ -67,12 +67,13 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
+<<<<<<< HEAD
     const uint8_t cmu8McuVersion[] = { "T-01.04.01" };
+=======
+    const uint8_t cmu8McuVersion[] = { "T-02.00.00" };
+>>>>>>> BX726_T-01.05.01
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T-01.05.00" };	/* Jacky@220928,
-    													   T.01.03.04 release to Social for derating test (Table V1.0)
-    													   T.01.03.06 release to Social for derating test (Table V1.1)
-    													 */
+    const uint8_t cmu8McuVersion[] = { "T-03.00.00" };	
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.00.00" };
 #else
