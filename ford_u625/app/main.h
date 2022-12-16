@@ -14,6 +14,10 @@
 #include <stdbool.h>
 
 /* -- Marco Define -- */
+// #define CX430_TDDI_NT51926				true
+// #define U717_TDDI_NT51926				false
+// #define BX726_TDDI_NT51926				false
+
 #define CX430_TDDI_NT51926				false
 #define U717_TDDI_NT51926				false
 #define BX726_TDDI_NT51926				true
@@ -48,7 +52,7 @@
 #define BACKDOOR_ICDIAG_OPEN			true
 #define BACKDOOR_DIAGNOSIS_SIMULATE		false
 #define DEBUG_POWER_UP					false
-#define HIJACK_ADC						true
+#define HIJACK_ADC						false
 #endif
 
 /* -- Includes -- */
