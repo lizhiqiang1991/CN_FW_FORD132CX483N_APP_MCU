@@ -225,15 +225,9 @@
 #define LEN_TD7800_DATA						0x01U
 //#if (BX726_TDDI_NT51926)
 #define LEN_TEMPERATURE_GET					0x05U
-<<<<<<< HEAD
 //#else
 //#define LEN_TEMPERATURE_GET					0x04U
 //#endif
-=======
-#else
-#define LEN_TEMPERATURE_GET				0x04U
-#endif
->>>>>>> BX726_T-01.05.01
 #define LEN_TEMPERATURE_ADC_GET				0x04U
 #define LEN_POWER_ERROR_STATUS				0x01U
 #define LEN_VOLTAGE_GET						0x04U

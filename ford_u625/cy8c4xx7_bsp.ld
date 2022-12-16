@@ -48,14 +48,6 @@ GROUP(-lgcc -lc -lnosys)
 ; </h>
  -----------------------------------------------------------------------------*/
 /* App with Bootloader */
-<<<<<<< HEAD
-__FLASH_START = 0x00000000;
-__FLASH_SIZE =  0x00020000;
-
-/* Flash Only have App */
-/*
-__FLASH_START = 0x00008000;
-=======
 /*
 __FLASH_START = 0x00008000;
 __FLASH_SIZE =  0x00020000;
@@ -64,9 +56,7 @@ __FLASH_SIZE =  0x00020000;
 /* Flash Only have App */
 
 __FLASH_START = 0x00000000;
->>>>>>> BX726_T-01.05.01
 __FLASH_SIZE =  0x00020000;
-*/
 
 
 /*--------------------- Embedded RAM Configuration ---------------------------
