@@ -76,7 +76,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #endif
 
 
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 /**
  * @brief Calls MPWMDimming_Routine6ms() to run independent state machine.
  *
@@ -108,7 +108,7 @@ int8_t Get_MCUVersion(uint8_t *pu8Out)
 	}
 	return i8Rt;
 }
-#endif
+//#endif
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:

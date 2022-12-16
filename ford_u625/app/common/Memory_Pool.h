@@ -420,9 +420,9 @@ uint8_t Memory_Pool_FPNProductionPhase_Get(void);
 tdiagnosis_simulate_def Memory_Pool_DiagnosisSimulateInfo_Get(void);
 #endif
 
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 extern int8_t Get_MCUVersion(uint8_t *);
-#endif
+//#endif
 
 #endif
 
