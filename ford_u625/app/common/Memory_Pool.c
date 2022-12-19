@@ -69,7 +69,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #if(CX430_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T-02.00.00" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T-03.00.00" };	
+    const uint8_t cmu8McuVersion[] = { "T-01.05.02" };	
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T.01.00.00" };
 #else
