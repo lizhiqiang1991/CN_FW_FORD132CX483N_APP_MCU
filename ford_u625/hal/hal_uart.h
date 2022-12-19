@@ -16,7 +16,7 @@
 
 /*---------------------------- Definition -----------------------------------*/
 #if(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
-#define DEBUG_UART_EN
+//#define DEBUG_UART_EN
 #elif(BX726_TDDI_NT51926)
 #define DEBUG_UART_EN
 #else
