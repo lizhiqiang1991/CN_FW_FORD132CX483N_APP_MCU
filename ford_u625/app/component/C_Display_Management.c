@@ -48,7 +48,7 @@ static void HW_TIMER_ISR(void)
 			if( 1UL ==  u32IO)	// If ATTN pull HIGH
 			{
 				gu8HighLvCNT++;
-				if( 2L == gu8HighLvCNT )
+				if( 1UL == gu8HighLvCNT )
 				{
 					//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 					u8DebounceRDY = true;
@@ -73,7 +73,7 @@ static void HW_TIMER_ISR(void)
 			else if( 0UL == u32IO ) // If ATTN pull LOW
 			{
 				gu8LowLvCNT++;
-				if( 2L == gu8LowLvCNT )
+				if( 2UL == gu8LowLvCNT )
 				{
 					//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 					u8DebounceRDY = true;
