@@ -72,7 +72,10 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
         case POWER_ON:
             HAL_GPIO_High( U301_HV_LDO_EN_PORT, U301_HV_LDO_EN_PIN);
             HAL_GPIO_High( U301_P3V3_EN_PORT, U301_P3V3_EN_PIN);
-            Cy_SysLib_Delay(9U);  /* <=10ms */
+            //Cy_SysLib_Delay(9U);  /* <=10ms */
+			Cy_SysLib_Delay(6U);  /* <=10ms */
+			HAL_GPIO_High( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);
+	        Cy_SysLib_Delay(4U);
 
 			/*Start AD Conversion*/
             M_DC_Function_Execute(DC_START_MEASURE);
@@ -103,8 +106,8 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 				}
 				else
 				{	
-	                HAL_GPIO_High( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);				
-	                Cy_SysLib_Delay(4U);	/* <=10ms */
+	                // HAL_GPIO_High( U301_P1V2_EN_PORT, U301_P1V2_EN_PIN);				
+	                // Cy_SysLib_Delay(4U);	/* <=10ms */
 					
 	                if (HIGH_LEVEL == M_PM_CheckPowerPG(P1V2_PGOOD, 10U))
 	                {
