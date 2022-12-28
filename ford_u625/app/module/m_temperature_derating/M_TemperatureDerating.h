@@ -34,8 +34,8 @@ extern "C" {
 #define TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP (95 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down threshold */
 #define TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP (93 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down release threshold */
 #else
-#define TEMP_DERATING_DEFAULT_DERA_TEMP (70 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of derating threshold */
-#define TEMP_DERATING_DEFAULT_REDUCEBL_TEMP (87 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of reduce threshold */
+#define TEMP_DERATING_DEFAULT_DERA_TEMP (88 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of derating threshold */
+#define TEMP_DERATING_DEFAULT_REDUCEBL_TEMP (89 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of reduce threshold */
 #define TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP (96 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down threshold */
 #define TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP (94 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down release threshold */
 #endif
