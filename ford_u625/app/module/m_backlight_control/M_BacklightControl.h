@@ -64,7 +64,7 @@ extern MBacklightControlStateMachine_E MBacklightControl_TriggerStateMachine(voi
 extern void MBacklightControl_DeratingModuleRoutine10ms(void);
 extern void MBacklightControl_DimmingModuleRoutine6ms(void);
 
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 extern MBacklightControlStateMachine_E MBacklightControl_GetBacklightState(void);
 
 #if (HIJACK_ADC)
@@ -74,6 +74,6 @@ extern uint8_t MBacklightControl_GetADCHiJack(void);
 extern uint8_t MBacklightControl_SetHADC(int16_t );
 extern int16_t MBacklightControl_GetHADC(void);
 #endif
-#endif
+//#endif
 #endif
 /* -- END -- */

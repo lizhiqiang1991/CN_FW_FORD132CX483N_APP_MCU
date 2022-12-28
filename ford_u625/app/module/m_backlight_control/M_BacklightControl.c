@@ -691,7 +691,7 @@ void MBacklightControl_DimmingModuleRoutine6ms(void)
 }
 
 
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 /**
  * @brief Calls MPWMDimming_Routine6ms() to run independent state machine.
  *
@@ -729,7 +729,7 @@ int16_t MBacklightControl_GetHADC(void)
 	return gi16FakePCBA;
 }
 #endif
-#endif
+//#endif
 
 
 /* -- END -- */

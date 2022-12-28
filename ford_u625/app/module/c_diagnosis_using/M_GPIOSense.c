@@ -81,6 +81,13 @@ uint64_t M_GPIOSense_LED_Driver_Diagnosis(void)
 	return u64ReturnStatus;
 }
 
+bool M_GPIOSense_LED_Driver_Clear(void)
+{
+	uint8_t mu8Temp[3U] = {0x10,0x03,0x00};
+	(void)HAL_I2C_Master_Write(LP8864_ADDRESS, &mu8Temp[0U], 3U, 10U);
+
+	return true;
+}
 /******************************************************************************
  ;       Function Name			:	uint64_t M_GPIOSense_DisplayFault_Read(void)
  ;       Function Description	:

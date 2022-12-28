@@ -48,7 +48,7 @@ static void HW_TIMER_ISR(void)
 			if( 1UL ==  u32IO)	// If ATTN pull HIGH
 			{
 				gu8HighLvCNT++;
-				if( 2L == gu8HighLvCNT )
+				if( 1UL == gu8HighLvCNT )
 				{
 					//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 					u8DebounceRDY = true;
@@ -73,7 +73,7 @@ static void HW_TIMER_ISR(void)
 			else if( 0UL == u32IO ) // If ATTN pull LOW
 			{
 				gu8LowLvCNT++;
-				if( 2L == gu8LowLvCNT )
+				if( 2UL == gu8LowLvCNT )
 				{
 					//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 					u8DebounceRDY = true;
@@ -387,9 +387,9 @@ static void C_Display_Management_CallbackLeavingDiagnosisProtected(void)
 static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8SetValue)
 {	
 	uint8_t u8ReturnStatus = DS_ACTION_NONE;
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 	uint8_t u8NTVGMA[4U] = {0x00};
-#endif
+//#endif
 
 	if(tDisplayCtrl.bPowerStartupEvent == true)
 	{
@@ -541,7 +541,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 								Memory_Pool_NT51926_Vcom_Set(M_DM_VCOM_Get());
 #endif
-#if (BX726_TDDI_NT51926)
+//#if (BX726_TDDI_NT51926)
 								if( true == M_DM_NT51926_VGAMMA_Get(u8NTVGMA) )
 								{
 									/* Read success */
@@ -558,7 +558,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 								{
 									;/* TODO:NT51926 VGAMA read fail */
 								}
-#endif							
+//#endif							
 							}
 							else
 							{
@@ -900,7 +900,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 							/* Enable LCD */
 							Memory_Pool_LcdStatus_Set(M_DM_DisplayControl(Memory_Pool_LcdStatus_Get(), u8SetValue, Memory_Pool_LockLoss_Get()));				
 							u8ReturnStatus  = DS_ACTION_DISPLAY_STATUS;          
-							tDisplayManageTask.u16Timer1 = TIME_190ms;
+							tDisplayManageTask.u16Timer1 = TIME_200ms;
 
 							break;
 						case DS_ACTION_DISPLAY_STATUS:

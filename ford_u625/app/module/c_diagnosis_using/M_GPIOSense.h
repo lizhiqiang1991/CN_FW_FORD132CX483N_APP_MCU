@@ -16,6 +16,7 @@
 
 bool M_GPIOSense_LevelDeboucne(GPIO_PRT_Type *pPort, uint8_t u8Pin, tgpio_debounce_def *ptDebounce);
 uint64_t M_GPIOSense_LED_Driver_Diagnosis(void);
+bool M_GPIOSense_LED_Driver_Clear(void);
 uint64_t M_GPIOSense_DisplayFault_Read(void);
 uint8_t M_GPIOSense_NT51926_Status_Get(void);
 

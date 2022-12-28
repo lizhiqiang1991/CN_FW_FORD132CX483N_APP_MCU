@@ -88,6 +88,7 @@ typedef struct
 	uint8_t  u8NT51926DpStatusOfDebunce;
 	uint8_t  u8NT51926DpStatusOfDebunce_RECOV;	
 
+	bool bFirstLedIntDebounceFinsh;	
 }tdiagnosis_ctrl_def;
 
 extern void C_Diagnosis_Timer1(void);

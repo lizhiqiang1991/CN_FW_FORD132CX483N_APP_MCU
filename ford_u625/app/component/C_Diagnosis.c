@@ -38,6 +38,12 @@ static void C_Diagnosis_IO_LedInt(uint16_t u16RoutineTime)
 	/* Check diagnosis is enable or not*/
 	if(tLedInt.blEnable == true)
 	{
+	   if (false == tDiagCtrl.bFirstLedIntDebounceFinsh)
+       {
+           // write 29 11 and delay 300ms ,then BL_EN pull high.When BL_EN is high,it could clear error bit.
+		   //Clear BSTOVPL status. When power on sequence, cause BSTOVPL will be set.
+           tDiagCtrl.bFirstLedIntDebounceFinsh = M_GPIOSense_LED_Driver_Clear();
+        }
 		/* When LED_INT debounce 3 times, start to read LP8864 status and record error flags. */
 		if(M_GPIOSense_LevelDeboucne(U301_LED_INT_PORT, U301_LED_INT_PIN, &tLedInt) == true)
 		{
@@ -714,6 +720,7 @@ static void C_Diagnosis_ParaInit(void)
 	tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;		
 	tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;	
 	tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = 0U;	
+	tDiagCtrl.bFirstLedIntDebounceFinsh = false;
 
 	tLedInt.u8DebounceHigh = 0U;
 	tLedInt.u8DebounceLow = 0U;
@@ -853,7 +860,12 @@ static void C_Diagnosis_Action(void)
 	/* Release LLOSS */
 	if((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS | BIT_A3_POWER_P1V2_ERROR_POS | BIT_A3_COMM_LOSS_ERROR_POS)) == 0U)
 	{
-		u32Temp&=~BIT_LLOSS_POS;
+		if((Memory_Pool_ReadAfterDisplayStatus_Get()&(BIT_LLOSS_POS)) == BIT_LLOSS_POS)
+		{
+			u32Temp&=~BIT_LLOSS_POS;
+		}
+		else
+		{/*Nothing*/}
 	}
 	else
 	{/*Nothing*/}
@@ -862,7 +874,12 @@ static void C_Diagnosis_Action(void)
 	if((u64LEDDiagnosis == 0U)
 		&& ((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS | BIT_A3_POWER_LOW_VOL_ERROR_POS | BIT_A3_POWER_HIGH_VOL_ERROR_POS | BIT_A3_BL_FPC_ERROR_POS)) == 0U))
 	{
-		u32Temp&=~BIT_BLERR_POS;
+		if((Memory_Pool_ReadAfterDisplayStatus_Get() & (BIT_BLERR_POS)) == BIT_BLERR_POS)
+		{
+			u32Temp&=~BIT_BLERR_POS;
+		}
+		else
+		{/*Nothing*/}
 	}
 	else
 	{/*Nothing*/}
@@ -870,7 +887,12 @@ static void C_Diagnosis_Action(void)
 	/* Release DCERR */
 	if((u16GeneralDiagnosis&(BIT_A3_PANEL_FPC_TX_L_ERROR_POS | BIT_A3_PANEL_FPC_RX_R_ERROR_POS | BIT_A3_POWER_P3V3_ERROR_POS)) == 0U)
 	{
-		u32Temp&=~BIT_DCERR_POS;
+		if((Memory_Pool_ReadAfterDisplayStatus_Get() & (BIT_DCERR_POS)) == BIT_DCERR_POS)
+		{
+		    u32Temp&=~BIT_DCERR_POS;
+		}
+		else
+		{/*Nothing*/}
 	}
 	else
 	{/*Nothing*/}
@@ -878,7 +900,12 @@ static void C_Diagnosis_Action(void)
 	/* Release TSCERR, TCERR. */
 	if(((u16GeneralDiagnosis&BIT_A3_POWER_P3V3_ERROR_POS) == 0U) &&	((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) == 0UL))
 	{
-		u32Temp&=~(BIT_TSCERR_POS | BIT_TCERR_POS);
+		if((Memory_Pool_ReadAfterDisplayStatus_Get() & (BIT_TSCERR_POS | BIT_TCERR_POS)) == (BIT_TSCERR_POS | BIT_TCERR_POS))
+		{
+		    u32Temp&=~(BIT_TSCERR_POS | BIT_TCERR_POS);
+		}
+		else
+		{/*Nothing*/}
 	}
 	else
 	{/*Nothing*/}
@@ -889,7 +916,12 @@ static void C_Diagnosis_Action(void)
 		&& (tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE) 
 		&& (tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE))
 	{
-		u32Temp&=~BIT_LCDERR_POS;
+		if((Memory_Pool_ReadAfterDisplayStatus_Get() & (BIT_LCDERR_POS)) == BIT_LCDERR_POS)
+		{
+		    u32Temp&=~BIT_LCDERR_POS;
+		}
+		else
+		{/*Nothing*/}
 	}
 	else
 	{/*Nothing*/}
@@ -1002,11 +1034,11 @@ static void C_Diagnosis_Action(void)
 	{/*Nothing*/}
 
 	/* Read 0x00 status. */
-	u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();
-	u32CommDisplayStatus |= u32Temp;
+	//u32CommDisplayStatus = Memory_Pool_DisplayStatus_Get();//latch bit change status when error is removed
+	//u32CommDisplayStatus |= u32Temp;//latch bit change status when error is removed
 
 	/* Set 0x00 related status. */
-	Memory_Pool_DisplayStatus_Set(u32CommDisplayStatus);
+	Memory_Pool_DisplayStatus_Set(u32Temp);
 	Memory_Pool_ActualDisplayStatus_Set(u32Temp);
 }
 /******************************************************************************
