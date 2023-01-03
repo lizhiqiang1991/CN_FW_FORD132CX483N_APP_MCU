@@ -26,7 +26,7 @@
 #define INT_ERROR						0x01U
 #define INT_TOUCH						0x04U
 
-#define DIAG_FPC_TX_DISCON_VOL			2640U /*Unit: 1 mv, FPC normal voltage */
+#define DIAG_FPC_TX_DISCON_VOL			2640U /*Unit: 1 mv, FPC normal voltage */ // ADC Check
 #define DIAG_FPC_RX_DISCON_VOL			2640U /*Unit: 1 mv, FPC normal voltage */
 #define DIAG_FPC_BL_DISCON_VOL			3180U /*Unit: 1 mv, FPC disconnect voltage */
 
