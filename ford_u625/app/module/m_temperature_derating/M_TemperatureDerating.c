@@ -222,31 +222,45 @@ static float gDeratingTable[TEMP_DERATING_TABLE_SIZE];
 #if(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
 static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
 {
-    100, /**< 70 Degree. */
-    100, /**< 71 Degree. */
-    100, /**< 72 Degree. */
-    100, /**< 73 Degree. */
-    100, /**< 74 Degree. */
-    100, /**< 75 Degree. */
-    100, /**< 76 Degree. */
-    100, /**< 77 Degree. */
-    100, /**< 78 Degree. */
-    100, /**< 79 Degree. */
-    100, /**< 80 Degree. */
-    100, /**< 81 Degree. */
-    100, /**< 82 Degree. */
-    100, /**< 83 Degree. */
-    100, /**< 84 Degree. */
-    100, /**< 85 Degree. */
-    100, /**< 86 Degree. */
-    100, /**< 87 Degree. */
-    88, /**< 88 Degree. */
-    75, /**< 89 Degree. */
-    63, /**< 90 Degree. */
-    50, /**< 91 Degree. */
-    38, /**< 92 Degree. */
-    25, /**< 93 Degree. */
-    13, /**< 94 Degree. */
+    // 100, /**< 70 Degree. */
+    // 100, /**< 71 Degree. */
+    // 100, /**< 72 Degree. */
+    // 100, /**< 73 Degree. */
+    // 100, /**< 74 Degree. */
+    // 100, /**< 75 Degree. */
+    // 100, /**< 76 Degree. */
+    // 100, /**< 77 Degree. */
+    // 100, /**< 78 Degree. */
+    // 100, /**< 79 Degree. */
+    // 100, /**< 80 Degree. */
+    // 100, /**< 81 Degree. */
+    // 100, /**< 82 Degree. */
+    // 100, /**< 83 Degree. */
+    // 100, /**< 84 Degree. */
+    // 100, /**< 85 Degree. */
+    // 100, /**< 86 Degree. */
+    // 100, /**< 87 Degree. */
+    // 88, /**< 88 Degree. */
+    // 75, /**< 89 Degree. */
+    // 63, /**< 90 Degree. */
+    // 50, /**< 91 Degree. */
+    // 38, /**< 92 Degree. */
+    // 25, /**< 93 Degree. */
+    // 13, /**< 94 Degree. */
+    // 10, /**< 95 Degree. */
+    //  0, /**< 96 Degree. */
+    //  0, /**< 97 Degree. */
+    //  0, /**< 98 Degree. */
+    //  0, /**< 99 Degree. */
+    //  0, /**< 100 Degree. */
+
+    100, /**< 88 Degree. */
+    81, /**< 89 Degree. */
+    64, /**< 90 Degree. */
+    49, /**< 91 Degree. */
+    36, /**< 92 Degree. */
+    26, /**< 93 Degree. */
+    17, /**< 94 Degree. */
     10, /**< 95 Degree. */
      0, /**< 96 Degree. */
      0, /**< 97 Degree. */
