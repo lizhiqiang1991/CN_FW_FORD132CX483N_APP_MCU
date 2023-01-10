@@ -83,6 +83,7 @@ typedef struct
 
 	uint16_t u16NT51926I2cCommTime;
 	uint8_t  u8NT51926I2cDebunce;
+	uint8_t  u8NT51926I2cDebunce_RECOV;
 	uint8_t  u8NT51926DpStatusOnDebunce;
 	uint8_t  u8NT51926DpStatusOnDebunce_RECOV;
 	uint8_t  u8NT51926DpStatusOfDebunce;
