@@ -646,8 +646,8 @@ static void C_Communiction_Process(void)
 	{
 		case EVENT_FIRST:
 			/* Enable EVENT_TIMER_INTB_ROUNTINE */
-			//tCommunicationTask.u16Timer2 = TIME_2ms;
-			tCommunicationTask.u16Timer2 = TIME_1ms;
+			tCommunicationTask.u16Timer2 = TIME_2ms;
+			//tCommunicationTask.u16Timer2 = TIME_1ms;
 			tCommunicationTask.u16Timer1 = TIME_DISABLE;
 		break;
 		
@@ -664,10 +664,10 @@ static void C_Communiction_Process(void)
 		break;
 
 		case EVENT_TIMER_INTB_ROUNTINE:
-			//tCommunicationTask.u16Timer2 = TIME_2ms;
-			//MINTB_Routine((uint16_t)(TIME_2ms - 1));
-			tCommunicationTask.u16Timer2 = TIME_1ms;
-			MINTB_Routine((uint16_t)(TIME_1ms - 1));
+			tCommunicationTask.u16Timer2 = TIME_2ms;
+			MINTB_Routine((uint16_t)(TIME_2ms - 1));
+			//tCommunicationTask.u16Timer2 = TIME_1ms;
+			//MINTB_Routine((uint16_t)(TIME_1ms - 1));
 		break;
 
 		default:
