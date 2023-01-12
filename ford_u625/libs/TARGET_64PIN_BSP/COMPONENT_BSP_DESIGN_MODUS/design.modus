@@ -925,7 +925,7 @@
                         <Param id="ClockPrescaler" value="CY_TCPWM_COUNTER_PRESCALER_DIVBY_1"/>
                         <Param id="RunMode" value="CY_TCPWM_COUNTER_CONTINUOUS"/>
                         <Param id="CountDirection" value="CY_TCPWM_COUNTER_COUNT_UP"/>
-                        <Param id="Period" value="12000"/>
+                        <Param id="Period" value="8000"/>
                         <Param id="CompareOrCapture" value="CY_TCPWM_COUNTER_MODE_CAPTURE"/>
                         <Param id="EnableCompareSwap" value="false"/>
                         <Param id="Compare0" value="16384"/>

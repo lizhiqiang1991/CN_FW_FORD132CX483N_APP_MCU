@@ -662,28 +662,14 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 				if(tDiagCtrl.u8NT51926I2cDebunce >= C_DIAG_NT51926_Comm_DEBUNCE)
 				{
 					tDiagCtrl.u8NT51926I2cDebunce = C_DIAG_NT51926_Comm_DEBUNCE;
-					tDiagCtrl.u8NT51926I2cDebunce_RECOV = 0U;
 					Memory_Pool_GeneralDiagnosis_Set(Memory_Pool_GeneralDiagnosis_Get() | (BIT_A3_PANEL_NT51926_COMM_ERROR_POS));
 				}			
 				else
 				{/*Nothing*/}				
 			}
-			else if((Memory_Pool_IcCommDiagnosis_Get() == 0U) && (tDiagCtrl.u8NT51926I2cDebunce == C_DIAG_NT51926_Comm_DEBUNCE))
-			{
-				tDiagCtrl.u8NT51926I2cDebunce_RECOV ++;
-				if(tDiagCtrl.u8NT51926I2cDebunce_RECOV >= C_DIAG_NT51926_Comm_DEBUNCE)
-				{
-					tDiagCtrl.u8NT51926I2cDebunce_RECOV = C_DIAG_NT51926_Comm_DEBUNCE;
-					tDiagCtrl.u8NT51926I2cDebunce = 0U;
-					Memory_Pool_GeneralDiagnosis_Set(Memory_Pool_GeneralDiagnosis_Get() & (~BIT_A3_PANEL_NT51926_COMM_ERROR_POS));
-				}			
-				else
-				{/*Nothing*/}	
-			}
 			else
 			{
 				tDiagCtrl.u8NT51926I2cDebunce = 0U;
-				tDiagCtrl.u8NT51926I2cDebunce_RECOV = 0U;
 			}
 		}
 	}
@@ -694,7 +680,6 @@ static void C_Diagnosis_IC_Communitation(uint16_t u16RoutineTime)
 		tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;
 		tDiagCtrl.u8NT51926DpStatusOnDebunce = 0U;
 		tDiagCtrl.u8NT51926I2cDebunce = 0U;
-		tDiagCtrl.u8NT51926I2cDebunce_RECOV = 0U;
 	}
 }
 
@@ -731,7 +716,6 @@ static void C_Diagnosis_ParaInit(void)
 	tDiagCtrl.u8LEDDriverRegDebunce_RECOV = 0U;
 	tDiagCtrl.u16NT51926I2cCommTime = C_DIAG_NT51926_I2CTIME;
 	tDiagCtrl.u8NT51926I2cDebunce = 0U;
-	tDiagCtrl.u8NT51926I2cDebunce_RECOV = 0U;
 	tDiagCtrl.u8NT51926DpStatusOnDebunce = 0U;	
 	tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;		
 	tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;	
