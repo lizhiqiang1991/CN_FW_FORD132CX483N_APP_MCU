@@ -8,6 +8,8 @@
 #include "M_TemperatureDerating.h"
 #include "M_DisplayManage.h"
 #include "M_PowerManagement.h"
+#include "FIDM_Config.h"
+
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
 #include "M_BatteryProtect.h"
 #endif
@@ -1177,6 +1179,8 @@ void Memory_Pool_DisplayStatus_Set(uint32_t u32SetValue)
 {
     uint32_t u32TempRegVal = gtDiagnosisInfo.u32DisplayStatus;
     uint8_t u8TempRegVal = gtDiagnosisInfo.u8IntStatus;
+    tdINTBIF *ptrINTB = NULL;
+	ptrINTB = GetINTB_Instance();
 
     gtDiagnosisInfo.u32DisplayStatus = u32SetValue;    
     /* Compares display status if setting INT_ERR bit. */
@@ -1191,7 +1195,8 @@ void Memory_Pool_DisplayStatus_Set(uint32_t u32SetValue)
 			if(Memory_Pool_PowerStatus_Get() != POWER_OFF_READY)
 			{
 				/* Send INTB Strategy Control Msg. */
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else
 			{/*Nothing*/}    
