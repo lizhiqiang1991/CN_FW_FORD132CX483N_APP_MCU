@@ -22,7 +22,7 @@
 #define	P3V3_PGOOD					0x00U
 #define	P1V2_PGOOD               	0x01U
 
-#define POWER_VMINRCV_ADC_CFG		775 /*Define as 7.0V*/
+#define POWER_VMINRCV_ADC_CFG		726 /*Define as 6.6V*/
 
 #define POWER_VMAXRCV_ADC_CFG		2114 /*Define as 18V*/
 
