@@ -17,11 +17,13 @@
 #include "C_Diagnosis.h"
 #include "C_Temperture_Protect.h"
 #include "C_Battery_Protect.h"
+#include "FIDM_Config.h"
 #ifdef DEBUG_UART_EN
 #include "simple_cli.h"
 #include "FIDM_SupportCLI.h"
 #endif
 
+static tdINTBIF *ptrINTB = NULL;
 /******************************************************************************
  ;       Function Name			:	void Main_TaskInit(void)
  ;       Function Description	:	Initial all Tasks.
@@ -120,6 +122,9 @@ int main(void)
 	Main_TaskInit();
 
 	__enable_irq();
+	EventGroup_Create();   //Submodule function
+	ptrINTB = GetINTB_Instance();  //INTB function 2023/01/17
+	ptrINTB->Init(aTRUE);  //INTB function 2023/01/17
 
 	HAL_UART_Printf("\r\nTask Start!\r\n");
 
@@ -129,6 +134,7 @@ int main(void)
 		SCLI_Run();
 #endif
 		Task_ProcessTask();
+		ptrINTB->StateMachine(NULL);  //INTB function 2023/01/17
 	}
 
 	return 0U;
@@ -155,5 +161,6 @@ void Main_TimerCore(void)
 	C_Data_Collecting_Timer1();
 	C_Temperture_Protect_Timer1();
 	C_Battery_Protect_Timer1();
+	//ptrINTB->Trigger(aTRUE);
 }
 
