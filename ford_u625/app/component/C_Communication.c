@@ -12,6 +12,7 @@
 #include "public.h"
 #include "ICDiagApp.h"
 #include "M_TemperatureDerating.h"
+#include "FIDM_Config.h"
 
 /* -- Marco Define -- */
 #define CCOMMUNICATION_FLASH_FACTORYDATA_START_OFFSET ADDR_DELIVERY_ASSEMBLY
@@ -106,6 +107,9 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
 	tFPN_ctrl_def tFPNCtrlSerNum = {0U};
 	tFPN_production_byte_def tFPNProductionByte = {0U};
 
+	tdINTBIF *ptrINTB = NULL;
+	ptrINTB = GetINTB_Instance();
+
 	uint8_t u8FPN_Control_Status = 0U;
 
 	switch (u8Case)
@@ -130,7 +134,8 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
 				Memory_Pool_WriteFPNDelivery_Set(false);
 				tFPNCtrlDelivery.FPN_Status_t.INT_WRT = FPN_ENABLE;
 				Memory_Pool_FPNDeliverystatusInfo_Set(&tFPNCtrlDelivery.FPN_Status_t);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_CHECKSUM_ERR)
 			{
@@ -138,13 +143,15 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
 				Memory_Pool_WriteFPNDelivery_Set(false);
 				tFPNCtrlDelivery.FPN_Status_t.CKSUM_ERR = FPN_ENABLE;
 				Memory_Pool_FPNDeliverystatusInfo_Set(&tFPNCtrlDelivery.FPN_Status_t);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_WRITE_NO_DATA)
 			{   
 				Memory_Pool_WriteFPNDeliveryStatusReg_Set(false);
 				Memory_Pool_WriteFPNDelivery_Set(false);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else
 			{ /* Nothing */ }
@@ -167,7 +174,8 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
 				Memory_Pool_WriteSerNumFPN_Set(false);
 				tFPNCtrlSerNum.FPN_Status_t.INT_WRT = FPN_ENABLE;
 				Memory_Pool_FPNSerialstatusInfo_Set(&tFPNCtrlSerNum.FPN_Status_t);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_CHECKSUM_ERR)
 			{   
@@ -175,13 +183,15 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
 				Memory_Pool_WriteSerNumFPN_Set(false);
 				tFPNCtrlSerNum.FPN_Status_t.CKSUM_ERR = FPN_ENABLE;
 				Memory_Pool_FPNSerialstatusInfo_Set(&tFPNCtrlSerNum.FPN_Status_t);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_WRITE_NO_DATA)
 			{   
 				Memory_Pool_WriteSerNumPNStatusReg_Set(false);
 				Memory_Pool_WriteSerNumFPN_Set(false);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}			
 			else
 			{ /* Nothing */ } 
@@ -203,13 +213,15 @@ static void C_Communication_Flash_Write(uint8_t u8Case)
 				Memory_Pool_WriteProductPhaseFPN_Set(false);
 				tFPNProductionByte.FPN_Status_t.INT_WRT = FPN_ENABLE;
 				Memory_Pool_FPNSProductPhaseStatusInfo_Set(&tFPNProductionByte.FPN_Status_t);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}
 			else if(u8FPN_Control_Status == FPN_WRITE_NO_DATA)
 			{   
 				Memory_Pool_WriteProductPhasePNStatusReg_Set(false);
 				Memory_Pool_WriteProductPhaseFPN_Set(false);
-				(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+				ptrINTB->Trigger(aTRUE);
+				//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 			}			
 			else
 			{ /* Nothing */ } 
@@ -646,7 +658,7 @@ static void C_Communiction_Process(void)
 	{
 		case EVENT_FIRST:
 			/* Enable EVENT_TIMER_INTB_ROUNTINE */
-			tCommunicationTask.u16Timer2 = TIME_2ms;
+			tCommunicationTask.u16Timer2 = TIME_DISABLE;
 			//tCommunicationTask.u16Timer2 = TIME_1ms;
 			tCommunicationTask.u16Timer1 = TIME_DISABLE;
 		break;
@@ -666,8 +678,8 @@ static void C_Communiction_Process(void)
 		case EVENT_TIMER_INTB_ROUNTINE:
 			tCommunicationTask.u16Timer2 = TIME_2ms;
 			MINTB_Routine((uint16_t)(TIME_2ms - 1));
-			//tCommunicationTask.u16Timer2 = TIME_1ms;
-			//MINTB_Routine((uint16_t)(TIME_1ms - 1));
+			// tCommunicationTask.u16Timer2 = TIME_1ms;
+			// MINTB_Routine((uint16_t)(TIME_1ms - 1));
 		break;
 
 		default:

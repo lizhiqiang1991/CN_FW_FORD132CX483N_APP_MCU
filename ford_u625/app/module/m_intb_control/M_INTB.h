@@ -5,6 +5,47 @@
 extern "C" {
 #endif
 
+
+typedef enum
+{
+	aSETUP_TIME = 2U,
+	aHOLD_TIME = 2U
+}enTimeConstant;
+
+typedef enum
+{
+	INTB_IDLE = 0x00000001UL,
+	INTB_CHECK = 0x00000002UL,
+	INTB_WAIT = 0x00000004UL,
+	INTB_ASSERT = 0x00000008UL,
+	INTB_DEASSERT = 0x00000010UL,
+}enINTBState;
+
+typedef enum
+{
+	aINTB_TIME_RDY = 0x00000001UL,
+}enINTBFlag;
+
+
+typedef struct
+{
+	int8_t (*Init)(uint8_t );
+	int8_t (*StateMachine)(uint8_t *);
+	int8_t (*Trigger)(uint8_t);
+}tdINTBIF;
+
+typedef struct
+{
+	unsigned bTrigger:1;
+	unsigned bTimerStart:1;
+	uint8_t u8State;
+	uint32_t u32SetupTime;
+	uint32_t u32HoldTime;
+}tdINTBCtl;
+
+extern tdINTBIF* GetINTB_Instance(void);
+
+#if 1
 /* -- Includes -- */
 #include "main.h"
 
@@ -36,6 +77,6 @@ typedef void (*CALLBACK_SDM_INTB_DO_SET)(uint8_t u8DigitalLevel);
 extern bool MINTB_Register(CALLBACK_SDM_INTB_DO_SET CallbackSDMIntbDoSet, MINTB_InttruptType_E eInterruptType);
 extern bool MINTB_StrategyControl(MINTB_StrategyCtrl_E eStrategyCtrl);
 extern void MINTB_Routine(uint16_t u16RoutineTimeMs);
-
+#endif
 #endif
 /* -- END -- */

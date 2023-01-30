@@ -939,6 +939,26 @@
                         <Param id="inFlash" value="true"/>
                     </Personality>
                 </Block>
+                <Block location="tcpwm[0].cnt[2]">
+                    <Alias value="INTB_STRATEGY"/>
+                    <Personality template="m0s8counter" version="1.0">
+                        <Param id="ClockPrescaler" value="CY_TCPWM_COUNTER_PRESCALER_DIVBY_1"/>
+                        <Param id="RunMode" value="CY_TCPWM_COUNTER_CONTINUOUS"/>
+                        <Param id="CountDirection" value="CY_TCPWM_COUNTER_COUNT_UP"/>
+                        <Param id="Period" value="16000"/>
+                        <Param id="CompareOrCapture" value="CY_TCPWM_COUNTER_MODE_CAPTURE"/>
+                        <Param id="EnableCompareSwap" value="false"/>
+                        <Param id="Compare0" value="16384"/>
+                        <Param id="Compare1" value="16384"/>
+                        <Param id="CaptureInput" value="CY_TCPWM_INPUT_DISABLED"/>
+                        <Param id="InterruptSource" value="CY_TCPWM_INT_ON_TC"/>
+                        <Param id="CountInput" value="CY_TCPWM_INPUT_DISABLED"/>
+                        <Param id="StopInput" value="CY_TCPWM_INPUT_DISABLED"/>
+                        <Param id="ReloadInput" value="CY_TCPWM_INPUT_DISABLED"/>
+                        <Param id="StartInput" value="CY_TCPWM_INPUT_DISABLED"/>
+                        <Param id="inFlash" value="true"/>
+                    </Personality>
+                </Block>
                 <Block location="tcpwm[0].cnt[7]">
                     <Alias value="PWM_OUT_DIM"/>
                     <Personality template="m0s8pwm" version="1.0">
@@ -1042,6 +1062,7 @@
                 <Net>
                     <Port name="peri[0].div_16[7].clk[0]"/>
                     <Port name="tcpwm[0].cnt[1].clock[0]"/>
+                    <Port name="tcpwm[0].cnt[2].clock[0]"/>
                 </Net>
                 <Mux name="Vplus" location="pass[0].sar[0]">
                     <Arm>

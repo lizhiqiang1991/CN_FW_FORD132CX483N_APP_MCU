@@ -9,6 +9,7 @@
 #include "M_BatteryProtect.h"
 #include "M_BacklightControl.h"
 #include "C_Diagnosis.h"
+#include "FIDM_Config.h"
 
 /* -- Marco Define -- */
 #define ATTN_ASSERT		BIT0
@@ -34,95 +35,95 @@ const static cy_stc_sysint_t gtdATTNCfg =
 static void C_Display_Management_CallbackTCHClickHandler(void);
 static void C_Display_Management_CallbackTCHClickRelHandler(void);
 
-static void HW_TIMER_ISR(void)
-{
-	uint32_t i32interrupts = Cy_TCPWM_GetInterruptStatus(HW_TIMER_HW, HW_TIMER_NUM);
-	uint32_t u32IO = Cy_GPIO_Read(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN);
-	uint8_t u8DebounceRDY = false;
+// static void HW_TIMER_ISR(void)
+// {
+// 	uint32_t i32interrupts = Cy_TCPWM_GetInterruptStatus(HW_TIMER_HW, HW_TIMER_NUM);
+// 	uint32_t u32IO = Cy_GPIO_Read(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN);
+// 	uint8_t u8DebounceRDY = false;
 
-	if(Memory_Pool_DisplayEnable_Get() == DISPLAY_ON_TOUCH_ON)
-	{
-		if(0UL != (CY_TCPWM_INT_ON_TC & i32interrupts))
-		{
-			/* There is a pending Terminal Count interrupt */
-			if( 1UL ==  u32IO)	// If ATTN pull HIGH
-			{
-				gu8HighLvCNT++;
-				if( 1UL == gu8HighLvCNT )
-				{
-					//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
-					u8DebounceRDY = true;
-					gu8ATTNST |= ATTN_RELEASE;
-					C_Display_Management_CallbackTCHClickRelHandler();
-					Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_FALLING);
-				}
-				else
-				{
-					if( CY_GPIO_INTR_RISING != gu32LVTrigger)
-					{
-						gu8HighLvCNT = 0U;
-						u8DebounceRDY = true;
-						//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
-					}
-					else
-					{
-						; /* still high */
-					}
-				}
-			}
-			else if( 0UL == u32IO ) // If ATTN pull LOW
-			{
-				gu8LowLvCNT++;
-				if( 2UL == gu8LowLvCNT )
-				{
-					//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
-					u8DebounceRDY = true;
-					gu8ATTNST |= ATTN_ASSERT;
-					C_Display_Management_CallbackTCHClickHandler();
-					Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_RISING);
+// 	if(Memory_Pool_DisplayEnable_Get() == DISPLAY_ON_TOUCH_ON)
+// 	{
+// 		if(0UL != (CY_TCPWM_INT_ON_TC & i32interrupts))
+// 		{
+// 			/* There is a pending Terminal Count interrupt */
+// 			if( 1UL ==  u32IO)	// If ATTN pull HIGH
+// 			{
+// 				// gu8HighLvCNT++;
+// 				// if( 1UL == gu8HighLvCNT )
+// 				// {
+// 					Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+// 					u8DebounceRDY = true;
+// 					gu8ATTNST |= ATTN_RELEASE;
+// 					C_Display_Management_CallbackTCHClickRelHandler();
+// 					Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_FALLING);
+// 				// }
+// 				// else
+// 				// {
+// 				// 	if( CY_GPIO_INTR_RISING != gu32LVTrigger)
+// 				// 	{
+// 				// 		gu8HighLvCNT = 0U;
+// 				// 		u8DebounceRDY = true;
+// 				// 		//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+// 				// 	}
+// 				// 	else
+// 				// 	{
+// 				// 		; /* still high */
+// 				// 	}
+// 				// }
+// 			}
+// 			else if( 0UL == u32IO ) // If ATTN pull LOW
+// 			{
+// 				// gu8LowLvCNT++;
+// 				// if( 2UL == gu8LowLvCNT )
+// 				// {
+// 					Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+// 					u8DebounceRDY = true;
+// 					gu8ATTNST |= ATTN_ASSERT;
+// 					C_Display_Management_CallbackTCHClickHandler();
+// 					Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_RISING);
 					
-				}
-				else
-				{
-					if( CY_GPIO_INTR_FALLING != gu32LVTrigger)
-					{
-						gu8LowLvCNT = 0U;
-						u8DebounceRDY = true;
-						//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
-					}
-					else
-					{
-						; /* still high */
-					}
-				}
-			}
-			else
-			{
-				;
-			}
+// 				// }
+// 				// else
+// 				// {
+// 				// 	if( CY_GPIO_INTR_FALLING != gu32LVTrigger)
+// 				// 	{
+// 				// 		gu8LowLvCNT = 0U;
+// 				// 		u8DebounceRDY = true;
+// 				// 		//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+// 				// 	}
+// 				// 	else
+// 				// 	{
+// 				// 		; /* still high */
+// 				// 	}
+// 				// }
+// 			}
+// 			else
+// 			{
+// 				;
+// 			}
 
-			if( true == u8DebounceRDY)
-			{
-				/* Stop the counter */
-				Cy_TCPWM_TriggerStopOrKill(HW_TIMER_HW, HW_TIMER_MASK);
-				/* Disable the counter */
-				Cy_TCPWM_Counter_Disable(HW_TIMER_HW, HW_TIMER_NUM);
-			}
-		}
-	}
+// 			if( true == u8DebounceRDY)
+// 			{
+// 				/* Stop the counter */
+// 				Cy_TCPWM_TriggerStopOrKill(HW_TIMER_HW, HW_TIMER_MASK);
+// 				/* Disable the counter */
+// 				Cy_TCPWM_Counter_Disable(HW_TIMER_HW, HW_TIMER_NUM);
+// 			}
+// 		}
+// 	}
 
-	if(0UL != (CY_TCPWM_INT_ON_CC & i32interrupts))
-	{
-		/* There is a pending Compare Count interrupt */
+// 	if(0UL != (CY_TCPWM_INT_ON_CC & i32interrupts))
+// 	{
+// 		/* There is a pending Compare Count interrupt */
 
-	}
+// 	}
 
-	Cy_TCPWM_ClearInterrupt(HW_TIMER_HW, HW_TIMER_NUM, i32interrupts );
-}
+// 	Cy_TCPWM_ClearInterrupt(HW_TIMER_HW, HW_TIMER_NUM, i32interrupts );
+// }
 
 void Timer_Module_Init(void)
 {
-	uint32_t u32Result = CY_TCPWM_SUCCESS;
+	//uint32_t u32Result = CY_TCPWM_SUCCESS;
 
 	/* hw timer config */
 	const cy_stc_sysint_t hw_timer_irq_config =
@@ -142,18 +143,17 @@ void Timer_Module_Init(void)
 	{
 		Cy_TCPWM_Counter_Disable(HW_TIMER_HW, HW_TIMER_NUM);
 
-
 		/* Check if the desired interrupt is enabled prior to triggering */
 		if (0UL != (CY_TCPWM_INT_ON_TC & Cy_TCPWM_GetInterruptMask(HW_TIMER_HW, HW_TIMER_NUM)))
 		{
 			Cy_TCPWM_SetInterrupt(HW_TIMER_HW, HW_TIMER_NUM, CY_TCPWM_INT_ON_TC);
 		}
 
-		u32Result = Cy_SysInt_Init(&hw_timer_irq_config, &HW_TIMER_ISR);
-		if(u32Result != CY_SYSINT_SUCCESS)
-		{
-			CY_ASSERT(0);
-		}
+		// u32Result = Cy_SysInt_Init(&hw_timer_irq_config, &HW_TIMER_ISR);
+		// if(u32Result != CY_SYSINT_SUCCESS)
+		// {
+		// 	CY_ASSERT(0);
+		// }
 
 		NVIC_EnableIRQ((IRQn_Type) hw_timer_irq_config.intrSrc);
 #if 0
@@ -173,8 +173,7 @@ void U301_TSC_ATTN_ISR(void)
 	uint32_t u32TriggerEdge = CY_GPIO_INTR_DISABLE;
 	uint8_t u8StartDebounce = 0U;
 	uint32_t u32TimerST = Cy_TCPWM_Counter_GetStatus(HW_TIMER_HW, HW_TIMER_NUM);
-
-
+	
 	/* Clears the triggered pin interrupt */
 	Cy_GPIO_ClearInterrupt(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN);
 	NVIC_ClearPendingIRQ(gtdATTNCfg.intrSrc);
@@ -184,22 +183,24 @@ void U301_TSC_ATTN_ISR(void)
 	if( CY_GPIO_INTR_RISING == u32TriggerEdge )
 	{
 		/* low to high */
-		gu32LVTrigger = CY_GPIO_INTR_RISING;
-		u8StartDebounce = 1U;
-		gu8HighLvCNT = 0U;
-		gu8ATTNST &= ~ATTN_RELEASE;
-
-		//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+		// gu32LVTrigger = CY_GPIO_INTR_RISING;
+		// u8StartDebounce = 0U;
+		// gu8HighLvCNT = 0U;
+		// gu8ATTNST &= ~ATTN_RELEASE;
+		Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+		C_Display_Management_CallbackTCHClickRelHandler();
+		Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_FALLING);
 	}
 	else if( CY_GPIO_INTR_FALLING == u32TriggerEdge )
 	{
 		/* high to low */
-		gu32LVTrigger = CY_GPIO_INTR_FALLING;
-		u8StartDebounce = 1U;
-		gu8LowLvCNT = 0U;
-		gu8ATTNST &= ~ATTN_ASSERT;
-
-		//Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+		// gu32LVTrigger = CY_GPIO_INTR_FALLING;
+		// u8StartDebounce = 0U;
+		// gu8LowLvCNT = 0U;
+		// gu8ATTNST &= ~ATTN_ASSERT;
+		Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
+		C_Display_Management_CallbackTCHClickHandler();
+		Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_RISING);
 	}
 	else if( CY_GPIO_INTR_BOTH == u32TriggerEdge)
 	{
@@ -210,28 +211,28 @@ void U301_TSC_ATTN_ISR(void)
 		//HAL_UART_Printf("ATTN pin unknow\r\n"); /* should not be here */
 	}
 
-	if( 1U == u8StartDebounce )
-	{
-		if( CY_TCPWM_COUNTER_STATUS_COUNTER_RUNNING == u32TimerST )
-		{
-			/* Stop the counter */
-			Cy_TCPWM_TriggerStopOrKill(HW_TIMER_HW, HW_TIMER_MASK);
-			/* Disable the counter */
-			Cy_TCPWM_Counter_Disable(HW_TIMER_HW, HW_TIMER_NUM);
-		}
-		else
-		{
-			;
-		}
-		/* Enable the initialized counter */
-		Cy_TCPWM_Counter_Enable(HW_TIMER_HW, HW_TIMER_NUM);
-		/* Then start the counter */
-		Cy_TCPWM_TriggerStart(HW_TIMER_HW, HW_TIMER_MASK);
-	}
-	else
-	{
-		; /* do nothing */
-	}
+	// if( 1U == u8StartDebounce )
+	// {
+	// 	if( CY_TCPWM_COUNTER_STATUS_COUNTER_RUNNING == u32TimerST )
+	// 	{
+	// 		/* Stop the counter */
+	// 		Cy_TCPWM_TriggerStopOrKill(HW_TIMER_HW, HW_TIMER_MASK);
+	// 		/* Disable the counter */
+	// 		Cy_TCPWM_Counter_Disable(HW_TIMER_HW, HW_TIMER_NUM);
+	// 	}
+	// 	else
+	// 	{
+	// 		;
+	// 	}
+	// 	/* Enable the initialized counter */
+	// 	Cy_TCPWM_Counter_Enable(HW_TIMER_HW, HW_TIMER_NUM);
+	// 	/* Then start the counter */
+	// 	Cy_TCPWM_TriggerStart(HW_TIMER_HW, HW_TIMER_MASK);
+	// }
+	// else
+	// {
+	// 	; /* do nothing */
+	// }
 }
 /* End of Jacky@20221213 for losing ATTN */
 
@@ -272,6 +273,8 @@ static MDetectTchAttn_TouchController_E C_Display_Management_CallbackTCHState(vo
  */
 static void C_Display_Management_CallbackTCHClickHandler(void)
 {
+	tdINTBIF *ptrINTB = NULL;
+	ptrINTB = GetINTB_Instance();
 	uint8_t u8TempRegVal = Memory_Pool_IntStatus_Get();
     Memory_Pool_IntStatus_Set(Memory_Pool_IntStatus_Get() | BIT_INT_TCH_POS);
     
@@ -281,7 +284,8 @@ static void C_Display_Management_CallbackTCHClickHandler(void)
 		//if(Memory_Pool_PowerStatus_Get() != POWER_OFF_READY)
 		//{
 			/* Send INTB Strategy Control Msg. */
-    		(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+    		ptrINTB->Trigger(aTRUE);
+			//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 		//}
 		//else
 		//{/*Nothing*/}    

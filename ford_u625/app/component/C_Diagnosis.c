@@ -5,6 +5,7 @@
 #include "C_Communication.h"
 #include "main.h"
 #include "ICDiagApp.h"
+#include "FIDM_Config.h"
 
 static tdiagnosis_task_def tDiagnosisTask;
 static tgpio_debounce_def tLedInt;
@@ -241,6 +242,9 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 static void C_Diagnosis_IO_SerdesLock(void)
 {
  	/* Check diagnosis is enable or not*/
+	tdINTBIF *ptrINTB = NULL;
+	ptrINTB = GetINTB_Instance();
+
 	if(tSerdesLock.blEnable == true)
 	{
 		if(M_GPIOSense_LevelDeboucne(U301_LOCK_PORT, U301_LOCK_PIN, &tSerdesLock) == true)
@@ -264,7 +268,8 @@ static void C_Diagnosis_IO_SerdesLock(void)
 					if((Memory_Pool_IntStatus_Get()&(BIT_INT_ERR_POS | BIT_INT_TCH_POS)) > 0U)
 					{					 
 						/* Send INTB Strategy Control Msg. */  
-						(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
+						ptrINTB->Trigger(aTRUE);
+						//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
 					}
 					else
 					{/*Nothing*/}
