@@ -5,6 +5,7 @@
 //#include "public_function_list.h"
 //#include "Event_Group.h"
 #include "M_INTB.h"
+#include "C_Power_Management.h"
 
 
 
@@ -67,7 +68,7 @@ static int8_t M_INTB_Init(uint8_t u8Init)
 	};
 
 
-	gtdINTBCtl.u8State = INTB_IDLE;
+	gtdINTBCtl.u8State = INTB_NOTFUNC;
 
 	/**
 	 *   NEED to modify
@@ -118,6 +119,11 @@ static int8_t M_INTB_StateMachine(uint8_t *u8Input)
 {
 	int8_t i8Resut = aTRUE;
 	uint32_t u32INTBFlag = 0UL;
+    int8_t PowerState;
+    int8_t DisplayState;
+
+    PowerState = Memory_Pool_PowerState_Get();
+    DisplayState = Memory_Pool_LcdStatus_Get();  
 
 
 	u32INTBFlag = Event_GroupWaitBits(aEVENT_INTB, aINTB_TIME_RDY, aNOTALL);
@@ -139,6 +145,10 @@ static int8_t M_INTB_StateMachine(uint8_t *u8Input)
 			gtdINTBCtl.u8State = INTB_CHECK;
 			//uart_printf("I to C\r\n");
 		}
+        else if(SHUTDOWN1OR2_STATE == Memory_Pool_PowerState_Get())
+        {
+            gtdINTBCtl.u8State = INTB_NOTFUNC;
+        }
 		else
 		{
 			;/* IDLE run */
@@ -207,6 +217,21 @@ static int8_t M_INTB_StateMachine(uint8_t *u8Input)
 		M_INTB_TimerStart(gtdINTBCtl.u32SetupTime);
 		gtdINTBCtl.bTimerStart = aTRUE;
 		gtdINTBCtl.bTrigger = aFALSE;
+	}
+    else if( aFALSE != (INTB_NOTFUNC & gtdINTBCtl.u8State) )
+	{
+
+		 if(NORMAL_RUN_STATE == PowerState && DISPLAY_ON == DisplayState)
+         {
+             gtdINTBCtl.u8State = INTB_IDLE;
+         }
+         else
+	     {
+            gtdINTBCtl.u8State = INTB_NOTFUNC;
+            gtdINTBCtl.bTimerStart = aFALSE;
+	        gtdINTBCtl.bTrigger = aFALSE;            
+	     }
+        
 	}
 	else
 	{

@@ -281,14 +281,14 @@ static void C_Display_Management_CallbackTCHClickHandler(void)
     /* Compares interrupt status if sending INTB. */
     if((u8TempRegVal & BIT_INT_TCH_POS) == 0U)
     {
-		//if(Memory_Pool_PowerStatus_Get() != POWER_OFF_READY)
-		//{
+		if(Memory_Pool_PowerStatus_Get() != POWER_OFF_READY)
+		{
 			/* Send INTB Strategy Control Msg. */
     		ptrINTB->Trigger(aTRUE);
 			//(void)Task_ChangeEvent(TYPE_COMMUNICATION, LEVEL4, EVENT_MESSAGE_START_INTB_STRATEGY);
-		//}
-		//else
-		//{/*Nothing*/}    
+		}
+		else
+		{/*Nothing*/}    
     }
 	else
 	{/*Nothing*/}
