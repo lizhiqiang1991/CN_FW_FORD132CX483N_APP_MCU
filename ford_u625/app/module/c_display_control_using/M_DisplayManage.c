@@ -271,72 +271,747 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 #if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
 		bFlashReloadDisable = false;
 
-		if(bFlashReloadDisable == false)
+		u8ScanSel = (u8Command & (BIT_HSD_MASK | BIT_VSD_MASK));
+
+		switch (u8ScanSel)
 		{
-			HAL_UART_Printf("\r\nNT51926 stop reload, show:%02x!\r\n",u8Command);
-			bFlashReloadDisable = true;
+			case SCAN_VT_HL :  //0x30U
+				/* Vertical scan Top to Bottom and Horizontal Left to Right */
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x21U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
 
-			mu8SendData[0] = 0x1EU;
-			mu8SendData[1] = 0x21U;
-			/*Switch Page to CMD2_P1.*/
-			if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
-			{
-				bFlashReloadDisable = false;
-				Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
-			}
-			else
-			{ /* Nothing */ }
+				mu8SendData[0] = 0x0AU;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
 
-			/* RELOAD_OFF_KEY .*/
-			mu8SendData[0] = 0x0AU;
-			mu8SendData[1] = 0xA5U;        
-			if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
-			{
-				bFlashReloadDisable = false;
-				Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
-			}
-			else
-			{ /* Nothing */ }
+				mu8SendData[0] = 0x09U;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
 
-			mu8SendData[0] = 0x09U;
-			mu8SendData[1] = 0xA5U;        
-			if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
-			{
-				bFlashReloadDisable = false;
-				Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
-			}
-			else
-			{ /* Nothing */ }
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x10U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
 
-			mu8SendData[0] = 0x1EU;
-			mu8SendData[1] = 0x10U;
-			/*Switch Page to CMD1_P0.*/
-			if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
-			{
-				bFlashReloadDisable = false;
-				Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
-			}
-			else
-			{ /* Nothing */ }
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
 
-			mu8SendData[0] = 0x1DU;
-			mu8SendData[1] = 0x03U;
-			/* Do not reload.*/
-			if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
-			{
-				bFlashReloadDisable = false;
-				Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
-			}
-			else
-			{ /* Nothing */ }
-		} 
-		else
-		{ /* Nothing */ }
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x1BU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x30U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x20U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x22U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x04U;
+				mu8SendData[1] = 0xDFU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0xE2U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x08U;
+				mu8SendData[1] = 0xDFU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+			break;
+
+			case SCAN_VT_HR :  //0x10U
+				/* Vertical scan Top to Bottom and Horizontal Right to Left */
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x21U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x0AU;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x09U;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x20U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x03U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x22U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x04U;
+				mu8SendData[1] = 0x9FU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x02U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x08U;
+				mu8SendData[1] = 0x9FU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x10U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x03U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x1BU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x10U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+			break;
+
+			case SCAN_VB_HL :  //0x20U
+				/* Vertical scan Bottom to Top and Horizontal Left to Right */
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x21U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x0AU;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x09U;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x20U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x03U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x22U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x04U;
+				mu8SendData[1] = 0x9FU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x02U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x08U;
+				mu8SendData[1] = 0x9FU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x10U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x03U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x1BU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x20U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+			break;
+
+			case SCAN_VB_HR :  //0x00U
+				/* Vertical scan Bottom to Top and Horizontal Right to Left */
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x21U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x0AU;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x09U;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x20U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x03U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x22U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x04U;
+				mu8SendData[1] = 0x9FU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x02U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x08U;
+				mu8SendData[1] = 0x9FU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x10U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x03U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x1BU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+			break;					
+
+			default:
+				/* Vertical scan Top to Bottom and Horizontal Left to Right */
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x21U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x0AU;
+				mu8SendData[1] = 0xA5U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x09U;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x10U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x1BU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0x30U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x20U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1DU;
+				mu8SendData[1] = 0x00U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x1EU;
+				mu8SendData[1] = 0x22U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x04U;
+				mu8SendData[1] = 0xDFU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x05U;
+				mu8SendData[1] = 0xE2U;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+
+				mu8SendData[0] = 0x08U;
+				mu8SendData[1] = 0xDFU;
+				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+				{
+					bFlashReloadDisable = false;
+					Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+				}
+				else
+				{ /* Nothing */ }
+				
+			break;
+		}
+
+		// if(bFlashReloadDisable == false)
+		// {
+		// 	HAL_UART_Printf("\r\nNT51926 stop reload, show:%02x!\r\n",u8Command);
+		// 	bFlashReloadDisable = true;
+
+		// 	mu8SendData[0] = 0x1EU;
+		// 	mu8SendData[1] = 0x21U;
+		// 	/*Switch Page to CMD2_P1.*/
+		// 	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+		// 	{
+		// 		bFlashReloadDisable = false;
+		// 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+		// 	}
+		// 	else
+		// 	{ /* Nothing */ }
+
+		// 	/* RELOAD_OFF_KEY .*/
+		// 	mu8SendData[0] = 0x0AU;
+		// 	mu8SendData[1] = 0xA5U;        
+		// 	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+		// 	{
+		// 		bFlashReloadDisable = false;
+		// 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+		// 	}
+		// 	else
+		// 	{ /* Nothing */ }
+
+		// 	mu8SendData[0] = 0x09U;
+		// 	mu8SendData[1] = 0xA5U;        
+		// 	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+		// 	{
+		// 		bFlashReloadDisable = false;
+		// 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+		// 	}
+		// 	else
+		// 	{ /* Nothing */ }
+
+		// 	mu8SendData[0] = 0x1EU;
+		// 	mu8SendData[1] = 0x10U;
+		// 	/*Switch Page to CMD1_P0.*/
+		// 	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+		// 	{
+		// 		bFlashReloadDisable = false;
+		// 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+		// 	}
+		// 	else
+		// 	{ /* Nothing */ }
+
+		// 	mu8SendData[0] = 0x1DU;
+		// 	mu8SendData[1] = 0x03U;
+		// 	/* Do not reload.*/
+		// 	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
+		// 	{
+		// 		bFlashReloadDisable = false;
+		// 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
+		// 	}
+		// 	else
+		// 	{ /* Nothing */ }
+		// } 
+		// else
+		// { /* Nothing */ }
 
 		u8ReturnStatus = u8Command;
 
 		mu8SendData[0] = 0x1EU;
-		mu8SendData[1] = 0x1BU;
+		mu8SendData[1] = 0x21U;
 		/*Switch Page to CMD1_PB.*/
 		if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
 		{
@@ -344,38 +1019,11 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 			Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 		}
 		else
-		{ /* Nothing */ }	
+		{ /* Nothing */ }
 
-		mu8SendData[0] = 0x05U;
-		u8ScanSel = (u8Command & (BIT_HSD_MASK | BIT_VSD_MASK));
-
-		switch (u8ScanSel)
-		{
-			case SCAN_VT_HL :  
-				/* Vertical scan Top to Bottom and Horizontal Left to Right */
-				mu8SendData[1] = 0x30U;
-			break;
-
-			case SCAN_VT_HR :  
-				/* Vertical scan Top to Bottom and Horizontal Right to Left */
-				mu8SendData[1] = 0x10U;
-			break;
-
-			case SCAN_VB_HL :  
-				/* Vertical scan Bottom to Top and Horizontal Left to Right */
-				mu8SendData[1] = 0x20U;
-			break;
-
-			case SCAN_VB_HR :  
-				/* Vertical scan Bottom to Top and Horizontal Right to Left */
-				mu8SendData[1] = 0x00U;
-			break;					
-
-			default:
-				/* Vertical scan Top to Bottom and Horizontal Left to Right */
-				mu8SendData[1] = 0x30U; 
-			break;
-		}			
+		mu8SendData[0] = 0x0AU;
+		mu8SendData[1] = 0x00U;
+		/*Switch Page to CMD1_PB.*/
 		if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
 		{
 			u8ReturnStatus = u8CurrentStatus;
@@ -383,6 +1031,7 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 		}
 		else
 		{ /* Nothing */ }
+
 #endif        
 	}
 	else
