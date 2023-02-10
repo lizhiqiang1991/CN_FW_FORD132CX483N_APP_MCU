@@ -585,7 +585,7 @@ void C_Communication_ParaInit(void)
 	tCommunicationTask.u32Timeout = TIME_DISABLE;
 
 	/* Registers INTB Module */
-	//MINTB_Register(M_DM_INTB_Ctrl,INTB_INT_TYPE_FALLING);
+	MINTB_Register(M_DM_INTB_Ctrl,INTB_INT_TYPE_FALLING);
 
 #if(BACKDOOR_ICDIAG_OPEN)
 	ICDIAG_Initialize();
