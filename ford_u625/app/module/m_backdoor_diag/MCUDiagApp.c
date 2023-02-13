@@ -100,6 +100,95 @@ void MCUDIAG_MemRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uin
 	{/*Nothing*/}
 
 }
+/******************************************************************************
+;	Function Name			:	MCUDIAG_NVMRW
+;	Function Description	:	
+;	Parameters				:	
+;	Return Values			:	
+******************************************************************************/
+
+void MCUDIAG_RegRW(uint32_t u32DataAddr, uint8_t *u8TxData, uint8_t u8TxLen, uint8_t *u8RxData, uint8_t u8RxLen)
+{   //implement CX430 function
+	uint32_t u32Data = 0U;
+
+	ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
+	if(u8RxLen > 0U)
+	{
+		if(u8RxLen <= 4U)
+		{
+			u32Data = CY_GET_REG32(u32DataAddr);		
+			if(u8RxLen == 1U)
+			{
+				*(u8RxData) = (uint8_t)(u32Data & 0xFFU);
+			}
+			else if(u8RxLen == 2U)
+			{
+				*(u8RxData)      = (uint8_t)(u32Data & 0xFFU);
+				*(u8RxData + 1U) = (uint8_t)((u32Data >> 8U) & 0xFFU);
+			}
+			else if(u8RxLen == 3U)
+			{
+				*(u8RxData)      = (uint8_t)(u32Data & 0xFFU);
+				*(u8RxData + 1U) = (uint8_t)((u32Data >> 8U) & 0xFFU);
+				*(u8RxData + 2U) = (uint8_t)((u32Data >> 16U) & 0xFFU);
+			}
+			else
+			{
+				*(u8RxData)      = (uint8_t)(u32Data & 0xFFU);
+				*(u8RxData + 1U) = (uint8_t)((u32Data >> 8U) & 0xFFU);
+				*(u8RxData + 2U) = (uint8_t)((u32Data >> 16U) & 0xFFU);
+				*(u8RxData + 3U) = (uint8_t)((u32Data >> 24U) & 0xFFU);  //Dylan 1216 Fix
+			}			
+
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
+		}
+		else
+		{
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
+		}		
+	}
+	else
+	{/*Nothing*/}
+
+	if(u8TxLen > 0U)
+	{
+		if(u8TxLen<=4U)
+		{
+			if(u8TxLen == 1U)
+			{
+				u32Data = (uint32_t)*(u8TxData);
+			}
+			else if(u8TxLen == 2U)
+			{
+				u32Data  = ((uint32_t)*(u8TxData + 1U))<< 8U;
+				u32Data |= (uint32_t)*(u8TxData);
+			}
+			else if(u8TxLen == 3U)
+			{
+				u32Data  = ((uint32_t)*(u8TxData + 2U))	<< 16U;
+				u32Data |= ((uint32_t)*(u8TxData + 1U))	<< 8U;
+				u32Data |= (uint32_t)*(u8TxData);
+			}
+			else
+			{
+				u32Data  = ((uint32_t)*(u8TxData + 3U))	<< 24U;
+				u32Data |= ((uint32_t)*(u8TxData + 2U))	<< 16U;
+				u32Data |= ((uint32_t)*(u8TxData + 1U))	<< 8U;
+				u32Data |= (uint32_t)*(u8TxData);
+			}
+			
+			CY_SET_REG32(u32DataAddr, u32Data);
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
+		}
+		else
+		{
+			ICDIAG_SetCmdResault(ICDIAG_RESULT_FAIL);
+		}
+	}
+	else
+	{/*Nothing*/}
+
+}
 
 /******************************************************************************
 ;	Function Name			:	MCUDIAG_NVMRW
