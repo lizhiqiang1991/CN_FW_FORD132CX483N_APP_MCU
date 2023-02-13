@@ -272,37 +272,56 @@ static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
 /* Jacky@2022.09.30 modify for BX726 PCBA follow "20220804_CX430 and U625_V1.1.xlsx" */
 static int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
 {
-	100, /**< 70 Degree. */
-	100, /**< 71 Degree. */
-	100, /**< 72 Degree. */
-	100, /**< 73 Degree. */
-	100, /**< 74 Degree. */
-	100, /**< 75 Degree. */
-	100, /**< 76 Degree. */
-	100, /**< 77 Degree. */
-	100, /**< 78 Degree. */
-	100, /**< 79 Degree. */
-	100, /**< 80 Degree. */
-	100, /**< 81 Degree. */
-	100, /**< 82 Degree. */
-	100, /**< 83 Degree. */
-	100, /**< 84 Degree. */
-	91, /**< 85 Degree. */
-	82, /**< 86 Degree. */
-	73, /**< 87 Degree. */
-	64, /**< 88 Degree. */
-	55, /**< 89 Degree. */
-	46, /**< 90 Degree. */
-	37, /**< 91 Degree. */
-	28, /**< 92 Degree. */
-	19, /**< 93 Degree. */
-	10, /**< 94 Degree. */
+	// 100, /**< 70 Degree. */
+	// 100, /**< 71 Degree. */
+	// 100, /**< 72 Degree. */
+	// 100, /**< 73 Degree. */
+	// 100, /**< 74 Degree. */
+	// 100, /**< 75 Degree. */
+	// 100, /**< 76 Degree. */
+	// 100, /**< 77 Degree. */
+	// 100, /**< 78 Degree. */
+	// 100, /**< 79 Degree. */
+	// 100, /**< 80 Degree. */
+	// 100, /**< 81 Degree. */
+	// 100, /**< 82 Degree. */
+	// 100, /**< 83 Degree. */
+	// 100, /**< 84 Degree. */
+	// 91, /**< 85 Degree. */
+	// 82, /**< 86 Degree. */
+	// 73, /**< 87 Degree. */
+	// 64, /**< 88 Degree. */
+	// 55, /**< 89 Degree. */
+	// 46, /**< 90 Degree. */
+	// 37, /**< 91 Degree. */
+	// 28, /**< 92 Degree. */
+	// 19, /**< 93 Degree. */
+	// 10, /**< 94 Degree. */
+	// 0, /**< 95 Degree. */
+	// 0, /**< 96 Degree. */
+	// 0, /**< 97 Degree. */
+	// 0, /**< 98 Degree. */
+	// 0, /**< 99 Degree. */
+	// 0, /**< 100 Degree. */
+
+    100, /**< 84 Degree. */
+	87, /**< 85 Degree. */
+	74, /**< 86 Degree. */
+	61, /**< 87 Degree. */
+	49, /**< 88 Degree. */
+	36, /**< 89 Degree. */
+	23, /**< 90 Degree. */
+	10, /**< 91 Degree. */
+	0, /**< 92 Degree. */
+    0, /**< 93 Degree. */
+	0, /**< 94 Degree. */
 	0, /**< 95 Degree. */
 	0, /**< 96 Degree. */
 	0, /**< 97 Degree. */
 	0, /**< 98 Degree. */
 	0, /**< 99 Degree. */
 	0, /**< 100 Degree. */
+
 };
 #else
 #endif

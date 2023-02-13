@@ -29,10 +29,10 @@ extern "C" {
 #define TEMP_DERATING_DEFAULT_OUTDATA 100  /* The default value of backlight PWM duty. */
 #define TEMP_DERATING_FULL_OUTDATA 100  /* The full value of backlight PWM duty. */
 #if(BX726_TDDI_NT51926)
-#define TEMP_DERATING_DEFAULT_DERA_TEMP (70 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of derating threshold */
+#define TEMP_DERATING_DEFAULT_DERA_TEMP (84 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of derating threshold */
 #define TEMP_DERATING_DEFAULT_REDUCEBL_TEMP (85 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of reduce threshold */
-#define TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP (95 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down threshold */
-#define TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP (93 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down release threshold */
+#define TEMP_DERATING_DEFAULT_SHUTDOWN_TEMP (92 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down threshold */
+#define TEMP_DERATING_DEFAULT_SHUTDOWN_REL_TEMP (90 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of shut down release threshold */
 #else
 #define TEMP_DERATING_DEFAULT_DERA_TEMP (88 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of derating threshold */
 #define TEMP_DERATING_DEFAULT_REDUCEBL_TEMP (89 * TEMP_DERATING_TEMP_RESOLUTION) /* The default value of reduce threshold */
