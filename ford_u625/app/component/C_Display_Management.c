@@ -187,18 +187,16 @@ void U301_TSC_ATTN_ISR(void)
 		// u8StartDebounce = 0U;
 		// gu8HighLvCNT = 0U;
 		// gu8ATTNST &= ~ATTN_RELEASE;
-		Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 		C_Display_Management_CallbackTCHClickRelHandler();
 		Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_FALLING);
 	}
-	else if( CY_GPIO_INTR_FALLING == u32TriggerEdge )
+	else if( CY_GPIO_INTR_FALLING == u32TriggerEdge && (Memory_Pool_TouchStatus_Get() == TOUCH_ON) )
 	{
 		/* high to low */
 		// gu32LVTrigger = CY_GPIO_INTR_FALLING;
 		// u8StartDebounce = 0U;
 		// gu8LowLvCNT = 0U;
 		// gu8ATTNST &= ~ATTN_ASSERT;
-		Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 		C_Display_Management_CallbackTCHClickHandler();
 		Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_RISING);
 	}
@@ -605,6 +603,7 @@ static uint8_t C_Display_Sequence_Control(uint8_t u8DispCtrlState, uint8_t u8Set
 
 							break;							
 						case DS_ACTION_TOUCH_STATUS:
+							Memory_Pool_TouchStatus_Set(TOUCH_ON);
 							/* Set 0x00 TSC_ST bit */							
 							if (Memory_Pool_TouchStatus_Get() == TOUCH_ON)
 							{
@@ -1041,7 +1040,7 @@ static void C_Display_Manage_Init(void)
             {
             	/* Power is ready and start I2C Master bus Initialize */
                 M_DM_I2cMasterInit();
-				Memory_Pool_TouchStatus_Set(TOUCH_ON);
+				Memory_Pool_TouchStatus_Set(TOUCH_OFF);
 				Memory_Pool_LcdResetStatus_Set(LCD_RESET_HIGH);
 				tDisplayCtrl.bPowerStartupEvent = true;
 
