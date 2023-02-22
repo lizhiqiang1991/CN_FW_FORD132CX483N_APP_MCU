@@ -132,6 +132,7 @@ typedef struct
 
 	uint32_t u32NT51926_Vcom;
 	uint8_t	u8NT51926VGMA[4U];
+	bool bDisplayBusySet;
 } tdisplay_management_def;
 
 typedef struct
@@ -359,6 +360,9 @@ uint8_t Memory_Pool_DisplayEnable_Get(void);
 
 void Memory_Pool_DisplayEnable_Reg_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_DisplayEnable_Reg_Get(void);
+
+void Memory_Pool_DisplayBusy_Set(bool bSetValue);
+bool Memory_Pool_DisplayBusy_Get(void);
 
 void Memory_Pool_PowerStatus_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_PowerStatus_Get(void);

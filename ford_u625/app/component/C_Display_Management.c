@@ -1183,12 +1183,23 @@ static void C_Display_Manage_Control(void)
 					tDisplayCtrl.bDiagnosisProtectLeve = false; /* Recover disable */
 					tDisplayCtrl.bBacklightSetBackup = false; /* Clear Recover setting */
 				}
-				else
+				else if(Memory_Pool_DisplayBusy_Get() == false)
 				{
 					u8Status = DS_ACTION_NONE;
 					u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 					tDisplayCtrl.u8DispSeqStatus = u8Status;
+					if(tDisplayCtrl.u8DispSeqStatus == DS_ACTION_NONE)
+					{
+						Memory_Pool_DisplayBusy_Set(false);
+					}
+					else
+					{
+						Memory_Pool_DisplayBusy_Set(true);
+					}
+
 				}
+				else
+				{/* Nothing */}
 				
 			}
 			else
@@ -1205,6 +1216,15 @@ static void C_Display_Manage_Control(void)
         case EVENT_DISPLAY_CONTORL_DELAY :
 			u8Status = C_Display_Sequence_Control(u8Status, tDisplayCtrl.u8CurrentDisplaySet);
 			tDisplayCtrl.u8DispSeqStatus = u8Status;
+			if(tDisplayCtrl.u8DispSeqStatus == DS_ACTION_NONE)
+			{
+				Memory_Pool_DisplayBusy_Set(false);
+			}
+			else
+			{
+				Memory_Pool_DisplayBusy_Set(true);
+			}
+			//HAL_UART_Printf("\r\nEVENT_DISPLAY_CONTORL_DELAY:%d\r\n",tDisplayCtrl.u8DispSeqStatus);
 
             break;
         case EVENT_MESSAGE_SCANNING :

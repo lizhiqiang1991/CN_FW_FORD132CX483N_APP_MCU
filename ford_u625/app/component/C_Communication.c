@@ -251,7 +251,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 
 		case CMD_DISPLAY_ENABLE:
 			u8Temp = Memory_Pool_DisplayEnable_Reg_Get();
-			if(u8Temp != DISPLAY_OFF_TOUCH_ON)
+			if((u8Temp != DISPLAY_OFF_TOUCH_ON)&&(Memory_Pool_DisplayBusy_Get() == false))
 			{
 				if ((u8Temp & BIT_DISP_EN_POS) == DISPLAY_ENABLE)
 				{

@@ -50,7 +50,7 @@ tdiagnosis_simulate_def gtDiagnosisSimulateInfo =
 };
 #endif
 
-tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U };
+tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U, .bDisplayBusySet = false };
 
 #if(U717_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x00U };    
@@ -1683,6 +1683,30 @@ uint8_t Memory_Pool_DisplayEnable_Get(void)
 {
     return gtDisplayManageInfo.u8DisplayEnableSet;
 }
+
+/******************************************************************************
+ ;       Function Name			:	void Memory_Pool_DisplayBusy_Set(bool bSetValue)
+ ;       Function Description	:	Set DisplayBusy value
+ ;       Parameters				:	bool bSetValue
+ ;       Return Values			:	void
+ ;       Source ID				:
+ ******************************************************************************/
+void Memory_Pool_DisplayBusy_Set(bool bSetValue)
+{
+    gtDisplayManageInfo.bDisplayBusySet = bSetValue;
+}
+/******************************************************************************
+ ;       Function Name			:	bool Memory_Pool_DisplayBusy_Get(void)
+ ;       Function Description	:	Get DisplayBusy value
+ ;       Parameters				:	void
+ ;       Return Values			:	bool gtDisplayManageInfo.bDisplayBusySet
+ ;       Source ID				:
+ ******************************************************************************/
+bool Memory_Pool_DisplayBusy_Get(void)
+{
+    return gtDisplayManageInfo.bDisplayBusySet;
+}
+
 
 /******************************************************************************
  ;       Function Name			:	void Memory_Pool_LcdResetStatus_Set(uint8_t u8SetValue)
