@@ -11,7 +11,7 @@
 
 #include "public.h"
 
-#define BP_VMIN_CFG				68 /*Define as 6.8V, unit: 0.1V*/
+#define BP_VMIN_CFG				66 /*Define as 6.6V, unit: 0.1V*/
 #define BP_VMINRCV_CFG			70 /*Define as 7.0V, unit: 0.1V*/
 #define BP_VMAX_CFG				220 /*Define as 22V, unit: 0.1V*/
 #define BP_VMAXRCV_CFG			180 /*Define as 18V, unit: 0.1V*/
