@@ -105,6 +105,8 @@ static void Main_BspInit(void)
 	(void) FIDM_CLI_Init();
 #endif
 	(void) Main_SysTickInit();
+	(void) Cy_WDT_Init(); // Test WDT 108
+	(void) Cy_WDT_Enable(); // Test WDT 109
 }
 /******************************************************************************
 
@@ -133,6 +135,7 @@ int main(void)
 #ifdef DEBUG_UART_EN
 		SCLI_Run();
 #endif
+		//Cy_WDT_ClearWatchdog();
 		Task_ProcessTask();
 		ptrINTB->StateMachine(NULL);  //INTB function 2023/01/17
 	}

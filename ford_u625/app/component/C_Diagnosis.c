@@ -1156,6 +1156,7 @@ static void C_Diagnosis_Control(void)
 			}
 			else
 			{/*Nothing*/}
+			Cy_WDT_ClearWatchdog();
 			C_Diagnosis_Action();
 			tDiagnosisTask.u16Timer2 = TIME_10ms;
 		break;
