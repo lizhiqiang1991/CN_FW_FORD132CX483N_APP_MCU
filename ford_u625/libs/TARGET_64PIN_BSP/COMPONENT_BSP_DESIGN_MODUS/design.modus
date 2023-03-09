@@ -866,17 +866,11 @@
                         <Param id="divider" value="1"/>
                     </Personality>
                 </Block>
-                <Block location="srss[0].clock[0].ilo[0]">
-                    <Personality template="m0s8ilo" version="1.0"/>
-                </Block>
                 <Block location="srss[0].clock[0].imo[0]">
                     <Personality template="m0s8imo" version="1.0">
                         <Param id="frequency" value="48000000"/>
                         <Param id="trim" value="2"/>
                     </Personality>
-                </Block>
-                <Block location="srss[0].clock[0].lfclk[0]">
-                    <Personality template="m0s8lfclk" version="1.0"/>
                 </Block>
                 <Block location="srss[0].clock[0].pumpclk[0]">
                     <Personality template="m0s8pumpclk" version="1.0">
@@ -903,12 +897,6 @@
                         <Param id="deepsleepLatency" value="0"/>
                         <Param id="vddaMv" value="3300"/>
                         <Param id="vdddMv" value="3300"/>
-                    </Personality>
-                </Block>
-                <Block location="srss[0].wdt[0]">
-                    <Personality template="m0s8wdt" version="1.0">
-                        <Param id="match" value="4096"/>
-                        <Param id="ignore" value="0"/>
                     </Personality>
                 </Block>
                 <Block location="tcpwm[0].cnt[0]">

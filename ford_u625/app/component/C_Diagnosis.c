@@ -1069,7 +1069,7 @@ static void C_Diagnosis_Init(void)
 				tDiagnosisTask.u16Timer1 = TIME_DISABLE;
  				(void)Task_ChangeState(TYPE_DIAGNOSIS, LEVEL5, STATE_DIAGNOSIS_CTRL, Diagnosis_State_Machine[STATE_DIAGNOSIS_CTRL]);
 				Memory_Pool_DiagnosisEnable_Set(true);
-				uart_printf("Diagnosis Enable");
+				//uart_printf("Diagnosis Enable");
 			}
 			else
 			{
