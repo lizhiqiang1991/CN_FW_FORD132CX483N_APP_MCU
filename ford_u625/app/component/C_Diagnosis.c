@@ -299,16 +299,16 @@ static void C_Diagnosis_IO_SerdesLock(void)
 static void C_Diagnosis_Vol_FPCTx(void)
 {
     uint16_t u16Temp;
- 	uint16_t u16VolTemp=Memory_Pool_FPCTxOutVol_Get();
+ 	int16_t i16VolTemp=Memory_Pool_FPCTxOutVol_Get();
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
-	u16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().u16FPCTXVol;
+	i16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().i16FPCTXVol;
 #endif
 
 	/* Check diagnosis is enable or not*/
 	if(tFpcTx.blEnable == true)
 	{
 		/* Count Debounce. */
-		if(u16VolTemp < DIAG_FPC_TX_DISCON_VOL)
+		if(i16VolTemp < DIAG_FPC_TX_DISCON_VOL)
 		{
 			tFpcTx.u8DebounceHigh=0U;
 			if(tFpcTx.u8DebounceLow < tFpcTx.u8DebounceMax)
@@ -363,16 +363,16 @@ static void C_Diagnosis_Vol_FPCTx(void)
 static void C_Diagnosis_Vol_FPCRx(void)
 {
     uint16_t u16Temp;
- 	uint16_t u16VolTemp=Memory_Pool_FPCRxOutVol_Get();
+ 	int16_t i16VolTemp=Memory_Pool_FPCRxOutVol_Get();
 #if (BACKDOOR_DIAGNOSIS_SIMULATE)
-	u16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().u16FPCRXVol;
+	i16VolTemp=Memory_Pool_DiagnosisSimulateInfo_Get().i16FPCRXVol;
 #endif
 
 	/* Check diagnosis is enable or not*/
 	if(tFpcRx.blEnable == true)
 	{
 		/* Count Debounce. */
-		if(u16VolTemp < DIAG_FPC_RX_DISCON_VOL)
+		if(i16VolTemp < DIAG_FPC_RX_DISCON_VOL)
 		{
 			tFpcRx.u8DebounceHigh=0U;
 			if(tFpcRx.u8DebounceLow < tFpcRx.u8DebounceMax)
@@ -1069,7 +1069,6 @@ static void C_Diagnosis_Init(void)
 				tDiagnosisTask.u16Timer1 = TIME_DISABLE;
  				(void)Task_ChangeState(TYPE_DIAGNOSIS, LEVEL5, STATE_DIAGNOSIS_CTRL, Diagnosis_State_Machine[STATE_DIAGNOSIS_CTRL]);
 				Memory_Pool_DiagnosisEnable_Set(true);
-				uart_printf("Diagnosis Enable");
 			}
 			else
 			{

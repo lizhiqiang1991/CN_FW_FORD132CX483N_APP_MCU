@@ -49,15 +49,15 @@ typedef struct
 	int16_t i16PCBATemperature;
 	uint16_t u16SyncVol;
 	uint16_t u16BatteryVol;
-	uint16_t u16FPCTxOutVol;
-	uint16_t u16FPCRxOutVol;
+	int16_t i16FPCTxOutVol;
+	int16_t i16FPCRxOutVol;
 
 	uint16_t u16TBacklightAnaVol;
 	uint16_t u16TPCBAAnaVol;
 	uint16_t u16SyncAnaVol;
 	uint16_t u16BatteryAnaVol;
-	uint16_t u16FPCTxOutAnaVol;
-	uint16_t u16FPCRxOutAnaVol;
+	int16_t i16FPCTxOutAnaVol;
+	int16_t i16FPCRxOutAnaVol;
 
 	int16_t i16BacklightTemperatureADC;
 	int16_t i16PCBATemperatureADC;
@@ -253,17 +253,17 @@ uint16_t Memory_Pool_BatteryVol_Get(void);
 void Memory_Pool_BatteryAnaVol_Set(uint16_t u16SetValue);
 uint16_t Memory_Pool_BatteryAnaVol_Get(void);
 
-void Memory_Pool_FPCTxOutVol_Set(uint16_t u16SetValue);
-uint16_t Memory_Pool_FPCTxOutVol_Get(void);
+void Memory_Pool_FPCTxOutVol_Set(int16_t i16SetValue);
+int16_t Memory_Pool_FPCTxOutVol_Get(void);
 
-void Memory_Pool_FPCTxOutAnaVol_Set(uint16_t u16SetValue);
-uint16_t Memory_Pool_FPCTxOutAnaVol_Get(void);
+void Memory_Pool_FPCTxOutAnaVol_Set(int16_t i16SetValue);
+int16_t Memory_Pool_FPCTxOutAnaVol_Get(void);
 
-void Memory_Pool_FPCRxOutVol_Set(uint16_t u16SetValue);
-uint16_t Memory_Pool_FPCRxOutVol_Get(void);
+void Memory_Pool_FPCRxOutVol_Set(int16_t i16SetValue);
+int16_t Memory_Pool_FPCRxOutVol_Get(void);
 
-void Memory_Pool_FPCRxOutAnaVol_Set(uint16_t u16SetValue);
-uint16_t Memory_Pool_FPCRxOutAnaVol_Get(void);
+void Memory_Pool_FPCRxOutAnaVol_Set(int16_t i16SetValue);
+int16_t Memory_Pool_FPCRxOutAnaVol_Get(void);
 
 void Memory_Pool_BLTempADC_Set(int16_t i16SetValue);
 int16_t Memory_Pool_BLTempADC_Get(void);
