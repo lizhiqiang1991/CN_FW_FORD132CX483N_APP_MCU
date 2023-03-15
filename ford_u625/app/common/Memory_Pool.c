@@ -799,9 +799,9 @@ uint16_t Memory_Pool_BatteryAnaVol_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPCTxOutVol_Set(uint16_t u16SetValue)
+void Memory_Pool_FPCTxOutVol_Set(int16_t i16SetValue)
 {
-    gtDataCollectInfo.u16FPCTxOutVol = u16SetValue;
+    gtDataCollectInfo.i16FPCTxOutVol = i16SetValue;
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -810,9 +810,9 @@ void Memory_Pool_FPCTxOutVol_Set(uint16_t u16SetValue)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-uint16_t Memory_Pool_FPCTxOutVol_Get(void)
+int16_t Memory_Pool_FPCTxOutVol_Get(void)
 {
-    return gtDataCollectInfo.u16FPCTxOutVol;
+    return gtDataCollectInfo.i16FPCTxOutVol;
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -821,9 +821,9 @@ uint16_t Memory_Pool_FPCTxOutVol_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPCTxOutAnaVol_Set(uint16_t u16SetValue)
+void Memory_Pool_FPCTxOutAnaVol_Set(int16_t i16SetValue)
 {
-    gtDataCollectInfo.u16FPCTxOutAnaVol = u16SetValue;
+    gtDataCollectInfo.i16FPCTxOutAnaVol = i16SetValue;
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -832,9 +832,9 @@ void Memory_Pool_FPCTxOutAnaVol_Set(uint16_t u16SetValue)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-uint16_t Memory_Pool_FPCTxOutAnaVol_Get(void)
+int16_t Memory_Pool_FPCTxOutAnaVol_Get(void)
 {
-    return gtDataCollectInfo.u16FPCTxOutAnaVol;
+    return gtDataCollectInfo.i16FPCTxOutAnaVol;
 }
 
 /******************************************************************************
@@ -844,9 +844,9 @@ uint16_t Memory_Pool_FPCTxOutAnaVol_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPCRxOutVol_Set(uint16_t u16SetValue)
+void Memory_Pool_FPCRxOutVol_Set(int16_t i16SetValue)
 {
-    gtDataCollectInfo.u16FPCRxOutVol = u16SetValue;
+    gtDataCollectInfo.i16FPCRxOutVol = i16SetValue;
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -855,9 +855,9 @@ void Memory_Pool_FPCRxOutVol_Set(uint16_t u16SetValue)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-uint16_t Memory_Pool_FPCRxOutVol_Get(void)
+int16_t Memory_Pool_FPCRxOutVol_Get(void)
 {
-    return gtDataCollectInfo.u16FPCRxOutVol;
+    return gtDataCollectInfo.i16FPCRxOutVol;
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -866,9 +866,9 @@ uint16_t Memory_Pool_FPCRxOutVol_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-void Memory_Pool_FPCRxOutAnaVol_Set(uint16_t u16SetValue)
+void Memory_Pool_FPCRxOutAnaVol_Set(int16_t i16SetValue)
 {
-    gtDataCollectInfo.u16FPCRxOutAnaVol = u16SetValue;
+    gtDataCollectInfo.i16FPCRxOutAnaVol = i16SetValue;
 }
 /******************************************************************************
  ;       Function Name			:	void (void)
@@ -877,9 +877,9 @@ void Memory_Pool_FPCRxOutAnaVol_Set(uint16_t u16SetValue)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
-uint16_t Memory_Pool_FPCRxOutAnaVol_Get(void)
+int16_t Memory_Pool_FPCRxOutAnaVol_Get(void)
 {
-    return gtDataCollectInfo.u16FPCRxOutAnaVol;
+    return gtDataCollectInfo.i16FPCRxOutAnaVol;
 }
 
 /******************************************************************************
@@ -2110,20 +2110,20 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 		break;
 
 		case CMD_FPCTXOUTVOLINFO:
-			*(pDataBuffer + 1U) = (gtDataCollectInfo.u16FPCTxOutVol*1U);
-			*(pDataBuffer + 2U) = (gtDataCollectInfo.u16FPCTxOutVol*1U)>>8U;
-			*(pDataBuffer + 3U) = gtDataCollectInfo.u16FPCTxOutAnaVol;
-			*(pDataBuffer + 4U) = gtDataCollectInfo.u16FPCTxOutAnaVol>>8U;
+			*(pDataBuffer + 1U) = (gtDataCollectInfo.i16FPCTxOutVol*1U);
+			*(pDataBuffer + 2U) = (gtDataCollectInfo.i16FPCTxOutVol*1U)>>8U;
+			*(pDataBuffer + 3U) = gtDataCollectInfo.i16FPCTxOutAnaVol;
+			*(pDataBuffer + 4U) = gtDataCollectInfo.i16FPCTxOutAnaVol>>8U;
 			*(pDataBuffer + 5U) = gtDataCollectInfo.i16FPCTxOutADC;
 			*(pDataBuffer + 6U) = gtDataCollectInfo.i16FPCTxOutADC>>8U;
 			*pLength = LEN_FPCTXOUTVOLTAGE_INFO + LEN_SUBADDRESS;
 		break;
 
 		case CMD_FPCRXOUTVOLINFO:
-			*(pDataBuffer + 1U) = (gtDataCollectInfo.u16FPCRxOutVol*1U);
-			*(pDataBuffer + 2U) = (gtDataCollectInfo.u16FPCRxOutVol*1U)>>8U;
-			*(pDataBuffer + 3U) = gtDataCollectInfo.u16FPCRxOutAnaVol;
-			*(pDataBuffer + 4U) = gtDataCollectInfo.u16FPCRxOutAnaVol>>8U;
+			*(pDataBuffer + 1U) = (gtDataCollectInfo.i16FPCRxOutVol*1U);
+			*(pDataBuffer + 2U) = (gtDataCollectInfo.i16FPCRxOutVol*1U)>>8U;
+			*(pDataBuffer + 3U) = gtDataCollectInfo.i16FPCRxOutAnaVol;
+			*(pDataBuffer + 4U) = gtDataCollectInfo.i16FPCRxOutAnaVol>>8U;
 			*(pDataBuffer + 5U) = gtDataCollectInfo.i16FPCRxOutADC;
 			*(pDataBuffer + 6U) = gtDataCollectInfo.i16FPCRxOutADC>>8U;
 			*pLength = LEN_FPCRXOUTVOLTAGE_INFO + LEN_SUBADDRESS;
