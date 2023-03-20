@@ -33,6 +33,7 @@
 #define	ICDIAG_ICTYPE_SPI			0x02U /* IC with SPI. */
 #define	ICDIAG_ICTYPE_MCU_MEM		0x03U /* MCU register. */
 #define	ICDIAG_ICTYPE_MCU_NVM		0x04U /* MCU EEProm(NVM). */
+#define	ICDIAG_ICTYPE_MCU_REG		0x05U
 
 #define	ICDIAG_STATUS_IDLE			0x00U /* Process idle */
 #define	ICDIAG_STATUS_PACKED		0x01U /* Command packed after recieve from host, ready to submit. */
@@ -228,7 +229,7 @@ void ICDIAG_CmdTrigger(uint8_t u8Cmd, uint8_t u8ICType, uint8_t u8Channel, uint8
 					ICDIAG_SetCmdResault(ICDIAG_RESULT_NONE);
 				}
 				/*Pack MCU write or control package for driver API*/
-				else if((u8ICType == ICDIAG_ICTYPE_MCU_MEM) || (u8ICType == ICDIAG_ICTYPE_MCU_NVM))
+				else if((u8ICType == ICDIAG_ICTYPE_MCU_MEM) || (u8ICType == ICDIAG_ICTYPE_MCU_NVM)  || (u8ICType == ICDIAG_ICTYPE_MCU_REG) )
 				{
 					I2CICDiagCtrl.u8ICType=u8ICType;
 					I2CICDiagCtrl.u8Channel=u8Channel;
@@ -274,7 +275,7 @@ void ICDIAG_CmdTrigger(uint8_t u8Cmd, uint8_t u8ICType, uint8_t u8Channel, uint8
 					ICDIAG_SetCmdResault(ICDIAG_RESULT_NONE);
 				}
 				/*Pack MCU fetch package for driver API*/
-				else if((u8ICType == ICDIAG_ICTYPE_MCU_MEM) || (u8ICType == ICDIAG_ICTYPE_MCU_NVM))
+				else if((u8ICType == ICDIAG_ICTYPE_MCU_MEM) || (u8ICType == ICDIAG_ICTYPE_MCU_NVM) || (u8ICType == ICDIAG_ICTYPE_MCU_REG))
 				{
 					I2CICDiagCtrl.u8ICType=u8ICType;
 					I2CICDiagCtrl.u8Channel=u8Channel;
@@ -330,7 +331,7 @@ void ICDIAG_Main(void)
 #if ICDIAG_USE_GM_DRV_API
 				I2cMasterApp_ICDiag(I2CICDiagCtrl.u8DeviceAddr, I2CICDiagCtrl.u8Channel, I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
 #elif ICDIAG_USE_SGM_DRV_API
-				I2cMasterApp_ICDiag(I2CICDiagCtrl.u8DeviceAddr, I2CICDiagCtrl.u8Channel, I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
+				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD23P6_DRV_API
 				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD13P2_DRV_API
@@ -343,7 +344,7 @@ void ICDIAG_Main(void)
 #if ICDIAG_USE_GM_DRV_API
 				MCUDIAG_MemRW(((uint8_t*)I2CICDiagCtrl.u32DataAddr), I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
 #elif ICDIAG_USE_SGM_DRV_API
-				MCUDIAG_MemRW(((uint8_t*)I2CICDiagCtrl.u32DataAddr), I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
+				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD23P6_DRV_API
 				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD13P2_DRV_API
@@ -356,7 +357,7 @@ void ICDIAG_Main(void)
 #if ICDIAG_USE_GM_DRV_API
 				MCUDIAG_NVMRW(I2CICDiagCtrl.u32DataAddr, I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
 #elif ICDIAG_USE_SGM_DRV_API
-				MCUDIAG_NVMRW(I2CICDiagCtrl.u32DataAddr, I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
+				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD23P6_DRV_API
 				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD13P2_DRV_API
@@ -374,6 +375,12 @@ void ICDIAG_Main(void)
 				ICDIAG_SetCmdResault(ICDIAG_RESULT_SUCCESS);
 #elif ICDIAG_USE_FORD13P2_DRV_API
 
+#endif
+			}
+			else if(I2CICDiagCtrl.u8ICType == ICDIAG_ICTYPE_MCU_REG)
+			{
+#if ICDIAG_USE_FORD13P2_DRV_API
+				MCUDIAG_RegRW(I2CICDiagCtrl.u32DataAddr, I2CICDiagCtrl.u8ICTxBuf, I2CICDiagCtrl.u8ICTxLen, I2CICDiagCtrl.u8ICRxBuf, I2CICDiagCtrl.u8ICRxLen);
 #endif
 			}
 			else
