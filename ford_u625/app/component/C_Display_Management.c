@@ -180,24 +180,28 @@ void U301_TSC_ATTN_ISR(void)
 
 	u32TriggerEdge = Cy_GPIO_GetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN);
 
-	if( CY_GPIO_INTR_RISING == u32TriggerEdge )
+	if( CY_GPIO_INTR_RISING == u32TriggerEdge && (Memory_Pool_TouchStatus_Get() == TOUCH_ON) )
 	{
 		/* low to high */
 		// gu32LVTrigger = CY_GPIO_INTR_RISING;
 		// u8StartDebounce = 0U;
 		// gu8HighLvCNT = 0U;
 		// gu8ATTNST &= ~ATTN_RELEASE;
-		C_Display_Management_CallbackTCHClickRelHandler();
+		C_Display_Management_CallbackTCHClickHandler();
+		//C_Display_Management_CallbackTCHClickRelHandler();
+		Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 		Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_FALLING);
 	}
-	else if( CY_GPIO_INTR_FALLING == u32TriggerEdge && (Memory_Pool_TouchStatus_Get() == TOUCH_ON) )
+	else if( CY_GPIO_INTR_FALLING == u32TriggerEdge )
 	{
 		/* high to low */
 		// gu32LVTrigger = CY_GPIO_INTR_FALLING;
 		// u8StartDebounce = 0U;
 		// gu8LowLvCNT = 0U;
 		// gu8ATTNST &= ~ATTN_ASSERT;
-		C_Display_Management_CallbackTCHClickHandler();
+		//C_Display_Management_CallbackTCHClickHandler();
+		C_Display_Management_CallbackTCHClickRelHandler();
+		Cy_GPIO_Inv(TEST_PIN_PORT, TEST_PIN_PIN);
 		Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_RISING);
 	}
 	else if( CY_GPIO_INTR_BOTH == u32TriggerEdge)
@@ -1057,10 +1061,10 @@ static void C_Display_Manage_Init(void)
                 gu8HighLvCNT = 0U;
                 gu8LowLvCNT = 0U;
                 gu8ATTNST = 0U;
-                gu32LVTrigger = CY_GPIO_INTR_FALLING;
+                gu32LVTrigger = CY_GPIO_INTR_RISING;
                 Timer_Module_Init();
 
-                Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_FALLING);
+                Cy_GPIO_SetInterruptEdge(U301_TSC_ATTN_PORT, U301_TSC_ATTN_PIN, CY_GPIO_INTR_RISING);
         		Cy_SysInt_Init(&gtdATTNCfg, &U301_TSC_ATTN_ISR);
         		NVIC_EnableIRQ(gtdATTNCfg.intrSrc);
         		/* End of Jacky@20221213 for losing ATTN */
