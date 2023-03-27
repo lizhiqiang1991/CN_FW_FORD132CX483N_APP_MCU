@@ -86,7 +86,10 @@ typedef struct
 	uint8_t  u8NT51926DpStatusOnDebunce;
 	uint8_t  u8NT51926DpStatusOnDebunce_RECOV;
 	uint8_t  u8NT51926DpStatusOfDebunce;
-	uint8_t  u8NT51926DpStatusOfDebunce_RECOV;	
+	uint8_t  u8NT51926DpStatusOfDebunce_RECOV;
+
+	uint8_t  u8NT51926TpFWDebunce;	
+	uint8_t  u8NT51926TpFWDebunce_RECOV;
 
 	bool bFirstLedIntDebounceFinsh;	
 }tdiagnosis_ctrl_def;

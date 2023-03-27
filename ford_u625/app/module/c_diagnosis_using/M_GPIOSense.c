@@ -268,14 +268,14 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	u8ReadData[7U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[7U];
 #endif
 	
-	u64ReturnStatus = (uint64_t)(u8ReadData[0U] & 0x9AU);
+	u64ReturnStatus = (uint64_t)(u8ReadData[0U] & 0x7DU);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[1U] & 0x03U)) << 8U);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[2U] & 0x01U)) << 16U);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[3U] & 0x01U)) << 24U);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[4U] & 0x7FU)) << 32U);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[5U] & 0x02U)) << 40U);
 	u64ReturnStatus |= (((uint64_t)(u8ReadData[6U] & 0x07U)) << 48U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[7U] & 0x03U)) << 56U);
+	u64ReturnStatus |= (((uint64_t)(u8ReadData[7U] & 0x07U)) << 56U);
 
 	return u64ReturnStatus;
 }
