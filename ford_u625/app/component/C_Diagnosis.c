@@ -157,13 +157,11 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					{
 						tDiagCtrl.u8NT51926TpFWDebunce_RECOV = 0U ;
 						tDiagCtrl.u8NT51926TpFWDebunce ++;
-						//HAL_UART_Printf("[A3] u8NT51926TpFWDebunce++");
 					}
 					else
 					{
 					 	tDiagCtrl.u8NT51926TpFWDebunce = 0U;
 					 	tDiagCtrl.u8NT51926TpFWDebunce_RECOV ++;
-					 	//HAL_UART_Printf("[A3] u8NT51926TpFWDebunce_RECOV++");
 					}
 
 					if(tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
@@ -857,7 +855,7 @@ static void C_Diagnosis_Action(void)
 	/************************************************************************************************/
 	u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 	/* Record 0x00. */
-	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS)) > 0UL)
+	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_GATE_ERROR_POS | BIT_A3_PANEL_SOURCE_ERROR_POS | BIT_A3_PANEL_FLASH_CRC_ERROR_POS)) > 0UL)
 	{
 		u32Temp|=BIT_LCDERR_POS;
 	}
