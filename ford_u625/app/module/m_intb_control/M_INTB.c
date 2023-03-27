@@ -217,7 +217,7 @@ static int8_t M_INTB_StateMachine(uint8_t *u8Input)
 
 static int8_t M_INTB_Trigger(uint8_t u8Input)
 {
-	HAL_UART_Printf("\r\nIN_ptrINTB_Trigger!\r\n");
+	//HAL_UART_Printf("\r\nIN_ptrINTB_Trigger!\r\n");
 	int8_t i8Resut = aTRUE;
 	gtdINTBCtl.bTrigger = aTRUE;
 	return i8Resut;
