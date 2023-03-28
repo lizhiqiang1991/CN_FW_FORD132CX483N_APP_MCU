@@ -467,6 +467,7 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 					else
 					{
 						u8MSGFormatCheckResult=FORMAT_READ_FORMAT_CORRECT;
+						memset(mu8BackupTxBuff, 0xFFU, BUFFER_SIZE);
 						/* Backup command for error handling use if next command format rolling counter error */
 						mu8BackupTxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
 
@@ -509,6 +510,7 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 					else
 					{
 						u8MSGFormatCheckResult=FORMAT_WRITE_FORMAT_CORRECT;
+						memset(mu8BackupTxBuff, 0xFFU, BUFFER_SIZE);
 						/* Backup command for error handling use if next command format rolling counter error */
 						mu8BackupTxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
 
@@ -552,6 +554,9 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 	          Memory_Pool_DisplayStatus_Set((Memory_Pool_ReadAfterDisplayStatus_Get() & (~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get());
             }
 			/* Michelle Add */
+
+			/* Clear all data. */
+			memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
 			/* Restore subaddress for echo purpose. */
 			mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
             /* Fetch the information from memory pool. */
