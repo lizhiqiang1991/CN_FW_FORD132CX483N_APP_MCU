@@ -1113,6 +1113,28 @@ uint64_t Memory_Pool_NT51926Diagnosis_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
+void Memory_Pool_NT51926FWDiagnosis_Set(uint8_t u8SetValue)
+{
+    gtDiagnosisInfo.u8NT51926FWDiagnosis = u8SetValue;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+uint8_t Memory_Pool_NT51926FWDiagnosis_Get(void)
+{
+    return gtDiagnosisInfo.u8NT51926FWDiagnosis;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
 void Memory_Pool_IcCommDiagnosis_Set(uint16_t u16SetValue)
 {
 	if(u16SetValue > 0U ) 
@@ -1975,6 +1997,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 14U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 40U) & 0xFFU;
 			*(pDataBuffer + 15U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 48U) & 0xFFU;
 			*(pDataBuffer + 16U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 56U) & 0xFFU;			
+			*(pDataBuffer + 17U) = gtDiagnosisInfo.u8NT51926FWDiagnosis & 0xFFU;
 			*pLength = LEN_DETIAL_DIAGNOSIS + LEN_SUBADDRESS;
 		break;
 
