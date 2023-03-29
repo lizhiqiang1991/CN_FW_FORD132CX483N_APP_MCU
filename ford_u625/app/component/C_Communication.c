@@ -474,11 +474,11 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 						/* Clear all data. */
 						memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
 						/* Copy sub-address */
-						mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
+						mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];//mu8TxBuff=04
 						/* Fetch the information from memory pool. */
-						Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);
+						Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength); //Fetch mu8TxBuff[0] value and put 03 into mu8TxBuff[1]
 						/* Calculated the rolling counter and CRC8 or checksum. */
-						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);
+						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);//add rc crc,mu8TxBuff=04 03 4A 1c
 						/* MCU returns data.*/
 						M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
 					}
@@ -522,11 +522,11 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 						/* Clear all data. */
 						memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
 						/* Copy sub-address */
-						mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];//寫04 到TXBuff
+						mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
 						/* Fetch the information from memory pool. */
-						Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);//抓取backup的值 03
+						Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);
 						/* Calculated the rolling counter and CRC8 or checksum. */
-						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);//加上rc crc 04 03 01 53
+						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);
 						/* MCU returns data. The data are previously by MCU returning successfully. */
 						M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
 					}
