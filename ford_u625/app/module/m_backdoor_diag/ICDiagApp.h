@@ -90,6 +90,10 @@
 #define	ICDIAG_CMD_ICFETCH				0xD0U /* Host to FIDM Command : Fetch command */
 #define	ICDIAG_CMD_READ					0xD1U /* Host to FIDM Command : Read command */
 #define	ICDIAG_CMD_ICCTRL				0xD2U /* Host to FIDM Command : Write command */
+#elif(U717_TDDI_NT51926)
+#define	ICDIAG_CMD_ICFETCH				0xD0U /* Host to FIDM Command : Fetch command */
+#define	ICDIAG_CMD_READ					0xD1U /* Host to FIDM Command : Read command */
+#define	ICDIAG_CMD_ICCTRL				0xD2U /* Host to FIDM Command : Write command */
 #endif
 #define	ICDIAG_RESULT_NONE				0x00U /* Driver command result : None(Default) */
 #define	ICDIAG_RESULT_SUCCESS			0x01U /* Driver command result : Success */
