@@ -417,10 +417,18 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 					/* MCU returns data. The first data is sub-address echo and the other data are 0xFF. No rolling counter and CRC8 */
 					M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);					
 				}
-				else if(u8MSGFormatCheckResult == FORMAT_LEN_FAIL)
+				else if(u8MSGFormatCheckResult == FORMAT_LEN_FAIL) //include lost RC CRC
 				{
 					/* Clear all data. */
 					memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
+					/* Michelle Add */
+					/* Fetch the information from memory pool. */
+					Memory_Pool_Command_Info_Fetch(mu8BackupTxBuff, &u8DataLength);
+					/* Calculated the rolling counter and CRC8. */
+					M_COM_TxBufferData_Set(mu8BackupTxBuff, u8DataLength);
+					/* MCU returns data. The data are previously by MCU returning successfully. */
+					M_COM_TxBuffer_Config(mu8BackupTxBuff, BUFFER_SIZE);
+					/* Michelle Add */
 				}
 				else if(u8MSGFormatCheckResult == FORMAT_READ_CHECK_SAFETY)
 				{
@@ -459,6 +467,7 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 					else
 					{
 						u8MSGFormatCheckResult=FORMAT_READ_FORMAT_CORRECT;
+						memset(mu8BackupTxBuff, 0xFFU, BUFFER_SIZE);
 						/* Backup command for error handling use if next command format rolling counter error */
 						mu8BackupTxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
 
@@ -501,6 +510,7 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 					else
 					{
 						u8MSGFormatCheckResult=FORMAT_WRITE_FORMAT_CORRECT;
+						memset(mu8BackupTxBuff, 0xFFU, BUFFER_SIZE);
 						/* Backup command for error handling use if next command format rolling counter error */
 						mu8BackupTxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
 
@@ -512,12 +522,12 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 						/* Clear all data. */
 						memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
 						/* Copy sub-address */
-						mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
+						mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];//寫04 到TXBuff
 						/* Fetch the information from memory pool. */
-						Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);
+						Memory_Pool_Command_Info_Fetch(mu8TxBuff, &u8DataLength);//抓取backup的值 03
 						/* Calculated the rolling counter and CRC8 or checksum. */
-						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);
-						/* MCU returns data.*/
+						M_COM_TxBufferData_Set(mu8TxBuff, u8DataLength);//加上rc crc 04 03 01 53
+						/* MCU returns data. The data are previously by MCU returning successfully. */
 						M_COM_TxBuffer_Config(mu8TxBuff, BUFFER_SIZE);
 					}
 				}
@@ -543,7 +553,19 @@ void C_Communication_Callback(uint32_t u32I2cEvent)
 	          Memory_Pool_ReadAfterDisplayStatus_Set(Memory_Pool_DisplayStatus_Get());
 	          Memory_Pool_DisplayStatus_Set((Memory_Pool_ReadAfterDisplayStatus_Get() & (~BIT_ALL_ERROR_POS))|Memory_Pool_ActualDisplayStatus_Get());
             }
-			/* Nothing */
+			/* Michelle Add */
+
+			/* Clear all data. */
+			memset(mu8TxBuff, 0xFFU, BUFFER_SIZE);
+			/* Restore subaddress for echo purpose. */
+			mu8TxBuff[CMD_SUBADDRESS_POS] = mu8RxBuff[CMD_SUBADDRESS_POS];
+            /* Fetch the information from memory pool. */
+            Memory_Pool_Command_Info_Fetch(mu8BackupTxBuff, &u8DataLength);
+            /* Calculated the rolling counter and CRC8. */
+            M_COM_TxBufferData_Set(mu8BackupTxBuff, u8DataLength);
+            /* MCU returns data. The data are previously by MCU returning successfully. */
+            M_COM_TxBuffer_Config(mu8BackupTxBuff, BUFFER_SIZE);
+			/* Michelle Add */
 		break;
 
 		case CY_SCB_I2C_MASTER_WR_IN_FIFO_EVENT:
