@@ -69,9 +69,9 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T-02.03.00" };
+    const uint8_t cmu8McuVersion[] = { "T-02.05.00" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T-03.01.00" };	
+    const uint8_t cmu8McuVersion[] = { "T-03.03.00" };	
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "T-03.00.00" };
 #else
@@ -1113,6 +1113,28 @@ uint64_t Memory_Pool_NT51926Diagnosis_Get(void)
  ;       Return Values			:
  ;       Source ID				:
  ******************************************************************************/
+void Memory_Pool_NT51926FWDiagnosis_Set(uint8_t u8SetValue)
+{
+    gtDiagnosisInfo.u8NT51926FWDiagnosis = u8SetValue;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
+uint8_t Memory_Pool_NT51926FWDiagnosis_Get(void)
+{
+    return gtDiagnosisInfo.u8NT51926FWDiagnosis;
+}
+/******************************************************************************
+ ;       Function Name			:	void Main_I2cSlaveInit(void)
+ ;       Function Description	:
+ ;       Parameters				:	void
+ ;       Return Values			:
+ ;       Source ID				:
+ ******************************************************************************/
 void Memory_Pool_IcCommDiagnosis_Set(uint16_t u16SetValue)
 {
 	if(u16SetValue > 0U ) 
@@ -1975,6 +1997,7 @@ void Memory_Pool_Command_Info_Fetch(uint8_t *pDataBuffer, uint8_t *pLength)
 			*(pDataBuffer + 14U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 40U) & 0xFFU;
 			*(pDataBuffer + 15U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 48U) & 0xFFU;
 			*(pDataBuffer + 16U) = (gtDiagnosisInfo.u64NT51926Diagnosis >> 56U) & 0xFFU;			
+			*(pDataBuffer + 17U) = gtDiagnosisInfo.u8NT51926FWDiagnosis & 0xFFU;
 			*pLength = LEN_DETIAL_DIAGNOSIS + LEN_SUBADDRESS;
 		break;
 
@@ -2190,7 +2213,10 @@ void Memory_Pool_Command_Info_Assign(uint8_t *pCmdBuffer)
 		break;
 
 		case CMD_DISPLAY_ENABLE:
-			gtDisplayManageInfo.u8DisplayEnable = *(pCmdBuffer + 1U) & 0x03U;
+			if (Memory_Pool_DisplayBusy_Get() == false) //if display sequence isn't finished,won't change display status
+			{
+				gtDisplayManageInfo.u8DisplayEnable = *(pCmdBuffer + 1U) & 0x03U;
+			}
 		break;
 
 		case CMD_DISPLAY_SHUTDOWN:

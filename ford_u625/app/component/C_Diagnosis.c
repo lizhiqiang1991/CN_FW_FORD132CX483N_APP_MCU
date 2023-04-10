@@ -153,6 +153,17 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 						tDiagCtrl.u8NT51926DpRegDebunce_RECOV ++;
 					}
 
+					if(u64Temp == 0UL)
+					{
+						tDiagCtrl.u8NT51926TpFWDebunce_RECOV = 0U ;
+						tDiagCtrl.u8NT51926TpFWDebunce ++;
+					}
+					else
+					{
+					 	tDiagCtrl.u8NT51926TpFWDebunce = 0U;
+					 	tDiagCtrl.u8NT51926TpFWDebunce_RECOV ++;
+					}
+
 					if(tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
 					{
 						tDiagCtrl.u8NT51926DpRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;
@@ -162,6 +173,21 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					{
 						tDiagCtrl.u8NT51926DpRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
 						u64Diagnosis &= ~(BIT_A3_PANEL_DISPFAULT_TYPEB_POS);
+					}
+					else
+					{/*Nothing*/}
+
+					if(tDiagCtrl.u8NT51926TpFWDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8NT51926TpFWDebunce = C_DIAG_NT51926_REG_DEBUNCE;
+						Memory_Pool_NT51926FWDiagnosis_Set(Memory_Pool_NT51926FWDiagnosis_Get() | BIT_A3_PANEL_FW_BLD_ERROR_POS);
+						// HAL_UART_Printf("[A3] FW_BLD_ERROR = 1");
+					}
+					else if(tDiagCtrl.u8NT51926TpFWDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8NT51926TpFWDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
+						//Memory_Pool_NT51926FWDiagnosis_Set(Memory_Pool_NT51926FWDiagnosis_Get() & BIT_A3_PANEL_FW_BLD_ERROR_POS);
+						// HAL_UART_Printf("[A3] FW_BLD_ERROR = 0");
 					}
 					else
 					{/*Nothing*/}
@@ -193,6 +219,11 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					}
 					else
 					{/*Nothing*/}
+
+					// if(u64Temp == 0UL)
+					// {
+					// 	Memory_Pool_NT51926Diagnosis_Set((Memory_Pool_NT51926Diagnosis_Get() & (BIT_A3_PANEL_DP_STATUS_POS)) | BIT_A3_PANEL_FW_BLD_ERROR_POS);
+					// }
 			
 					if((tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
 						|| 	(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)\
@@ -214,11 +245,15 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				tDiagCtrl.u8NT51926DpRegDebunce_RECOV = 0U;
 				tDiagCtrl.u8NT51926TpRegDebunce = 0U;
 				tDiagCtrl.u8NT51926TpRegDebunce_RECOV = 0U;
+				tDiagCtrl.u8NT51926TpFWDebunce = 0U;
+				tDiagCtrl.u8NT51926TpFWDebunce_RECOV = 0U;
 
 				if(Memory_Pool_LcdStatus_Get() == DISPLAY_ON)
 				{
 					/* Record 0xA3 status */
 					Memory_Pool_NT51926Diagnosis_Set(Memory_Pool_NT51926Diagnosis_Get() & BIT_A3_PANEL_DP_STATUS_POS );
+					Memory_Pool_NT51926FWDiagnosis_Set( Memory_Pool_NT51926FWDiagnosis_Get() & (~BIT_A3_PANEL_FW_BLD_ERROR_POS));
+					//HAL_UART_Printf("u8DisplayFWDiagnosis:%02x\n",Memory_Pool_NT51926FWDiagnosis_Get());
 				}
 				else
 				{/*Nothing*/}
@@ -809,16 +844,18 @@ static void C_Diagnosis_Action(void)
 	uint32_t u32CommDisplayStatus=0U;
 	uint64_t u64LEDDiagnosis=0UL;
 	uint64_t u64DisplayDiagnosis=0UL;
+	uint8_t u8DisplayFWDiagnosis=0UL;
 
 	/* Read 0xA3 status. */
 	u64LEDDiagnosis=Memory_Pool_LEDDiagnosis_Get();
 	u16GeneralDiagnosis=Memory_Pool_GeneralDiagnosis_Get();
 	u64DisplayDiagnosis=Memory_Pool_NT51926Diagnosis_Get();
+	u8DisplayFWDiagnosis=Memory_Pool_NT51926FWDiagnosis_Get();
 
 	/************************************************************************************************/
 	u32Temp = Memory_Pool_ActualDisplayStatus_Get();
 	/* Record 0x00. */
-	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS)) > 0UL)
+	if((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_GATE_ERROR_POS | BIT_A3_PANEL_SOURCE_ERROR_POS | BIT_A3_PANEL_FLASH_CRC_ERROR_POS)) > 0UL)
 	{
 		u32Temp|=BIT_LCDERR_POS;
 	}
@@ -833,6 +870,13 @@ static void C_Diagnosis_Action(void)
 	{/*Nothing*/}
 
 	if((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) > 0UL)
+	{
+		u32Temp|=BIT_TSCERR_POS;
+	}
+	else
+	{/*Nothing*/}
+
+	if((u8DisplayFWDiagnosis&BIT_A3_PANEL_FW_BLD_ERROR_POS) > 0UL)
 	{
 		u32Temp|=BIT_TSCERR_POS;
 	}
@@ -905,9 +949,16 @@ static void C_Diagnosis_Action(void)
 	/* Release TSCERR, TCERR. */
 	if(((u16GeneralDiagnosis&BIT_A3_POWER_P3V3_ERROR_POS) == 0U) &&	((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) == 0UL))
 	{
-		if((Memory_Pool_ReadAfterDisplayStatus_Get() & (BIT_TSCERR_POS | BIT_TCERR_POS)) == (BIT_TSCERR_POS | BIT_TCERR_POS))
+		if((Memory_Pool_ReadAfterDisplayStatus_Get() & BIT_TSCERR_POS) == BIT_TSCERR_POS)
 		{
-		    u32Temp&=~(BIT_TSCERR_POS | BIT_TCERR_POS);
+			u32Temp&=~(BIT_TSCERR_POS);
+		}
+		else
+		{/*Nothing*/}
+
+		if((Memory_Pool_ReadAfterDisplayStatus_Get() & BIT_TCERR_POS) == BIT_TCERR_POS)
+		{
+			u32Temp&=~(BIT_TCERR_POS);
 		}
 		else
 		{/*Nothing*/}
