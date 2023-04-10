@@ -296,7 +296,7 @@
                     <Alias value="U301_TSC_ATTN"/>
                     <Personality template="m0s8pin" version="1.0">
                         <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
-                        <Param id="initialState" value="0"/>
+                        <Param id="initialState" value="1"/>
                         <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                         <Param id="isrTrigger" value="CY_GPIO_INTR_BOTH"/>
                         <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
