@@ -18,13 +18,13 @@
 #define U717_TDDI_NT51926				false
 #define BX726_TDDI_NT51926				false
 
-// #define CX430_TDDI_NT51926				false
-// #define U717_TDDI_NT51926				false
-// #define BX726_TDDI_NT51926				true
+ #define CX430_TDDI_NT51926				false
+ #define U717_TDDI_NT51926				false
+ #define BX726_TDDI_NT51926				true
 
-// #define CX430_TDDI_NT51926				false
-// #define U717_TDDI_NT51926				true
-// #define BX726_TDDI_NT51926				false
+//#define CX430_TDDI_NT51926				false
+//#define U717_TDDI_NT51926				true
+//#define BX726_TDDI_NT51926				false
 
 #if (CX430_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN			false
