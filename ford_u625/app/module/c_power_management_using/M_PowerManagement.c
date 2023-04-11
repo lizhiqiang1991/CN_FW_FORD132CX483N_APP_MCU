@@ -149,6 +149,7 @@ uint8_t M_PM_Sequnce_Execute(uint8_t u8Action)
 			Cy_SysLib_Delay(6U); /* 6ms */
             HAL_GPIO_Low( U301_P3V3_EN_PORT, U301_P3V3_EN_PIN);
 
+			//Cy_SysLib_Delay(6U); 
 			Cy_SysLib_Delay(100U); /* 100ms */
             HAL_GPIO_Low( U301_HV_LDO_EN_PORT, U301_HV_LDO_EN_PIN);
 
