@@ -152,6 +152,16 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 						tDiagCtrl.u8NT51926DpRegDebunce = 0U;
 						tDiagCtrl.u8NT51926DpRegDebunce_RECOV ++;
 					}
+					if((u64Temp & (BIT_A3_PANEL_TYPEC_ERR_POS)) > 0UL)
+					{
+						tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV = 0U;
+						tDiagCtrl.u8NT51926TypeCRegDebunce ++;
+					}
+					else
+					{
+						tDiagCtrl.u8NT51926TypeCRegDebunce = 0U;
+						tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV ++;
+					}
 
 					if(u64Temp == 0UL)
 					{
@@ -176,6 +186,21 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					}
 					else
 					{/*Nothing*/}
+
+					/*Type C error*/
+					if(tDiagCtrl.u8NT51926TypeCRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8NT51926TypeCRegDebunce = C_DIAG_NT51926_REG_DEBUNCE;
+						u64Diagnosis |= (u64Temp & (BIT_A3_PANEL_TYPEC_ERR_POS));
+					}
+					else if(tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
+					{
+						tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV = C_DIAG_NT51926_REG_DEBUNCE;
+						u64Diagnosis &= ~(BIT_A3_PANEL_TYPEC_ERR_POS);
+					}
+					else
+					{/*Nothing*/}
+					/*Type C error*/
 
 					if(tDiagCtrl.u8NT51926TpFWDebunce >= C_DIAG_NT51926_REG_DEBUNCE)
 					{
@@ -227,6 +252,8 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 			
 					if((tDiagCtrl.u8NT51926DpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
 						|| 	(tDiagCtrl.u8NT51926DpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)\
+						||	(tDiagCtrl.u8NT51926TypeCRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
+						||	(tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)\
 						||	(tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
 						||	(tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE))
 					{
@@ -243,6 +270,8 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 				tDiagCtrl.u16NT51926CommTime= C_DIAG_NT51926_I2CTIME;
 				tDiagCtrl.u8NT51926DpRegDebunce = 0U;
 				tDiagCtrl.u8NT51926DpRegDebunce_RECOV = 0U;
+				tDiagCtrl.u8NT51926TypeCRegDebunce = 0U;
+				tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV = 0U;
 				tDiagCtrl.u8NT51926TpRegDebunce = 0U;
 				tDiagCtrl.u8NT51926TpRegDebunce_RECOV = 0U;
 				tDiagCtrl.u8NT51926TpFWDebunce = 0U;
@@ -757,9 +786,9 @@ static void C_Diagnosis_ParaInit(void)
 	tDiagCtrl.u16NT51926I2cCommTime = C_DIAG_NT51926_I2CTIME;
 	tDiagCtrl.u8NT51926I2cDebunce = 0U;
 	tDiagCtrl.u8NT51926DpStatusOnDebunce = 0U;	
-	tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = 0U;		
-	tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;	
-	tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = 0U;	
+	tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV = C_DIAG_NT51926_STATE_DEBUNCE;
+	tDiagCtrl.u8NT51926DpStatusOfDebunce = 0U;
+	tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV = C_DIAG_NT51926_STATE_DEBUNCE;	
 	tDiagCtrl.bFirstLedIntDebounceFinsh = false;
 
 	tLedInt.u8DebounceHigh = 0U;
@@ -947,7 +976,9 @@ static void C_Diagnosis_Action(void)
 	{/*Nothing*/}
 
 	/* Release TSCERR, TCERR. */
-	if(((u16GeneralDiagnosis&BIT_A3_POWER_P3V3_ERROR_POS) == 0U) &&	((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) == 0UL))
+	if(((u16GeneralDiagnosis&BIT_A3_POWER_P3V3_ERROR_POS) == 0U) 
+	  && ((u64DisplayDiagnosis&BIT_A3_PANEL_TOUCHFAULT_ALL_POS) == 0UL) 
+	  && ((u8DisplayFWDiagnosis&BIT_A3_PANEL_FW_BLD_ERROR_POS) == 0UL))
 	{
 		if((Memory_Pool_ReadAfterDisplayStatus_Get() & BIT_TSCERR_POS) == BIT_TSCERR_POS)
 		{
@@ -969,6 +1000,7 @@ static void C_Diagnosis_Action(void)
 	/* Release LCDERR. */
 	if(((u16GeneralDiagnosis&(BIT_A3_POWER_P3V3_ERROR_POS )) == 0U)
 		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_DISPFAULT_TYPEB_POS)) == 0UL)
+		&& ((u64DisplayDiagnosis&(BIT_A3_PANEL_TYPEC_ERR_POS)) == 0UL) 
 		&& (tDiagCtrl.u8NT51926DpStatusOnDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE) 
 		&& (tDiagCtrl.u8NT51926DpStatusOfDebunce_RECOV >= C_DIAG_NT51926_STATE_DEBUNCE))
 	{
