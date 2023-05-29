@@ -102,6 +102,7 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	uint8_t u8PageSwitch[2]={0x1EU,0x2BU};
 	uint8_t u8DataAddress=0x00U;
 	uint8_t u8ReadData[8];
+	uint8_t u8ReadDataSencond[8];
 
 	/*Switch Page to CMD2_PB.*/
 	if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, u8PageSwitch, 2U, 10U) != DRIVER_TRUE)
@@ -120,7 +121,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 00h.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[0], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[0], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -137,7 +140,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 01h.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[1], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[1], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -154,7 +159,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 03h.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[2], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[2], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -171,7 +178,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 04h.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[3], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[3], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[3], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -188,7 +197,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 07h.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[4], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[4], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[4], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -205,7 +216,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 0Ah.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[5], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[5], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[5], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -222,7 +235,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 1Fh.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[6], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[6], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[6], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 		u8ReadData[6] = 0xFFU;
@@ -250,7 +265,9 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	{ /* Nothing */ }
 
 	/*Read data from 1Ch.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[7], 1U, 10U) != DRIVER_TRUE)
+	/*Primary IC & Secondary IC*/
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData[7], 1U, 10U) != DRIVER_TRUE) 
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond[7], 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 	}
@@ -268,14 +285,14 @@ uint64_t M_GPIOSense_DisplayFault_Read(void)
 	u8ReadData[7U] = Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[7U];
 #endif
 	
-	u64ReturnStatus = (uint64_t)(u8ReadData[0U] & 0x7DU);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[1U] & 0x03U)) << 8U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[2U] & 0x01U)) << 16U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[3U] & 0x01U)) << 24U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[4U] & 0x7FU)) << 32U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[5U] & 0x02U)) << 40U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[6U] & 0x07U)) << 48U);
-	u64ReturnStatus |= (((uint64_t)(u8ReadData[7U] & 0x07U)) << 56U);
+	u64ReturnStatus = (uint64_t)((u8ReadData[0U] | u8ReadDataSencond[0U]) & 0x7DU);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[1U] | u8ReadDataSencond[1U]) & 0x03U)) << 8U);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[2U] | u8ReadDataSencond[2U]) & 0x01U)) << 16U);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[3U] | u8ReadDataSencond[3U]) & 0x01U)) << 24U);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[4U] | u8ReadDataSencond[4U]) & 0x7FU)) << 32U);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[5U] | u8ReadDataSencond[5U]) & 0x02U)) << 40U);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[6U] | u8ReadDataSencond[6U]) & 0x07U)) << 48U);
+	u64ReturnStatus |= (((uint64_t)((u8ReadData[7U] | u8ReadDataSencond[7U]) & 0x07U)) << 56U);
 
 	return u64ReturnStatus;
 }
@@ -290,6 +307,7 @@ uint8_t M_GPIOSense_NT51926_Status_Get(void)
 {
 	uint8_t u8PageSwitch[2]={0x1EU,0x2BU};
 	uint8_t u8ReadData = 0xFFU;
+	uint8_t u8ReadDataSencond = 0xFFU;
 	uint8_t u8DataAddress = 0x1FU;
 
 	/*Switch Page to CMD2_PB.*/
@@ -309,10 +327,12 @@ uint8_t M_GPIOSense_NT51926_Status_Get(void)
 	{ /* Nothing */ }
 	
 	/*Read data from 1Fh.*/
-	if(HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData, 1U, 10U) != DRIVER_TRUE)
+	if((HAL_I2C_Master_Read(NT51926_SLAVE_ADDRESS, &u8ReadData, 1U, 10U) != DRIVER_TRUE)
+	|| (HAL_I2C_Master_Read(NT51926_SLAVE_SECOND_ADDRESS, &u8ReadDataSencond, 1U, 10U) != DRIVER_TRUE))
 	{
 		Memory_Pool_IcCommDiagnosis_Set(Memory_Pool_IcCommDiagnosis_Get() + 1U);
 		u8ReadData = 0xFFU; /* If I2C master bus read error， Set u8Temp = 0x07U */ 
+		u8ReadDataSencond = 0xFF;
 	}
 	else
 	{ /* Nothing */ }
@@ -321,8 +341,9 @@ uint8_t M_GPIOSense_NT51926_Status_Get(void)
 	u8ReadData =  Memory_Pool_DiagnosisSimulateInfo_Get().u8DispFaultStatus[6U];
 #endif
 	u8ReadData &= 0x07U;
+	u8ReadDataSencond &= 0x07U;
 	
-	return u8ReadData;
+	return (u8ReadData | u8ReadDataSencond);
 }
 
 
