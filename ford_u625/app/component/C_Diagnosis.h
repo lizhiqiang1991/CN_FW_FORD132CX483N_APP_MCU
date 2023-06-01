@@ -78,6 +78,8 @@ typedef struct
 	uint16_t u16NT51926CommTime;
 	uint8_t  u8NT51926DpRegDebunce;
 	uint8_t  u8NT51926DpRegDebunce_RECOV;	
+	uint8_t  u8NT51926TypeCRegDebunce;
+	uint8_t  u8NT51926TypeCRegDebunce_RECOV;	
 	uint8_t  u8NT51926TpRegDebunce;	
 	uint8_t  u8NT51926TpRegDebunce_RECOV;
 
