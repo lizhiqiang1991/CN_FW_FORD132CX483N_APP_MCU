@@ -212,6 +212,13 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 						tDiagCtrl.u8NT51926BLDDebunce = C_DIAG_NT51926_REG_DEBUNCE;
 						Memory_Pool_NT51926FWDiagnosis_Set(Memory_Pool_NT51926FWDiagnosis_Get() | BIT_A3_PANEL_FW_BLD_ERROR_POS);
 						// HAL_UART_Printf("[A3] FW_BLD_ERROR = 1");
+						
+						if((Memory_Pool_ScanStatus_Get() == SCAN_VB_HL) || (Memory_Pool_ScanStatus_Get() == SCAN_VB_HR))
+						{
+							Memory_Pool_NT51926FWDiagnosis_Set(Memory_Pool_NT51926FWDiagnosis_Get() & ~BIT_A3_PANEL_FW_BLD_ERROR_POS);
+						}
+						else
+						{/*Nothing*/}
 					}
 					else if(tDiagCtrl.u8NT51926BLDDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)
 					{
