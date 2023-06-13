@@ -556,7 +556,7 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 				{ /* Nothing */ }
 
 				mu8SendData[0] = 0x05U;
-				mu8SendData[1] = 0x20U;
+				mu8SendData[1] = 0x10U;  //SHLR=0,UD=1
 				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
 				{
 					bFlashReloadDisable = false;
@@ -712,7 +712,7 @@ uint8_t M_DM_ScanningControl(uint8_t u8CurrentStatus, uint8_t u8Command)
 				{ /* Nothing */ }
 
 				mu8SendData[0] = 0x05U;
-				mu8SendData[1] = 0x10U;
+				mu8SendData[1] = 0x20U;  //SHLR=1,UD=0
 				if(HAL_I2C_Master_Write(NT51926_SLAVE_ADDRESS, mu8SendData, sizeof(mu8SendData), 10U) != DRIVER_TRUE)
 				{
 					bFlashReloadDisable = false;
