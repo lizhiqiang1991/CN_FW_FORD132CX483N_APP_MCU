@@ -293,7 +293,8 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					}
 					else
 					{/*Nothing*/}		
-					if((tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE))
+					if((tDiagCtrl.u8NT51926TpRegDebunce >= C_DIAG_NT51926_REG_DEBUNCE)\
+					 && ((Memory_Pool_DisplayStatus_Get() & BIT_TSC_ST_POS) == BIT_TSC_ST_POS))
 					{
 						Memory_Pool_NT51926Diagnosis_Set(((Memory_Pool_NT51926Diagnosis_Get() & ~(BIT_A3_PANEL_TOUCHFAULT_ALL_POS))\
 						| (u64Diagnosis & (BIT_A3_PANEL_TOUCHFAULT_ALL_POS | BIT_A3_PANEL_DP_STATUS_POS))) );
@@ -325,7 +326,8 @@ static void C_Diagnosis_IO_DispFaultMaster(uint16_t u16RoutineTime)
 					}
 					else
 					{/*Nothing*/}
-					if(tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE)/*Recover type C TSCERR*/
+					if((tDiagCtrl.u8NT51926TpRegDebunce_RECOV >= C_DIAG_NT51926_REG_DEBUNCE) \
+					&& ((Memory_Pool_DisplayStatus_Get() & BIT_TSC_ST_POS) == BIT_TSC_ST_POS))/*Recover type C TSCERR*/
 					{
 						Memory_Pool_NT51926Diagnosis_Set((Memory_Pool_NT51926Diagnosis_Get()\
 						& (BIT_A3_PANEL_DP_STATUS_POS | BIT_A3_PANEL_DISPFAULT_TYPEB_POS | BIT_A3_PANEL_TYPEC_LCDERR_POS)) );
@@ -857,6 +859,10 @@ static void C_Diagnosis_ParaInit(void)
 	tDiagCtrl.u8NT51926DpRegDebunce_RECOV = 0U;	
 	tDiagCtrl.u8NT51926TpRegDebunce = 0U;	
 	tDiagCtrl.u8NT51926TpRegDebunce_RECOV = 0U;	
+	tDiagCtrl.u8NT51926TypeCRegDebunce = 0U;	
+	tDiagCtrl.u8NT51926TypeCRegDebunce_RECOV = 0U;
+	tDiagCtrl.u8NT51926BLDDebunce = 0U;
+	tDiagCtrl.u8NT51926BLDDebunce_RECOV = 0U;
 	tDiagCtrl.u8LEDDriverRegDebunce = 0U;
 	tDiagCtrl.u8LEDDriverRegDebunce_RECOV = 0U;
 	tDiagCtrl.u16NT51926I2cCommTime = C_DIAG_NT51926_I2CTIME;
