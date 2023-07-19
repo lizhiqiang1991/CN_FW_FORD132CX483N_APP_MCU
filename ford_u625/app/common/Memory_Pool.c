@@ -57,7 +57,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #elif(CX430_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x00U };
 #elif(BX726_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x02U };
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x03U };
 #else
 #endif
 
@@ -69,11 +69,11 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T-03.02.00" };
+    const uint8_t cmu8McuVersion[] = { "T-03.03.00" };
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "F-04.01.00" };
+    const uint8_t cmu8McuVersion[] = { "F-04.02.00" };
 #elif(U717_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "T-03.04.00" };
+    const uint8_t cmu8McuVersion[] = { "T-03.05.00" };
 #else
 #endif
 
