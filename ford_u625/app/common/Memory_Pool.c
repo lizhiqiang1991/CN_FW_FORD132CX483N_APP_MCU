@@ -53,9 +53,9 @@ tdiagnosis_simulate_def gtDiagnosisSimulateInfo =
 tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U, .bDisplayBusySet = false };
 
 #if(U717_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x00U };    
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x01U };    
 #elif(CX430_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x00U };
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x01U };
 #elif(BX726_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x03U };
 #else
@@ -69,11 +69,11 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "F-04.00.00" };
+    const uint8_t cmu8McuVersion[] = { "F-04.01.00" };
 #elif(BX726_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "F-04.02.00" };
 #elif(U717_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "F-04.00.00" };
+    const uint8_t cmu8McuVersion[] = { "F-04.01.00" };
 #else
 #endif
 
