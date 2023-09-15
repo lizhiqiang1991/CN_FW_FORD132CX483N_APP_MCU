@@ -2,6 +2,44 @@
 #include "M_DisplayManage.h"
 #include "Memory_Pool.h"
 
+
+
+static uint8_t gu8SerialCMDFlow_ON[SERIAL_FLOW_ON_STPE][ARRY_DEPTH] = 
+{
+ 	{'w', aNTADDR, aCMD2_P1},
+ 	{'r', aNTADDR, aCMD2_P1},
+ 	{'w', aTDDI_ADDR_0A, 0xA5U},
+ 	{'r', aTDDI_ADDR_0A, 0xA5U},
+ 	{'w', aTDDI_ADDR_09, 0xA5U},
+ 	{'r', aTDDI_ADDR_09, 0xA5U},
+ 	{'w', aNTADDR, aCMD1_P0},
+	{'w', aTDDI_ADDR_1D, 0x03U},
+	{'w', aNTADDR, aCMD1_P1},
+	{'w', aTDDI_ADDR_1D, 0x03U},
+	{'w', aNTADDR, aCMD1_P7},
+	{'w', aTDDI_ADDR_1D, 0x03U},
+	{'w', aNTADDR, aCMD2_P0},
+	{'w', aTDDI_ADDR_1D, 0x03U},
+	{'w', aNTADDR, aCMD3_P0},
+	{'w', aTDDI_ADDR_1D, 0x03U},
+	{'w', aNTADDR, aCMD4_P0},
+	{'w', aTDDI_ADDR_1D, 0x03U},
+};
+
+static uint8_t gu8SerialCMDFlow_OFF[SERIAL_FLOW_OFF_STPE][ARRY_DEPTH] = 
+{
+ 	/* WenChang's step, it looks okay */
+ 	{'w', aNTADDR, aCMD2_P1},
+ 	{'r', aNTADDR, aCMD2_P1},
+ 	{'w', aTDDI_ADDR_0A, 0x00U},
+ 	{'r', aTDDI_ADDR_0A, 0x00U},
+ 	{'w', aTDDI_ADDR_09, 0x00U},
+ 	{'r', aTDDI_ADDR_09, 0x00U},
+};
+
+static uint8_t M_TDDI_SendCMD(const uint8_t *ptrArray, const uint8_t u8Length);
+static int8_t M_TDDI_WR_Reg(uint8_t u8RegAddr, uint8_t u8RegData);
+static uint8_t M_TDDI_RD_Reg(uint8_t u8RegAddr, uint8_t *pRdData);
 /******************************************************************************
  ;       Function Name			:	void Main_I2cSlaveInit(void)
  ;       Function Description	:
@@ -346,4 +384,98 @@ uint8_t M_GPIOSense_NT51926_Status_Get(void)
 	return (u8ReadData | u8ReadDataSencond);
 }
 
+static uint8_t M_TDDI_SendCMD(const uint8_t *ptrArray, const uint8_t cu8ArrLength)
+{
+	//uint8_t u8Action;
+	uint8_t u8Length = cu8ArrLength;
+	uint8_t u8Action = 0U, u8Reg = 0U, u8Data = 0U, \
+	        u8Retry = 0U, u8RdData = 0U, u8Ret = false;
 
+	do
+	{
+		//uart_printf("step:%d\r\n",u8Length);
+		u8Action = *(ptrArray + 0U);
+		u8Reg 	 = *(ptrArray + 1U);
+		u8Data 	 = *(ptrArray + 2U);
+
+		if( 'w' == u8Action )
+		{
+			/* write actions */
+			M_TDDI_WR_Reg(u8Reg, u8Data);
+			u8Length--;
+			ptrArray += ARRY_DEPTH;
+		}
+		else if( 'r' == u8Action )
+		{
+			/* read actions */
+			u8RdData = 0U;
+			u8Ret = M_TDDI_RD_Reg(u8Reg, &u8RdData);
+			if( false == u8Ret || \
+			    u8Data != u8RdData )
+			{
+				/* error */
+				u8Retry++;
+				Free_Run(1000);		
+			}
+			else
+			{
+				/* ok */
+				u8Length--;
+				ptrArray += ARRY_DEPTH;
+			}
+		}
+		else
+		{
+			/* error */
+		}
+		//uart_printf("%x, reg:0x%02X, data:0x%02X\r\n",u8Action, u8Reg, u8Data);
+	}while( 0U < u8Length && 3U > u8Retry);
+
+	return u8Retry;
+}
+
+static int8_t M_TDDI_WR_Reg(uint8_t u8RegAddr, uint8_t u8RegData)
+{
+	int8_t i8Return = false;
+	uint8_t u8Cmd[2U] = {0x00U};
+	uint8_t	u8Idx = 0U;
+
+	Mem_Set(u8Cmd, 0x00U, 2U); u8Idx = 0U;
+	u8Cmd[u8Idx++] = u8RegAddr;
+	u8Cmd[u8Idx++] = u8RegData;
+
+	if( DRIVER_TRUE == HAL_I2C_Master_Write(aNTSlaveADDR, u8Cmd, u8Idx, aI2C_TIMEOUT) )
+	{
+		i8Return = true;
+	}
+	else
+	{
+		i8Return = false;
+	}
+
+	return i8Return;
+}
+static uint8_t M_TDDI_RD_Reg(uint8_t u8RegAddr, uint8_t *pRdData)
+{
+	uint8_t u8Ret = true;
+	uint8_t u8Reg = u8RegAddr;
+
+	//if( DRIVER_TRUE == HAL_I2C_Master_Write(aNTSlaveADDR, &u8Reg, 1U, aI2C_TIMEOUT) )
+	//{
+		if( DRIVER_FALSE == HAL_I2C_Master_Read(aNTSlaveADDR, pRdData, 1U, aI2C_TIMEOUT) )
+		{
+			u8Ret = false;
+		}
+		else
+		{
+			//u8Return = true;
+		}
+	//}
+	//else
+	//{
+	//	u8Return = false;
+	//}
+	
+
+	return u8Ret;
+}
