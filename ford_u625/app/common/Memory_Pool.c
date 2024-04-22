@@ -53,9 +53,9 @@ tdiagnosis_simulate_def gtDiagnosisSimulateInfo =
 tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U, .bDisplayBusySet = false };
 
 #if(U717_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x01U };    
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x02U };    
 #elif(CX430_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x01U };
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x02U };
 #elif(BX726_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x05U };
 #else
