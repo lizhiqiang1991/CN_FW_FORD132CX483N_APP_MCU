@@ -47,17 +47,17 @@ static uint8_t mu8BackupTxBuff[BUFFER_SIZE];
 volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
 
 #if (U717_TDDI_NT51926)
-	const uint8_t mu8Core[] = { "RU5T-14F180-SA" };
-	const uint8_t mu8Soft[] = { "RU5T-14D358-SA" };
-	const uint8_t mu8Main[] = { "RU5T-14D359-SA" };    
+	const uint8_t mu8Core[] = { "RU5T-14F180-SB" };
+	const uint8_t mu8Soft[] = { "RU5T-14D358-SB" };
+	const uint8_t mu8Main[] = { "RU5T-14D359-SB" };    
 #elif(CX430_TDDI_NT51926)
-	const uint8_t mu8Core[] = { "SU5T-14F180-PA" };
-	const uint8_t mu8Soft[] = { "SU5T-14D358-PA" };
-	const uint8_t mu8Main[] = { "SU5T-14D359-PA" };
+	const uint8_t mu8Core[] = { "SU5T-14F180-PB" };
+	const uint8_t mu8Soft[] = { "SU5T-14D358-PB" };
+	const uint8_t mu8Main[] = { "SU5T-14D359-PB" };
 #elif(BX726_TDDI_NT51926)
-	const uint8_t mu8Core[] = { "PU5T-14F180-RC" }; /* PU5T-14F180-RC */
-	const uint8_t mu8Soft[] = { "PU5T-14D358-RC" }; /* PU5T-14D358-RC */
-	const uint8_t mu8Main[] = { "PU5T-14D359-RC" };	/* PU5T-14D359-RC */
+	const uint8_t mu8Core[] = { "PU5T-14F180-RD" }; /* Change PU5T-14F180-RC to PU5T-14F180-RD*/
+	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" }; /* Change PU5T-14D358-RC to PU5T-14D358-RD*/
+	const uint8_t mu8Main[] = { "PU5T-14D359-RD" };	/* Change PU5T-14D359-RC to PU5T-14D359-RD*/
 #else
 #endif
 /* -- Local Functions -- */
@@ -259,7 +259,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				}
 				else
 				{
-					Memory_Pool_BacklightEnable_Set(false);					
+					Memory_Pool_BacklightEnable_Set(false);
 				}
 				Memory_Pool_DisplayEnable_Set(u8Temp);
 
