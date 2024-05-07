@@ -46,18 +46,30 @@ static uint8_t mu8TxBuff[BUFFER_SIZE];
 static uint8_t mu8BackupTxBuff[BUFFER_SIZE];
 volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
 
-#if (U717_TDDI_NT51926)
-	const uint8_t mu8Core[] = { "RU5T-14F180-SA" };
-	const uint8_t mu8Soft[] = { "RU5T-14D358-SA" };
-	const uint8_t mu8Main[] = { "RU5T-14D359-SA" };    
-#elif(CX430_TDDI_NT51926)
-	const uint8_t mu8Core[] = { "SU5T-14F180-PA" };
-	const uint8_t mu8Soft[] = { "SU5T-14D358-PA" };
-	const uint8_t mu8Main[] = { "SU5T-14D359-PA" };
-#elif(BX726_TDDI_NT51926)
-	const uint8_t mu8Core[] = { "PU5T-14F180-RD" }; /* Change PU5T-14F180-RC to PU5T-14F180-RD*/
-	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" }; /* Change PU5T-14D358-RC to PU5T-14D358-RD*/
-	const uint8_t mu8Main[] = { "PU5T-14D359-RD" };	/* Change PU5T-14D359-RC to PU5T-14D359-RD*/
+#if (U717_TDDI_NT51926) /*H-04.03.00*/
+	const uint8_t mu8Core[] = { "RU5T-14F180-SB" };
+	const uint8_t mu8Soft[] = { "RU5T-14D358-SB" };
+	const uint8_t mu8Main[] = { "RU5T-14D359-SB" };    
+#elif(CX430_TDDI_NT51926) /*F-04.04.00*/
+	const uint8_t mu8Core[] = { "SU5T-14F180-PB" };
+	const uint8_t mu8Soft[] = { "SU5T-14D358-PB" };
+	const uint8_t mu8Main[] = { "SU5T-14D359-PB" };
+#elif(P758_TDDI_NT51926) /*O-04.04.00*/
+	const uint8_t mu8Core[] = { "SU5T-14F180-PB" };
+	const uint8_t mu8Soft[] = { "SU5T-14D358-PB" };
+	const uint8_t mu8Main[] = { "SU5T-14D359-PB" };
+#elif(BX726_TDDI_NT51926) /*G-04.04.00*/
+	const uint8_t mu8Core[] = { "PU5T-14F180-RD" };
+	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" };
+	const uint8_t mu8Main[] = { "PU5T-14D359-RD" };
+#elif(P708_TDDI_NT51926) /*B-04.04.00*/
+	const uint8_t mu8Core[] = { "PU5T-14F180-RD" };
+	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" };
+	const uint8_t mu8Main[] = { "PU5T-14D359-RD" };
+#elif(P702_TDDI_NT51926) /*P-04.04.00*/
+	const uint8_t mu8Core[] = { "RU5T-14F180-GA" };
+	const uint8_t mu8Soft[] = { "RU5T-14D358-GA" };
+	const uint8_t mu8Main[] = { "RU5T-14D359-GA" };
 #else
 #endif
 /* -- Local Functions -- */

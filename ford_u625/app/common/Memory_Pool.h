@@ -374,7 +374,7 @@ uint8_t Memory_Pool_PowerStatus_Get(void);
 void Memory_Pool_PowerState_Set(uint8_t u8SetValue);
 uint8_t Memory_Pool_PowerState_Get(void);
 
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
+#if (CX430_TDDI_NT51926|| P758_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926 || P708_TDDI_NT51926 || P702_TDDI_NT51926)
 	void Memory_Pool_NT51926_Vcom_Set(uint32_t u32SetValue);
 	uint32_t Memory_Pool_NT51926_Vcom_Get(void);
 	int8_t Memory_Pool_NT51926_VGMA_Set(const uint8_t *);	/* Jacky@220928, for VGMA*/

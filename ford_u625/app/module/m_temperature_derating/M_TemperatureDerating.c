@@ -219,7 +219,7 @@ static float gDeratingTable[TEMP_DERATING_TABLE_SIZE];
  * @details When table is not loaded from flash, the PWM duty is recoverd by the look up table.
  * 
  */
-#if(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if(CX430_TDDI_NT51926 || P758_TDDI_NT51926 || U717_TDDI_NT51926)
 static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
 {
     // 100, /**< 70 Degree. */
@@ -268,7 +268,7 @@ static const int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
      0, /**< 99 Degree. */
      0, /**< 100 Degree. */
 };
-#elif(BX726_TDDI_NT51926)
+#elif(BX726_TDDI_NT51926 || P708_TDDI_NT51926 || P702_TDDI_NT51926)
 /* Jacky@2022.09.30 modify for BX726 PCBA follow "20220804_CX430 and U625_V1.1.xlsx" */
 static int16_t gDeratingDefaultTable[TEMP_DERATING_TABLE_SIZE] =
 {
