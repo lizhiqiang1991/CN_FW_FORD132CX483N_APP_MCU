@@ -15,9 +15,9 @@
 #include "public.h"
 
 /*---------------------------- Definition -----------------------------------*/
-#if(CX430_TDDI_NT51926 || U717_TDDI_NT51926)
+#if(CX430_TDDI_NT51926 || P758_TDDI_NT51926 || U717_TDDI_NT51926)
 //#define DEBUG_UART_EN
-#elif(BX726_TDDI_NT51926)
+#elif(BX726_TDDI_NT51926 || P708_TDDI_NT51926 || P702_TDDI_NT51926)
 //#define DEBUG_UART_EN
 #else
 #endif

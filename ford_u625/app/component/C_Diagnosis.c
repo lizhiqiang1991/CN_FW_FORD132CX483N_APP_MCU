@@ -1313,7 +1313,7 @@ static void C_Diagnosis_Control(void)
 				C_Diagnosis_IO_P3V3Good();
 				C_Diagnosis_IO_SerdesLock();
 				C_Diagnosis_Vol_FPC_BL();
-#if(CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
+#if(CX430_TDDI_NT51926|| P758_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926 || P708_TDDI_NT51926 || P702_TDDI_NT51926)
 				C_Diagnosis_IO_DispFaultMaster((uint16_t)(TIME_10ms)- 1U);
 				C_Diagnosis_IC_Communitation((uint16_t)(TIME_10ms)- 1U);			
 #endif

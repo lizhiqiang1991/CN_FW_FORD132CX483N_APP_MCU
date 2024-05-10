@@ -52,11 +52,44 @@ tdiagnosis_simulate_def gtDiagnosisSimulateInfo =
 
 tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNOW, .u8DisplayEnableBackup = DISPLAY_UNKNOW, .u8DisplayEnableSet = DISPLAY_UNKNOW, .u8TouchStatus = TOUCH_UNKNOW, .u8ScanStatus = SCAN_UNKNOW, .bBacklightEnable = false, .u8LcdResetStatus = LCD_RESET_UNKNOW, .u32NT51926_Vcom=0x00U, .bDisplayBusySet = false };
 
+/*
+#if (U717_TDDI_NT51926) H-04.03.00
+	const uint8_t mu8Core[] = { "RU5T-14F180-SB" };
+	const uint8_t mu8Soft[] = { "RU5T-14D358-SB" };
+	const uint8_t mu8Main[] = { "RU5T-14D359-SB" };    
+#elif(CX430_TDDI_NT51926) F-04.01.00
+	const uint8_t mu8Core[] = { "SU5T-14F180-PA" };
+	const uint8_t mu8Soft[] = { "SU5T-14D358-PA" };
+	const uint8_t mu8Main[] = { "SU5T-14D359-PA" };
+#elif(P758_TDDI_NT51926) O-04.04.00
+	const uint8_t mu8Core[] = { "SU5T-14F180-PB" };
+	const uint8_t mu8Soft[] = { "SU5T-14D358-PB" };
+	const uint8_t mu8Main[] = { "SU5T-14D359-PB" };
+#elif(BX726_TDDI_NT51926) F-04.03.00
+	const uint8_t mu8Core[] = { "PU5T-14F180-RC" };
+	const uint8_t mu8Soft[] = { "PU5T-14D358-RC" };
+	const uint8_t mu8Main[] = { "PU5T-14D359-RC" };
+#elif(P708_TDDI_NT51926) B-04.04.00
+	const uint8_t mu8Core[] = { "PU5T-14F180-RD" };
+	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" };
+	const uint8_t mu8Main[] = { "PU5T-14D359-RD" };
+#elif(P702_TDDI_NT51926) P-04.04.00
+	const uint8_t mu8Core[] = { "RU5T-14F180-GA" };
+	const uint8_t mu8Soft[] = { "RU5T-14D358-GA" };
+	const uint8_t mu8Main[] = { "RU5T-14D359-GA" };
+*/
+
 #if(U717_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3AU, .u8Subversion = 0x02U };    
 #elif(CX430_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x02U };
+#elif(P758_TDDI_NT51926)
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x02U };
 #elif(BX726_TDDI_NT51926)
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x05U };
+#elif(P708_TDDI_NT51926)
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x05U };
+#elif(P702_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x05U };
 #else
 #endif
@@ -69,11 +102,17 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "F-04.03.00" };
-#elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "G-04.04.00" };
+    const uint8_t cmu8McuVersion[] = { "F-04.04.00" }; // Mew version definition
+#elif(P758_TDDI_NT51926)
+    const uint8_t cmu8McuVersion[] = { "O-04.04.00" }; // New version definition
 #elif(U717_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "H-04.03.00" };
+    const uint8_t cmu8McuVersion[] = { "H-04.03.00" }; // New version definition
+#elif(BX726_TDDI_NT51926)
+    const uint8_t cmu8McuVersion[] = { "G-04.04.00" }; // New version definition
+#elif(P708_TDDI_NT51926)
+	const uint8_t cmu8McuVersion[] = { "B-04.04.00" }; // New version definition
+#elif(P702_TDDI_NT51926)
+	const uint8_t cmu8McuVersion[] = { "P-04.04.00" }; // New version definition
 #else
 #endif
 
@@ -1419,7 +1458,7 @@ uint8_t Memory_Pool_SyncStatus_Get(void)
     return gtPowerManageInfo.u8SyncStatus;
 }
 
-#if (CX430_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926)
+#if (CX430_TDDI_NT51926 || P758_TDDI_NT51926 || U717_TDDI_NT51926 || BX726_TDDI_NT51926 || P708_TDDI_NT51926 || P702_TDDI_NT51926)
 /******************************************************************************
  ;       Function Name			:	void Memory_Pool_NT51926_Vcom_Set(uint16_t u16SetValue)
  ;       Function Description	:
