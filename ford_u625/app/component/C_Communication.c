@@ -44,7 +44,7 @@ static tcommunication_task_def tCommunicationTask;
 static uint8_t mu8RxBuff[BUFFER_SIZE];
 static uint8_t mu8TxBuff[BUFFER_SIZE];
 static uint8_t mu8BackupTxBuff[BUFFER_SIZE];
-volatile uint16_t *pUpdateKey = ((volatile uint16_t*) (0x20003F00));
+volatile uint32_t *pUpdateKey = ((volatile uint32_t*) (0x20003F00));
 
 #if (U717_TDDI_NT51926) /*H-04.03.00*/
 	const uint8_t mu8Core[] = { "RU5T-14F180-SB" };
@@ -357,7 +357,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		break;
 			
 		case CMD_UPDATE_REQUEST:
-			*pUpdateKey = 0x55AAU;
+			*pUpdateKey = 0xAA55A5B5U;
 			Memory_Pool_SoftwareReset_Set(true);
 		break;
 		
