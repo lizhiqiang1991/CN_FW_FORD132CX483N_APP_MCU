@@ -271,7 +271,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 				}
 				else
 				{
-					Memory_Pool_BacklightEnable_Set(false);					
+					Memory_Pool_BacklightEnable_Set(false);
 				}
 				Memory_Pool_DisplayEnable_Set(u8Temp);
 
