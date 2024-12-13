@@ -357,7 +357,7 @@ static void C_Communication_Event_Assign(uint8_t u8Message)
 		break;
 			
 		case CMD_UPDATE_REQUEST:
-			*pUpdateKey = 0xAA55A5B5U;
+			*pUpdateKey = 0x55AAA5B5U;
 			Memory_Pool_SoftwareReset_Set(true);
 		break;
 		
