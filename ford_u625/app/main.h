@@ -31,7 +31,7 @@
 #define U717_TDDI_NT51926				false   /*61.FC147.009*/
 
 /*C132IAA01.1*/
-#define CX430_TDDI_NT51926				false    /*61.FC147.005*/
+#define CX430_TDDI_NT51926				true    /*61.FC147.005*/
 #define P758_TDDI_NT51926				false   /*61.FC147.011*/
 
 /*C120UAA01.1*/
@@ -39,7 +39,7 @@
 #define P708_TDDI_NT51926				false   /*61.FC147.010*/
 
 /*C120UAA01.2*/
-#define P702_TDDI_NT51926				true   /*61.FC147.012*/
+#define P702_TDDI_NT51926				false   /*61.FC147.012*/
 
 #if (CX430_TDDI_NT51926 || P758_TDDI_NT51926)
 #define FORD_SPSS_CRC_ROLL_EN			false
