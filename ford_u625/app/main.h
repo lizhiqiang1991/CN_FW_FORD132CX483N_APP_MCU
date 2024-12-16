@@ -18,9 +18,9 @@
 // #define U717_TDDI_NT51926				false
 // #define BX726_TDDI_NT51926				false
 
-#define CX430_TDDI_NT51926				false
-#define U717_TDDI_NT51926				false
-#define BX726_TDDI_NT51926				true
+// #define CX430_TDDI_NT51926				false
+// #define U717_TDDI_NT51926				false
+// #define BX726_TDDI_NT51926				true
 
 // #define CX430_TDDI_NT51926				false
 // #define U717_TDDI_NT51926				true
@@ -28,10 +28,10 @@
 
 /*C132IAA01.0*/
 /*Note: U717 is also applicable to the NOVA version of U625.*/ 
-#define U717_TDDI_NT51926				false   /*61.FC147.009*/
+#define U717_TDDI_NT51926				true    /*61.FC147.009*/
 
 /*C132IAA01.1*/
-#define CX430_TDDI_NT51926				true    /*61.FC147.005*/
+#define CX430_TDDI_NT51926				false   /*61.FC147.005*/
 #define P758_TDDI_NT51926				false   /*61.FC147.011*/
 
 /*C120UAA01.1*/
