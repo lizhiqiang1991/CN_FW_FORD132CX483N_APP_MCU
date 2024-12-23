@@ -102,7 +102,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
  ;  流水號  : Build number，RD自行記錄用，當小版號進位後，此碼歸零，範圍: 1 ~ 99
  ************************************************************************************/
 #if(CX430_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "F-04.05.00" }; // Mew version definition
+    const uint8_t cmu8McuVersion[] = { "F-04.06.00" }; // Mew version definition
 #elif(P758_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "O-04.04.00" }; // New version definition
 #elif(U717_TDDI_NT51926)
