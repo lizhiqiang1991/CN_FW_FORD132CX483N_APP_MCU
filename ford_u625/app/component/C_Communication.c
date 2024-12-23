@@ -58,10 +58,10 @@ volatile uint32_t *pUpdateKey = ((volatile uint32_t*) (0x20003F00));
 	const uint8_t mu8Core[] = { "SU5T-14F180-PB" };
 	const uint8_t mu8Soft[] = { "SU5T-14D358-PB" };
 	const uint8_t mu8Main[] = { "SU5T-14D359-PB" };
-#elif(BX726_TDDI_NT51926) /*G-04.04.00*/
-	const uint8_t mu8Core[] = { "PU5T-14F180-RD" };
-	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" };
-	const uint8_t mu8Main[] = { "PU5T-14D359-RD" };
+#elif(BX726_TDDI_NT51926) /*G-04.05.00*/
+	const uint8_t mu8Core[] = { "PU5T-14F180-RE" };
+	const uint8_t mu8Soft[] = { "PU5T-14D358-RE" };
+	const uint8_t mu8Main[] = { "PU5T-14D359-RE" };
 #elif(P708_TDDI_NT51926) /*B-04.04.00*/
 	const uint8_t mu8Core[] = { "PU5T-14F180-RD" };
 	const uint8_t mu8Soft[] = { "PU5T-14D358-RD" };

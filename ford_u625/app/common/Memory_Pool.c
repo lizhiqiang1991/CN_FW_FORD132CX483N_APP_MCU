@@ -86,7 +86,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #elif(P758_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3FU, .u8Subversion = 0x02U };
 #elif(BX726_TDDI_NT51926)
-    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x05U };
+    const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x06U };
 #elif(P708_TDDI_NT51926)
     const tdisplay_identification_def ctDisplayID = { .u8ID = 0x3BU, .u8Subversion = 0x05U };
 #elif(P702_TDDI_NT51926)
@@ -108,7 +108,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #elif(U717_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "H-04.05.00" }; // New version definition
 #elif(BX726_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "G-04.04.00" }; // New version definition
+    const uint8_t cmu8McuVersion[] = { "G-04.05.00" }; // New version definition
 #elif(P708_TDDI_NT51926)
 	const uint8_t cmu8McuVersion[] = { "B-04.04.00" }; // New version definition
 #elif(P702_TDDI_NT51926)
