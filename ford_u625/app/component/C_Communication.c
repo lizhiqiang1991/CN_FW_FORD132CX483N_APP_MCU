@@ -46,10 +46,10 @@ static uint8_t mu8TxBuff[BUFFER_SIZE];
 static uint8_t mu8BackupTxBuff[BUFFER_SIZE];
 volatile uint32_t *pUpdateKey = ((volatile uint32_t*) (0x20003F00));
 
-#if (U717_TDDI_NT51926) /*H-04.03.00*/
-	const uint8_t mu8Core[] = { "RU5T-14F180-SB" };
-	const uint8_t mu8Soft[] = { "RU5T-14D358-SB" };
-	const uint8_t mu8Main[] = { "RU5T-14D359-SB" };    
+#if (U717_TDDI_NT51926) /*H-04.05.00*/
+	const uint8_t mu8Core[] = { "RU5T-14F180-SC" };
+	const uint8_t mu8Soft[] = { "RU5T-14D358-SC" };
+	const uint8_t mu8Main[] = { "RU5T-14D359-SC" };    
 #elif(CX430_TDDI_NT51926) /*F-04.04.00*/
 	const uint8_t mu8Core[] = { "SU5T-14F180-PB" };
 	const uint8_t mu8Soft[] = { "SU5T-14D358-PB" };

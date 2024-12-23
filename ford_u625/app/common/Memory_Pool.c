@@ -106,7 +106,7 @@ tdisplay_management_def gtDisplayManageInfo = { .u8DisplayStatus = DISPLAY_UNKNO
 #elif(P758_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "O-04.04.00" }; // New version definition
 #elif(U717_TDDI_NT51926)
-    const uint8_t cmu8McuVersion[] = { "H-04.04.00" }; // New version definition
+    const uint8_t cmu8McuVersion[] = { "H-04.05.00" }; // New version definition
 #elif(BX726_TDDI_NT51926)
     const uint8_t cmu8McuVersion[] = { "G-04.04.00" }; // New version definition
 #elif(P708_TDDI_NT51926)
